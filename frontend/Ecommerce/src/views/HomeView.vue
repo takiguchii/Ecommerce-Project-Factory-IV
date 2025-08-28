@@ -1,5 +1,4 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
 <template>
@@ -13,4 +12,3 @@ import TheWelcome from '../components/TheWelcome.vue'
     </div>
   </div>
 </template>
-
