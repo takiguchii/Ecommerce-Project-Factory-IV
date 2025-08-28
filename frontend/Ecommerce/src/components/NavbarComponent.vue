@@ -1,0 +1,28 @@
+<template>
+  <nav class="bg-blue-600 text-white px-6 py-3 flex items-center justify-between">
+    <!-- Left: Logo -->
+    <div class="font-bold text-lg flex-1 text-left">
+      EcomerceProject
+    </div>
+    <form class="flex-1 flex justify-center">
+      <input type="text" placeholder="Pesquisar..." class="rounded px-2 py-1 text-black"/>
+      <button type="submit" class="bg-white text-blue-600 rounded px-3 py-1 ml-2 hover:bg-gray-200">
+        Buscar
+      </button>
+    </form>
+    <ul class="flex gap-6 flex-1 justify-end">
+      <li>
+        <router-link to="/" class="hover:underline">Home</router-link>
+      </li>
+      <li>
+        <router-link to="/about" class="hover:underline">Sobre</router-link>
+      </li>
+      <li>
+        <router-link to="/cart" class="hover:underline">Carrinho</router-link>
+      </li>
+      <li>
+        <router-link to="/checkout" class="hover:underline">Finalizar Compra</router-link>
+      </li>
+    </ul>
+  </nav>
+</template>
