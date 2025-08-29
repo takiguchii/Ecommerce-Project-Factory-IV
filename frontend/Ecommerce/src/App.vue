@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen flex flex-col relative">
-    <Navbar />
-    <main class="flex-grow">
+  <div>
+    <NavbarComponent />
+    <main>
       <router-view />
     </main>
   </div>
@@ -11,5 +11,3 @@
 import { RouterView } from 'vue-router'
 import NavbarComponent from './components/NavbarComponent.vue'
 </script>
-
-
