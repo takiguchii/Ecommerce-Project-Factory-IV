@@ -21,6 +21,9 @@
         <router-link to="/cart" class="hover:underline">Carrinho</router-link>
       </li>
       <li>
+        <router-link to="/login" class="hover:underline">Login</router-link>
+      </li>
+      <li>
         <router-link to="/sidebar" class="hover:underline">
           <img src="https://cdn-icons-png.flaticon.com/512/5358/5358649.png" alt="Sidebar" class="w-6 h-6 inline filter invert brightness-0 contrast-100"/>
         </router-link>
