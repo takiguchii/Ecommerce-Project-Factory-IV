@@ -1,0 +1,7 @@
+.idea/
+.vscode/
+bin/
+obj/
+global.json
+*.nupkg
+.nuget/
