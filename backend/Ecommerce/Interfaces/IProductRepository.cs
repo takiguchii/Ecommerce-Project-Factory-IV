@@ -1,6 +1,10 @@
-namespace Ecommerce.Interfaces;
+using Ecommerce.Entity;
 
-public class IProductRepository
+namespace Ecommerce.Interfaces;
+public interface IProductRepository
 {
-    
+    void Add(Product product);
+    List<Product> GetAll();
+    Product? GetById(int id);
+    void SaveChanges();
 }
