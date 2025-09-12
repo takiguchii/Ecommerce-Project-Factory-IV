@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Ecommerce.Dto;
-using Ecommerce.Entity; 
+using Ecommerce.Entity;
+using Ecommerce.Interfaces; 
 
 namespace Ecommerce.Api.Controllers;
 
@@ -8,29 +9,38 @@ namespace Ecommerce.Api.Controllers;
 [Route("api/products")]
 public class ProductsController : ControllerBase
 {
+    private readonly IProductService _productService;
+    
+    public ProductsController(IProductService productService)
+    {
+        _productService = productService;
+    }
+    
     [HttpPost]
     public IActionResult CreateProduct([FromBody] CreateProductDto productDto)
     {
-        var productEntity = new Product
-        {
-            Id = 1,
-            Name = productDto.Name,
-            OriginalPrice = productDto.OriginalPrice,
-            Description = productDto.Description
-        };
+        var product = _productService.CreateProduct(productDto);
         
-        return Ok(productEntity);
+        return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
     }
+
     [HttpGet("{id}")]
     public IActionResult GetProductById(int id)
     {
-        var productEntity = new Product
+        var product = _productService.GetProductById(id);
+
+        if (product == null)
         {
-            Id = id,
-            Name = "Produto de Exemplo",
-            OriginalPrice = 99.99m,
-            Description = "Esta é uma descrição de exemplo."
-        };
-        return Ok(productEntity);
+            return NotFound(); // Retorna 404 se não encontrar o produto
+        }
+
+        return Ok(product);
+    }
+
+    [HttpGet]
+    public IActionResult GetAllProducts()
+    {
+        var products = _productService.GetAllProducts();
+        return Ok(products);
     }
 }
