@@ -43,4 +43,15 @@ public class ProductsController : ControllerBase
         var products = _productService.GetAllProducts();
         return Ok(products);
     }
+    
+    [HttpDelete("{id}")]
+    public IActionResult DeleteProduct(int id)
+    {
+        var success = _productService.DeleteProduct(id);
+        if (!success)
+        {
+            return NotFound(); 
+        }
+        return NoContent(); 
+    }
 }

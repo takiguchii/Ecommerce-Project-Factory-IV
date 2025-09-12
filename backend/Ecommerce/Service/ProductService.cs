@@ -45,4 +45,16 @@ public class ProductService : IProductService
     {
         return _productRepository.GetById(id);
     }
+    public bool DeleteProduct(int id)
+    {
+        var product = _productRepository.GetById(id);
+
+        if (product == null)
+        {
+            return false;
+        }
+        _productRepository.Delete(product);
+        _productRepository.SaveChanges();
+        return true; 
+    }
 }
