@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-100">
-    
     <section class="relative w-full h-[320px] md:h-[420px] lg:h-[520px] overflow-hidden">
       <div class="absolute inset-0 bg-cover bg-center"
         style="background-image: url('https://img.freepik.com/fotos-gratis/luminaria-de-neon-para-vendas-de-sexta-feira-negra_23-2151833076.jpg?semt=ais_hybrid&w=1280');">
@@ -15,36 +14,57 @@
       </div>
     </section>
 
-    <!-- PRODUTOS: estrutura base (placeholder) -->
+    <!-- PRODUTOS -->
     <section class="py-12 px-6 md:px-12">
       <h2 class="text-2xl md:text-3xl font-bold text-gray-800 text-center mb-8">Nossos Produtos</h2>
 
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <!-- Card modelo (estático) -->
-        <article class="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden relative">
-          <div class="w-full h-44 bg-gray-200" />
+        <article v-for="p in products" :key="p.id"
+                 class="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden relative">
+          <img :src="p.image" :alt="p.title" class="w-full h-44 object-cover" />
+
           <div class="p-4 space-y-2">
-            <h3 class="text-base font-semibold text-gray-800">Produto</h3>
-            <p class="text-sm text-gray-600">Subtítulo do produto</p>
+            <h3 class="text-base font-semibold text-gray-800 line-clamp-2">{{ p.title }}</h3>
+            <p class="text-sm text-gray-600 line-clamp-2">{{ p.subtitle }}</p>
+
             <div class="flex items-center justify-between mt-2">
-              <span class="text-blue-600 font-bold text-lg">R$ 0,00</span>
-              <span class="text-xs text-gray-500">Estoque: 0</span>
+              <span class="text-blue-600 font-bold text-lg">{{ formatPrice(p.price) }}</span>
+              <span class="text-xs text-gray-500">Estoque: {{ p.stock }}</span>
             </div>
-            <button class="w-full mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600">
+
+            <button
+              class="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+                     text-white shadow-sm transition
+                     bg-indigo-600 hover:bg-indigo-700">
               Adicionar ao carrinho
             </button>
           </div>
         </article>
-      
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 
+const products = ref([
+  { id: 1, title: 'Fone Razer', subtitle: 'Cancelamento de ruído e 30h de bateria', price: 199.9, stock: 12, image: 'https://m.media-amazon.com/images/I/51TzGmowjSL._AC_SL1500_.jpg'},
+  { id: 2, title: 'Notebook Gamer', subtitle: 'RTX, tela 144Hz e 16GB RAM', price: 4999.0, stock: 5, image: 'https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fimages2.kabum.com.br%2Fprodutos%2Ffotos%2Fsync_mirakl%2F872622%2Fxlarge%2FNotebook-Gamer-Asus-Rog-Strix-Scar-18-Intel-Core-Ultra-9-275hx-64GB-RAM-Nvidia-RTX5090-SSD-4TB-Tela-18-240Hz-Windows-11-Home-Black-G835lx_1755889506.jpg&w=640&q=75' },
+  { id: 3, title: 'Smartwatch Fit', subtitle: 'Monitor de saúde, GPS e notificações', price: 499.9, stock: 0, image: 'https://m.media-amazon.com/images/I/51-XHYBPO1L.__AC_SX300_SY300_QL70_ML2_.jpg' },
+  { id: 4, title: 'Teclado Mecânico RGB', subtitle: 'Switches táteis e construção em alumínio', price: 349.9, stock: 20, image: 'https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fimages8.kabum.com.br%2Fprodutos%2Ffotos%2F627458%2Fteclado-mecanico-gamer-machenike-k500-b61-rgb-switch-brown-layout-61-teclas-abnt2-cinza-k500-b61_1746534964_gg.jpg&w=640&q=75' }
+])
+
+function formatPrice(n) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n)
+}
 </script>
 
 <style scoped>
-
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>
