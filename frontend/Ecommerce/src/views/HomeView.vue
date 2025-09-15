@@ -1,6 +1,7 @@
-
+<!-- src/views/HomeView.vue -->
 <template>
   <div class="min-h-screen bg-gray-100">
+    <!-- HERO (mantido) -->
     <section class="relative w-full h-[320px] md:h-[420px] lg:h-[520px] overflow-hidden">
       <div class="absolute inset-0 bg-cover bg-center"
         style="background-image: url('https://img.freepik.com/fotos-gratis/luminaria-de-neon-para-vendas-de-sexta-feira-negra_23-2151833076.jpg?semt=ais_hybrid&w=1280');">
@@ -46,6 +47,24 @@
         </article>
       </div>
     </section>
+
+    <!-- TOAST (popup verde) -->
+    <transition name="toast-fade">
+      <div
+        v-if="toast.visible"
+        role="status"
+        aria-live="polite"
+        class="fixed bottom-6 right-6 z-50"
+      >
+        <div class="flex items-center gap-3 bg-green-600 text-white px-4 py-3 rounded-xl shadow-lg">
+          <!-- ícone check -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l2.293 2.293 6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">{{ toast.message }}</span>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -59,6 +78,17 @@ const products = ref([
   { id: 4, title: 'Teclado Mecânico RGB', subtitle: 'Switches táteis e construção em alumínio', price: 349.9, stock: 20, image: 'https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fimages8.kabum.com.br%2Fprodutos%2Ffotos%2F627458%2Fteclado-mecanico-gamer-machenike-k500-b61-rgb-switch-brown-layout-61-teclas-abnt2-cinza-k500-b61_1746534964_gg.jpg&w=640&q=75' }
 ])
 
+// estado do toast
+const toast = ref({ visible: false, message: '' })
+let toastTimer = null
+
+function showToast(message) {
+  toast.value.message = message
+  toast.value.visible = true
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => (toast.value.visible = false), 1400)
+}
+
 function addToCart(product) {
   if (product.stock === 0) return
   const cart = JSON.parse(localStorage.getItem('cart') || '[]')
@@ -70,6 +100,7 @@ function addToCart(product) {
     cart.push({ id: product.id, title: product.title, price: product.price, image: product.image, qty: 1 })
   }
   localStorage.setItem('cart', JSON.stringify(cart))
+  showToast('Adicionado ao carrinho')
 }
 
 function formatPrice(n) {
@@ -83,5 +114,16 @@ function formatPrice(n) {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* animação do toast */
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
 </style>
