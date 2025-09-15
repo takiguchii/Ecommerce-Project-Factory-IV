@@ -1,3 +1,4 @@
+
 <template>
   <div class="min-h-screen bg-gray-100">
     <section class="relative w-full h-[320px] md:h-[420px] lg:h-[520px] overflow-hidden">
@@ -33,10 +34,13 @@
             </div>
 
             <button
+              :disabled="p.stock === 0"
+              @click="addToCart(p)"
               class="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
                      text-white shadow-sm transition
+                     disabled:opacity-60 disabled:cursor-not-allowed
                      bg-indigo-600 hover:bg-indigo-700">
-              Adicionar ao carrinho
+              {{ p.stock === 0 ? 'Indisponível' : 'Adicionar ao carrinho' }}
             </button>
           </div>
         </article>
@@ -54,6 +58,19 @@ const products = ref([
   { id: 3, title: 'Smartwatch Fit', subtitle: 'Monitor de saúde, GPS e notificações', price: 499.9, stock: 0, image: 'https://m.media-amazon.com/images/I/51-XHYBPO1L.__AC_SX300_SY300_QL70_ML2_.jpg' },
   { id: 4, title: 'Teclado Mecânico RGB', subtitle: 'Switches táteis e construção em alumínio', price: 349.9, stock: 20, image: 'https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fimages8.kabum.com.br%2Fprodutos%2Ffotos%2F627458%2Fteclado-mecanico-gamer-machenike-k500-b61-rgb-switch-brown-layout-61-teclas-abnt2-cinza-k500-b61_1746534964_gg.jpg&w=640&q=75' }
 ])
+
+function addToCart(product) {
+  if (product.stock === 0) return
+  const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+  const idx = cart.findIndex(i => i.id === product.id)
+  if (idx >= 0) {
+    cart[idx].qty += 1
+  } else {
+    // salva apenas campos necessários
+    cart.push({ id: product.id, title: product.title, price: product.price, image: product.image, qty: 1 })
+  }
+  localStorage.setItem('cart', JSON.stringify(cart))
+}
 
 function formatPrice(n) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n)
