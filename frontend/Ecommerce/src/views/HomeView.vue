@@ -60,7 +60,6 @@
                   {{ formatPrice(p.originalPrice) }}
                 </span>
               </div>
-              <!-- ajuste aqui -->
               <span v-if="p.stock !== null && p.stock !== undefined" class="text-xs text-gray-500">
                 Estoque: {{ p.stock }}
               </span>
@@ -133,6 +132,7 @@ function addToCart(product) {
       title: product.name,
       originalPrice: product.price,
       description: product.description,
+      qty: 1
     })
   }
   localStorage.setItem('cart', JSON.stringify(cart))
