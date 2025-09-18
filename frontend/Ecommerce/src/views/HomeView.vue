@@ -36,7 +36,13 @@
           :key="p.id"
           class="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden relative"
         >
-          <img :src="p.image" :alt="p.name" class="w-full h-44 object-cover" />
+          <!-- imagem com fallback -->
+          <img
+            :src="p.image || placeholder"
+            :alt="p.name"
+            class="w-full h-44 object-cover"
+            @error="onImgError"
+          />
 
           <div class="p-4 space-y-2">
             <h3 class="text-base font-semibold text-gray-800 line-clamp-2">{{ p.name }}</h3>
@@ -97,6 +103,12 @@ import { ref, onMounted } from 'vue'
 import { useProducts } from '../composables/useProducts'
 
 const { products, loading, error, fetchProducts } = useProducts()
+
+// fallback de imagem
+const placeholder = 'https://images.unsplash.com/photo-1512446816042-444d641267ee?q=80&w=1200&auto=format&fit=crop'
+function onImgError(e) {
+  e.target.src = placeholder
+}
 
 // toast
 const toast = ref({ visible: false, message: '' })
