@@ -3,7 +3,7 @@
     <!-- HERO -->
     <section class="relative w-full h-[320px] md:h-[420px] lg:h-[520px] overflow-hidden">
       <div class="absolute inset-0 bg-cover bg-center"
-        style="background-image: url('https://img.freepik.com/fotos-gratis/luminaria-de-neon-para-vendas-de-sexta-feira-negra_23-2151833076.jpg?semt=ais_hybrid&w=1280');">
+        style="background-image: url('https://sdmntprwestus.oaiusercontent.com/files/00000000-21c0-6230-9222-6bc99992e6b0/raw?se=2025-09-16T02%3A16%3A10Z&sp=r&sv=2024-08-04&sr=b&scid=514e3787-5952-5638-a630-b4070f5b6b47&skoid=ea1de0bc-0467-43d6-873a-9a5cf0a9f835&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-09-16T00%3A12%3A23Z&ske=2025-09-17T00%3A12%3A23Z&sks=b&skv=2024-08-04&sig=kfrvWuNmvd27Hb8Q62qCBdRF%2B6IRWDjfAKsQdgEKiSo%3D');">
       </div>
       <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
 
@@ -18,7 +18,7 @@
     <!-- PRODUTOS -->
     <section class="py-12 px-6 md:px-12">
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Nossos Produtos</h2>
+        <h2 class="text-center text-2xl md:text-3xl font-semibold text-orange-500">Nossos Produtos</h2>
         <div v-if="loading" class="text-sm text-gray-500">Carregando...</div>
       </div>
 
