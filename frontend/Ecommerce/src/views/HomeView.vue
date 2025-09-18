@@ -60,7 +60,8 @@
                   {{ formatPrice(p.originalPrice) }}
                 </span>
               </div>
-              <span v-if="p.stock !== null" class="text-xs text-gray-500">
+              <!-- ajuste aqui -->
+              <span v-if="p.stock !== null && p.stock !== undefined" class="text-xs text-gray-500">
                 Estoque: {{ p.stock }}
               </span>
             </div>
