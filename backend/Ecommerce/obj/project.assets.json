@@ -2776,19 +2776,19 @@
     ]
   },
   "packageFolders": {
-    "/home/raul/.nuget/packages/": {}
+    "/home/takiguchi/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/raul/Documentos/Ecommerce-Project-Factory-IV/backend/Ecommerce/Ecommerce.csproj",
+      "projectUniqueName": "/home/takiguchi/Documentos/Github/Ecommerce-Project-Factory-IV/backend/Ecommerce/Ecommerce.csproj",
       "projectName": "Ecommerce",
-      "projectPath": "/home/raul/Documentos/Ecommerce-Project-Factory-IV/backend/Ecommerce/Ecommerce.csproj",
-      "packagesPath": "/home/raul/.nuget/packages/",
-      "outputPath": "/home/raul/Documentos/Ecommerce-Project-Factory-IV/backend/Ecommerce/obj/",
+      "projectPath": "/home/takiguchi/Documentos/Github/Ecommerce-Project-Factory-IV/backend/Ecommerce/Ecommerce.csproj",
+      "packagesPath": "/home/takiguchi/.nuget/packages/",
+      "outputPath": "/home/takiguchi/Documentos/Github/Ecommerce-Project-Factory-IV/backend/Ecommerce/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/raul/.nuget/NuGet/NuGet.Config"
+        "/home/takiguchi/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -2856,7 +2856,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.119/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.118/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
