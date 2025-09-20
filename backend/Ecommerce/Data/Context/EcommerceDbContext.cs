@@ -22,6 +22,17 @@ public class EcommerceDbContext : DbContext
             .WithMany(c=> c.Products)
             .HasForeignKey(p => p.CategoryId);
         
+        //Relação do produto com a SubCategoria ( Um para muitos )
+        modelBuilder.Entity<Product>()
+            .HasOne(p => p.SubCategory)
+            .WithMany(sc => sc.Products)
+            .HasForeignKey(p => p.SubCategoryId);
+        
+        
+        
+        
+        
+        
         base.OnModelCreating(modelBuilder);
     }
 
