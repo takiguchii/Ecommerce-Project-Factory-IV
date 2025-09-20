@@ -8,32 +8,56 @@
         </header>
 
         <form @submit.prevent="onSubmit" class="space-y-4 mt-4">
+          <!-- Nome -->
           <div>
             <label class="block text-sm font-medium text-zinc-700 mb-1">Nome do Produto</label>
-            <input v-model="form.name" type="text" placeholder="Ex.: Mouse Gamer RGB"
-              class="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+            <div class="relative">
+              <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
+              </span>
+              <input v-model="form.name" type="text" placeholder="Ex.: Mouse Gamer RGB"
+                class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+            </div>
           </div>
 
+          <!-- Descrição -->
           <div>
             <label class="block text-sm font-medium text-zinc-700 mb-1">Descrição</label>
-            <textarea v-model="form.description" placeholder="Ex.: Sensor 16.000 DPI…"
-              class="w-full rounded-lg border border-zinc-300 px-3 py-2 min-h-[110px] outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required></textarea>
+            <div class="relative">
+              <span class="pointer-events-none absolute left-0 top-2.5 pl-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h16v2H4v-2zm0 4h10v2H4v-2z"/></svg>
+              </span>
+              <textarea v-model="form.description" placeholder="Ex.: Sensor 16.000 DPI…"
+                class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 min-h-[110px] outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required></textarea>
+            </div>
           </div>
 
+          <!-- Grid preço/estoque -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-zinc-700 mb-1">Preço</label>
-              <input v-model="form.price" type="number" step="0.01" placeholder="199.90"
-                class="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+              <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <span class="text-zinc-400 text-xs">R$</span>
+                </span>
+                <input v-model="form.price" type="number" step="0.01" placeholder="199.90"
+                  class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+              </div>
             </div>
+
             <div>
               <label class="block text-sm font-medium text-zinc-700 mb-1">Estoque</label>
-              <input v-model="form.stock" type="number" min="0" placeholder="Ex.: 25"
-                class="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+              <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v2H3V3zm2 4h14v12H5V7zm2 2v8h10V9H7z"/></svg>
+                </span>
+                <input v-model="form.stock" type="number" min="0" placeholder="Ex.: 25"
+                  class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+              </div>
             </div>
           </div>
 
-          <button type="submit" class="w-full rounded-lg py-2.5 font-semibold text-white bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 shadow hover:shadow-md transition">
+          <button type="submit" class="w-full rounded-lg py-2.5 mt-2 font-semibold text-white bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 shadow hover:shadow-md transition">
             Registrar Produto
           </button>
         </form>
