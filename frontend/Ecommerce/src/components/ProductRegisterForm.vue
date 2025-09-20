@@ -20,16 +20,17 @@
               class="w-full rounded-lg border border-zinc-300 px-3 py-2 min-h-[110px] outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required></textarea>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-zinc-700 mb-1">Preço</label>
-            <input v-model="form.price" type="number" step="0.01" placeholder="199.90"
-              class="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-zinc-700 mb-1">Estoque</label>
-            <input v-model="form.stock" type="number" min="0" placeholder="Ex.: 25"
-              class="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-zinc-700 mb-1">Preço</label>
+              <input v-model="form.price" type="number" step="0.01" placeholder="199.90"
+                class="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-zinc-700 mb-1">Estoque</label>
+              <input v-model="form.stock" type="number" min="0" placeholder="Ex.: 25"
+                class="w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
+            </div>
           </div>
 
           <button type="submit" class="w-full rounded-lg py-2.5 font-semibold text-white bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 shadow hover:shadow-md transition">
