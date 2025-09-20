@@ -15,7 +15,7 @@
               <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
               </span>
-              <input v-model="form.name" type="text" :class="baseInput + ' pl-9 pr-3'" placeholder="Ex.: Mouse Gamer RGB" required/>
+              <input v-model="form.name" type="text" :class="inputClass(form.name)" placeholder="Ex.: Mouse Gamer RGB" required/>
             </div>
             <p class="mt-1 text-xs text-zinc-500">Use um nome claro e fácil de buscar.</p>
           </div>
@@ -27,7 +27,7 @@
               <span class="pointer-events-none absolute left-0 top-2.5 pl-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h16v2H4v-2zm0 4h10v2H4v-2z"/></svg>
               </span>
-              <textarea v-model="form.description" :class="baseTextarea + ' pl-9 pr-3'" placeholder="Ex.: Sensor 16.000 DPI…" required></textarea>
+              <textarea v-model="form.description" :class="textareaClass(form.description)" placeholder="Ex.: Sensor 16.000 DPI…" required></textarea>
             </div>
             <p class="mt-1 text-xs text-zinc-500">Detalhe pontos fortes: material, desempenho, garantia.</p>
           </div>
@@ -37,10 +37,8 @@
             <div>
               <label class="block text-sm font-medium text-zinc-700 mb-1">Preço</label>
               <div class="relative">
-                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <span class="text-zinc-400 text-xs">R$</span>
-                </span>
-                <input v-model="form.price" type="number" step="0.01" :class="baseInput + ' pl-9 pr-3'" placeholder="199.90" required/>
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><span class="text-zinc-400 text-xs">R$</span></span>
+                <input v-model="form.price" type="number" step="0.01" :class="inputClass(form.price)" placeholder="199.90" required/>
               </div>
               <p class="mt-1 text-xs text-zinc-500">Apenas números, use ponto para decimais.</p>
             </div>
@@ -50,7 +48,7 @@
                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v2H3V3zm2 4h14v12H5V7zm2 2v8h10V9H7z"/></svg>
                 </span>
-                <input v-model="form.stock" type="number" min="0" :class="baseInput + ' pl-9 pr-3'" placeholder="Ex.: 25" required/>
+                <input v-model="form.stock" type="number" min="0" :class="inputClass(form.stock)" placeholder="Ex.: 25" required/>
               </div>
               <p class="mt-1 text-xs text-zinc-500">Quantidade disponível para venda.</p>
             </div>
@@ -72,11 +70,20 @@ import { reactive, ref } from 'vue'
 import { apiPost } from '../services/api'
 const form = reactive({ name:'', description:'', price:'', stock:'' })
 const submitting = ref(false)
+const triedSubmit = ref(false)
 
-const baseInput = 'w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none transition focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500'
-const baseTextarea = 'w-full rounded-lg border border-zinc-300 px-3 py-2 outline-none transition min-h-[110px] focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500'
+const baseInput = 'w-full rounded-lg border px-3 py-2 outline-none transition focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500'
+const baseTextarea = 'w-full rounded-lg border px-3 py-2 outline-none transition min-h-[110px] focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500'
 
-async function onSubmit(){ try{ submitting.value=true; await apiPost('/products', form); alert('Produto registrado com sucesso!'); form.name=''; form.description=''; form.price=''; form.stock='' }catch(e){ alert(`Erro ao registrar produto: ${e.message}`)} finally { submitting.value=false } }
+function inputClass(v){ return [baseInput, 'pl-9 pr-3', v ? 'border-zinc-300' : (triedSubmit.value ? 'border-rose-400' : 'border-zinc-300')].join(' ') }
+function textareaClass(v){ return [baseTextarea, 'pl-9 pr-3', v ? 'border-zinc-300' : (triedSubmit.value ? 'border-rose-400' : 'border-zinc-300')].join(' ') }
+
+async function onSubmit(){
+  triedSubmit.value = true
+  try{ submitting.value=true; await apiPost('/products', form); alert('Produto registrado com sucesso!'); form.name=''; form.description=''; form.price=''; form.stock=''; triedSubmit.value=false }
+  catch(e){ alert(`Erro ao registrar produto: ${e.message}`) }
+  finally { submitting.value=false }
+}
 </script>
 
 <style scoped>
