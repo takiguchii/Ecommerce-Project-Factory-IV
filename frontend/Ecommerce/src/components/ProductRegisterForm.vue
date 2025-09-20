@@ -28,7 +28,7 @@
               <span class="pointer-events-none absolute left-0 top-2.5 pl-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h16v2H4v-2zm0 4h10v2H4v-2z"/></svg>
               </span>
-              <textarea v-model="form.description" placeholder="Ex.: Sensor 16.000 DPI, 7 botões programáveis…"
+              <textarea v-model="form.description" placeholder="Ex.: Sensor 16.000 DPI…"
                 class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 min-h-[110px] outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required></textarea>
             </div>
             <p class="mt-1 text-xs text-zinc-500">Detalhe pontos fortes: material, desempenho, garantia.</p>
@@ -60,8 +60,13 @@
             </div>
           </div>
 
-          <button type="submit" class="w-full rounded-lg py-2.5 mt-2 font-semibold text-white bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 shadow hover:shadow-md transition">
-            Registrar Produto
+          <button type="submit" :disabled="submitting"
+            class="w-full rounded-lg py-2.5 mt-2 font-semibold text-white bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 disabled:opacity-70 disabled:cursor-not-allowed shadow hover:shadow-md transition flex items-center justify-center gap-2">
+            <svg v-if="submitting" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+            </svg>
+            <span>{{ submitting ? 'Registrando...' : 'Registrar Produto' }}</span>
           </button>
         </form>
       </div>
@@ -70,10 +75,11 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { apiPost } from '../services/api'
 const form = reactive({ name:'', description:'', price:'', stock:'' })
-async function onSubmit(){ try{ await apiPost('/products', form); alert('Produto registrado com sucesso!'); form.name=''; form.description=''; form.price=''; form.stock='' }catch(e){ alert(`Erro ao registrar produto: ${e.message}`)}}
+const submitting = ref(false)
+async function onSubmit(){ try{ submitting.value = true; await apiPost('/products', form); alert('Produto registrado com sucesso!'); form.name=''; form.description=''; form.price=''; form.stock='' }catch(e){ alert(`Erro ao registrar produto: ${e.message}`)} finally { submitting.value=false } }
 </script>
 
 <style scoped>
