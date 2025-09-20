@@ -18,6 +18,7 @@
               <input v-model="form.name" type="text" placeholder="Ex.: Mouse Gamer RGB"
                 class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
             </div>
+            <p class="mt-1 text-xs text-zinc-500">Use um nome claro e fácil de buscar.</p>
           </div>
 
           <!-- Descrição -->
@@ -27,12 +28,13 @@
               <span class="pointer-events-none absolute left-0 top-2.5 pl-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h16v2H4v-2zm0 4h10v2H4v-2z"/></svg>
               </span>
-              <textarea v-model="form.description" placeholder="Ex.: Sensor 16.000 DPI…"
+              <textarea v-model="form.description" placeholder="Ex.: Sensor 16.000 DPI, 7 botões programáveis…"
                 class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 min-h-[110px] outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required></textarea>
             </div>
+            <p class="mt-1 text-xs text-zinc-500">Detalhe pontos fortes: material, desempenho, garantia.</p>
           </div>
 
-          <!-- Grid preço/estoque -->
+          <!-- Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-zinc-700 mb-1">Preço</label>
@@ -43,8 +45,8 @@
                 <input v-model="form.price" type="number" step="0.01" placeholder="199.90"
                   class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
               </div>
+              <p class="mt-1 text-xs text-zinc-500">Apenas números, use ponto para decimais.</p>
             </div>
-
             <div>
               <label class="block text-sm font-medium text-zinc-700 mb-1">Estoque</label>
               <div class="relative">
@@ -54,6 +56,7 @@
                 <input v-model="form.stock" type="number" min="0" placeholder="Ex.: 25"
                   class="w-full rounded-lg border border-zinc-300 pl-9 pr-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/70 focus:border-orange-500 transition" required/>
               </div>
+              <p class="mt-1 text-xs text-zinc-500">Quantidade disponível para venda.</p>
             </div>
           </div>
 
