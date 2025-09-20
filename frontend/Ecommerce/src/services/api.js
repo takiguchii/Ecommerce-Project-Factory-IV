@@ -6,7 +6,23 @@ export async function apiGet(path) {
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`GET ${path} falhou: ${res.status} ${text}`);
+    throw new Error(`GET ${path} failed: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+export async function apiPost(path, data) {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`POST ${path} failed: ${res.status} ${text}`);
   }
   return res.json();
 }
