@@ -16,8 +16,11 @@ public class Product
     public int Rating { get; set; }
     public int RatingQuantity { get; set; }
 
-    // Chaves Estrangeiras ( não vou fazer 
-    //public int Category { get; set; }
-    //public int SubCategory { get; set; }
-    //public int Provider { get; set; }
+    //Adicionando as ForeKey com suas relações 
+    public int CategoryId { get; set; }
+    public Category Category { get; set; }
+    public int SubCategoryId { get; set; }
+    public SubCategory SubCategory { get; set; }
+    public int ProviderId { get; set; }
+    public Provider Provider { get; set; }
 }
