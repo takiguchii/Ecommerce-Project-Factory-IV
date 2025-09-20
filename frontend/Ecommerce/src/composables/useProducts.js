@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { apiGet } from '../services/api'
+import { apiGet, apiPost } from '../services/api'
 
 export function useProducts() {
   const products = ref([])
@@ -10,23 +10,14 @@ export function useProducts() {
     loading.value = true
     error.value = null
     try {
-      // chama GET http://localhost:5295/api/products
       const data = await apiGet('/products')
-
-      // espera [{ name, originalPrice, discountPrice, description, ... }]
-      products.value = (Array.isArray(data) ? data : []).map((it, idx) => {
-        const price = it.discountPrice && it.discountPrice > 0
-          ? it.discountPrice
-          : it.originalPrice
-
-        return {
-          id: it.id ?? idx + 1,
-          name: it.name ?? 'Produto',
-          description: it.description ?? '',
-          originalPrice: it.originalPrice ?? 0,
-          discountPrice: it.discountPrice ?? 0,
-        }
-      })
+      products.value = (Array.isArray(data) ? data : []).map((it, idx) => ({
+        id: it.id ?? idx + 1,
+        name: it.name ?? 'Produto',
+        description: it.description ?? '',
+        originalPrice: it.originalPrice ?? 0,
+        discountPrice: it.discountPrice ?? 0,
+      }))
     } catch (e) {
       error.value = e.message || String(e)
     } finally {
@@ -34,5 +25,18 @@ export function useProducts() {
     }
   }
 
-  return { products, loading, error, fetchProducts }
+  async function registerProduct(product) {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await apiPost('/products', product)
+      return response
+    } catch (e) {
+      error.value = e.message || String(e)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { products, loading, error, fetchProducts, registerProduct }
 }
