@@ -209,7 +209,12 @@ async function onSubmit() {
 
   try {
     submitting.value = true
-    await apiPost('/products', form)
+    await apiPost('/products', {
+      ...form,
+      TechnicalInfo: '',        // Adicione estes campos
+      RawDescription: '',
+      RawTechnicalInfo: ''
+    })
     banner.type = 'success'
     banner.message = 'Produto registrado com sucesso!'
     form.name = ''
