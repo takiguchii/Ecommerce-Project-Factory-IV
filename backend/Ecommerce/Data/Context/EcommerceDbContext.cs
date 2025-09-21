@@ -34,10 +34,11 @@ public class EcommerceDbContext : DbContext
             .WithMany(pr => pr.Products)
             .HasForeignKey(p => p.ProviderId);
         
-        
-        
-        
-        
+        // Relação de Subcategoria para Categoria ( um para muitos )
+        modelBuilder.Entity<SubCategory>()
+            .HasOne(sc => sc.ParentCategory)
+            .WithMany()
+            .HasForeignKey(sc => sc.ParentCategoryId);
         
         
         base.OnModelCreating(modelBuilder);
