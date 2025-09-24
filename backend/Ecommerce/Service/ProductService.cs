@@ -1,6 +1,8 @@
 using Ecommerce.Dto;
 using Ecommerce.Entity;
 using Ecommerce.Interfaces;
+using Ecommerce.Interfaces.Repositories; 
+using Ecommerce.Interfaces.Services;
 
 namespace Ecommerce.Service;
 

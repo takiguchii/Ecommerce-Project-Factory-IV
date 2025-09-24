@@ -1,6 +1,6 @@
 using Ecommerce.Entity;
 
-namespace Ecommerce.Interfaces.Repositories;
+namespace Ecommerce.Interfaces.Repositories; 
 
 public interface ICategoryRepository
 {

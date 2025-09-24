@@ -1,6 +1,6 @@
 using Ecommerce.Entity;
 
-namespace Ecommerce.Interfaces;
+namespace Ecommerce.Interfaces.Repositories;
 public interface IProductRepository
 {
     void Add(Product product);
