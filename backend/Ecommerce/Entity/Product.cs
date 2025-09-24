@@ -15,8 +15,7 @@ public class Product
     public string RawTechnicalInfo { get; set; }
     public int Rating { get; set; }
     public int RatingQuantity { get; set; }
-
-    //Adicionando as ForeKey com suas relações 
+    
     public int CategoryId { get; set; }
     public Category Category { get; set; }
     public int SubCategoryId { get; set; }

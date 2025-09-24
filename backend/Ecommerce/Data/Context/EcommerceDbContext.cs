@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Ecommerce.Entity; 
 
-namespace Ecommerce.Data;
+namespace Ecommerce.Data.Context;
 
 public class EcommerceDbContext : DbContext
 {
     public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : base(options)
     {
     }
-    
     public DbSet<Product> Products { get; set; } 
     public DbSet<Category> Categories { get; set; }
     public DbSet<SubCategory> SubCategories { get; set; }

@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore; // Adicione este using
-using Ecommerce.Data;
+using Microsoft.EntityFrameworkCore;
+using Ecommerce.Data.Seed; 
+using Ecommerce.Data.Context;
 using Ecommerce.Interfaces;
 using Ecommerce.Repositories;
 using Ecommerce.Service;
@@ -32,6 +33,14 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<EcommerceDbContext>();
+    context.Database.EnsureCreated(); 
+    SeedData.Initialize(context);
+}
 
 
 if (app.Environment.IsDevelopment())
