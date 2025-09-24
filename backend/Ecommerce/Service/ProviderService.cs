@@ -29,7 +29,7 @@ public class ProviderService : IProviderService
             Cnpj = providerDto.Cnpj,
             Email = providerDto.Email,
             PhoneNumber = providerDto.PhoneNumber,
-            Andress = providerDto.Address 
+            Address = providerDto.Address 
         };
 
         _providerRepository.Add(newProvider);
