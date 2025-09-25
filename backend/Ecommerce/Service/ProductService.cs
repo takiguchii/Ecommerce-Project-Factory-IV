@@ -22,6 +22,7 @@ public class ProductService : IProductService
         var newProduct = new Product
         {
             Name = productDto.Name,
+            ImageUrl = productDto.ImageUrl,
             OriginalPrice = productDto.OriginalPrice,
             DiscountPrice = productDto.DiscountPrice,
             Description = productDto.Description,
