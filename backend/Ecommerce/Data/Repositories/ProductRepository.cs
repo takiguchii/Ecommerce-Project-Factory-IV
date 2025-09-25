@@ -1,6 +1,6 @@
-using Ecommerce.Data;
+using Ecommerce.Data.Context;
 using Ecommerce.Entity;
-using Ecommerce.Interfaces; 
+using Ecommerce.Interfaces.Repositories;
 
 namespace Ecommerce.Repositories;
 
