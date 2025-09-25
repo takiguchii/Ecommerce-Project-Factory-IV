@@ -18,7 +18,7 @@ public class SubCategoryService : ISubCategoryService
 
     public object? CreateSubCategory(CreateSubCategoryDto subCategoryDto)
     {
-        // === PRIMEIRA REGRA DE NEGÓCIO ===
+        // Regra de negocio 
         // Verificar se a Categoria Pai informada realmente existe no banco de dados.
         var parentCategory = _categoryRepository.GetById(subCategoryDto.ParentCategoryId);
         if (parentCategory == null)
