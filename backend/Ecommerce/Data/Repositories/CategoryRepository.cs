@@ -1,0 +1,40 @@
+using Ecommerce.Data.Context;
+using Ecommerce.Entity;
+using Ecommerce.Interfaces.Repositories;
+
+namespace Ecommerce.Repositories;
+
+public class CategoryRepository : ICategoryRepository
+{
+    private readonly EcommerceDbContext _dbContext;
+
+    public CategoryRepository(EcommerceDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public void Add(Category category)
+    {
+        _dbContext.Categories.Add(category);
+    }
+    
+    public List<Category> GetAll()
+    {
+        return _dbContext.Categories.ToList();
+    }
+
+    public Category? GetById(int id)
+    {
+        return _dbContext.Categories.FirstOrDefault(c => c.Id == id);
+    }
+    
+    public void Delete(Category category)
+    {
+        _dbContext.Categories.Remove(category);
+    }
+
+    public void SaveChanges()
+    {
+        _dbContext.SaveChanges();
+    }
+}

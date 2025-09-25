@@ -1,6 +1,8 @@
 using Ecommerce.Dto;
 using Ecommerce.Entity;
 using Ecommerce.Interfaces;
+using Ecommerce.Interfaces.Repositories; 
+using Ecommerce.Interfaces.Services;
 
 namespace Ecommerce.Service;
 
@@ -20,6 +22,7 @@ public class ProductService : IProductService
         var newProduct = new Product
         {
             Name = productDto.Name,
+            ImageUrl = productDto.ImageUrl,
             OriginalPrice = productDto.OriginalPrice,
             DiscountPrice = productDto.DiscountPrice,
             Description = productDto.Description,
