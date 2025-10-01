@@ -32,18 +32,10 @@
       </div>
 
       <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <article
-          v-for="p in products"
-          :key="p.id"
-          class="bg-neutral-900 rounded-2xl shadow hover:shadow-lg transition overflow-hidden relative border border-neutral-800"
-        >
+        <article v-for="p in products" :key="p.id"
+          class="bg-neutral-900 rounded-2xl shadow hover:shadow-lg transition overflow-hidden relative border border-neutral-800">
           <!-- imagem com fallback -->
-          <img
-            :src="p.image || placeholder"
-            :alt="p.name"
-            class="w-full h-44 object-cover"
-            @error="onImgError"
-          />
+          <img :src="p.imageUrl || placeholder" :alt="p.name" class="w-full h-44 object-cover" @error="onImgError" />
 
           <div class="p-4 space-y-2">
             <h3 class="text-base font-semibold text-orange-300 line-clamp-2">{{ p.name }}</h3>
@@ -52,13 +44,13 @@
             <div class="flex items-center justify-between mt-2">
               <div class="flex items-baseline gap-2">
                 <span class="text-orange-400 font-bold text-lg">
+                  {{ formatPrice(p.discount ? p.price * (1 - p.discount/100) : p.price) }}
+                </span>
+                <span v-if="p.discount" class="text-xs text-orange-200/60 line-through">
                   {{ formatPrice(p.price) }}
                 </span>
-                <span
-                  v-if="p.discountPrice && p.originalPrice && p.originalPrice > p.discountPrice"
-                  class="text-xs text-orange-200/60 line-through"
-                >
-                  {{ formatPrice(p.originalPrice) }}
+                <span v-if="p.discount" class="text-xs bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded">
+                  -{{ p.discount }}%
                 </span>
               </div>
               <span v-if="p.stock !== null && p.stock !== undefined" class="text-xs text-orange-200/70">
@@ -66,10 +58,7 @@
               </span>
             </div>
 
-            <button
-              :disabled="p.stock === 0"
-              @click="addToCart(p)"
-              class="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+            <button :disabled="p.stock === 0" @click="addToCart(p)" class="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
                      text-black shadow-sm transition
                      disabled:opacity-60 disabled:cursor-not-allowed
                      bg-orange-500 hover:bg-orange-600 disabled:bg-gray-700 disabled:text-gray-400">
@@ -82,15 +71,12 @@
 
     <!-- TOAST -->
     <transition name="toast-fade">
-      <div
-        v-if="toast.visible"
-        role="status"
-        aria-live="polite"
-        class="fixed bottom-6 right-6 z-50"
-      >
+      <div v-if="toast.visible" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-50">
         <div class="flex items-center gap-3 bg-orange-500 text-black px-4 py-3 rounded-xl shadow-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l2.293 2.293 6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l2.293 2.293 6.543-6.543a1 1 0 011.414 0z"
+              clip-rule="evenodd" />
           </svg>
           <span class="font-medium">{{ toast.message }}</span>
         </div>
@@ -130,9 +116,10 @@ function addToCart(product) {
   } else {
     cart.push({
       id: product.id,
-      title: product.name,
-      originalPrice: product.price,
+      name: product.name,
+      price: product.price,
       description: product.description,
+      imageUrl: product.imageUrl,
       qty: 1
     })
   }
@@ -154,10 +141,12 @@ onMounted(fetchProducts)
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
 .toast-fade-enter-active,
 .toast-fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
+
 .toast-fade-enter-from,
 .toast-fade-leave-to {
   opacity: 0;
