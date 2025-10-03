@@ -1,11 +1,11 @@
 <script setup>
 import HeroCarouselComponent from '@/components/HeroCarouselComponent.vue';
+import ProductSectionComponent from '@/components/ProductSectionComponent.vue';
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100">
-    
+  <div>
     <HeroCarouselComponent />
-
+    <ProductSectionComponent title="Nossos Produtos" />
     </div>
 </template>

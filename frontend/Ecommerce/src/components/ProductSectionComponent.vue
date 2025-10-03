@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
-import useProducts from '../composables/useProducts.js';
+import { useProducts } from '../composables/useProducts.js';
 import ProductCardComponent from './ProductCardComponent.vue';
 
 defineProps({
