@@ -38,7 +38,6 @@ function scrollRight() {
     scrollContainer.value.scrollBy({ left: 300, behavior: 'smooth' });
   }
 }
-// --- FIM DA LÓGICA DO SCROLL ---
 
 function handleAddToCart(product) {
   console.log('Adicionado ao carrinho:', product.name);
