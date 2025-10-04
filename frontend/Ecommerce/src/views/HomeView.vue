@@ -1,6 +1,7 @@
 <script setup>
 import HeroCarouselComponent from '@/components/HeroCarouselComponent.vue';
 import ProductSectionComponent from '@/components/ProductSectionComponent.vue';
+import DepartmentSectionComponent from '@/components/DepartmentSectionComponent.vue'; 
 import { usePromotions } from '@/composables/usePromotions.js';
 import { useProducts } from '@/composables/useProducts.js';
 
@@ -13,14 +14,15 @@ const { products, loading: productsLoading, error: productsError, fetchProducts 
     <HeroCarouselComponent />
 
     <main class="container mx-auto px-4">
-    
+
       <ProductSectionComponent 
-        title="Hora de Dar Play!"
+        title="🔥 Hora de Dar Play!"
         :products="promotions"
         :loading="promotionsLoading"
         :error="promotionsError"
         @fetch-needed="fetchPromotions"
       />
+      <DepartmentSectionComponent />
 
       <ProductSectionComponent 
         title="Nossos Produtos"
@@ -29,7 +31,6 @@ const { products, loading: productsLoading, error: productsError, fetchProducts 
         :error="productsError"
         @fetch-needed="fetchProducts"
       />
-
     </main>
   </div>
 </template>
