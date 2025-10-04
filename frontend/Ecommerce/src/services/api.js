@@ -45,4 +45,8 @@ api.interceptors.response.use(
   }
 );
 
+export async function getProductById(id) {
+  return await apiGet(`/products/${id}`);
+}
+
 export default api;
