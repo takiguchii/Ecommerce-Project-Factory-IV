@@ -46,9 +46,7 @@ api.interceptors.response.use(
 );
 
 export async function getProductById(id) {
-  const res = await fetch(`/api/products/${id}`);
-  if (!res.ok) return null;
-  return await res.json();
+  return await apiGet(`/products/${id}`);
 }
 
 export default api;

@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 
-defineProps({
+const props = defineProps({
   product: {
     type: Object,
     required: true
@@ -18,7 +18,8 @@ const formatPrice = (price) => {
 const router = useRouter();
 
 const goToDetail = () => {
-  router.push({ name: 'ProductDetail', params: { id: product.id } });
+  console.log('Navegando para:', props.product.id);
+  router.push({ name: 'ProductDetail', params: { id: props.product.id } });
 };
 </script>
 
@@ -26,11 +27,11 @@ const goToDetail = () => {
   <article @click="goToDetail" class="cursor-pointer bg-neutral-900 rounded-lg shadow-lg hover:shadow-orange-400/20 transition-shadow duration-300 flex flex-col border border-neutral-800 overflow-hidden">
     
     <div class="h-48 flex items-center justify-center p-4 bg-white">
-      <img :src="product.imageUrl" :alt="product.name" class="max-h-full max-w-full object-contain" />
+      <img :src="props.product.imageUrl" :alt="props.product.name" class="max-h-full max-w-full object-contain" />
     </div>
 
     <div class="p-4 flex flex-col flex-grow">
-      <h3 class="text-sm font-semibold text-orange-300 h-10 line-clamp-2 mb-2">{{ product.name }}</h3>
+      <h3 class="text-sm font-semibold text-orange-300 h-10 line-clamp-2 mb-2">{{ props.product.name }}</h3>
       
       <div class="mt-auto">
         <div class="h-12">
@@ -42,7 +43,7 @@ const goToDetail = () => {
             </p>
         </div>
 
-        <button @click="emit('addToCart', product)" 
+        <button @click.stop="emit('addToCart', product)" 
                 class="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-black font-bold py-2 px-4 rounded-md transition-colors duration-300">
           Adicionar ao Carrinho
         </button>
