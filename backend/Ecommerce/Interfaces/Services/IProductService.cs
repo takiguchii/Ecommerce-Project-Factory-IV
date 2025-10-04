@@ -9,4 +9,6 @@ public interface IProductService
     List<Product> GetAllProducts();
     Product? GetProductById(int id);
     bool DeleteProduct(int id);
+    List<Product> GetPromotions();
+
 }
