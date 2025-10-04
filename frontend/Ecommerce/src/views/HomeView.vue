@@ -6,6 +6,6 @@ import ProductSectionComponent from '@/components/ProductSectionComponent.vue';
 <template>
   <div>
     <HeroCarouselComponent />
-    <ProductSectionComponent title="Nossos Produtos" />
+    <ProductSectionComponent class="text-center" title="Nossos Produtos" />
     </div>
 </template>
