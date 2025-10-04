@@ -1,4 +1,6 @@
 <script setup>
+import { useRouter } from 'vue-router';
+
 defineProps({
   product: {
     type: Object,
@@ -12,10 +14,16 @@ const formatPrice = (price) => {
   if (price === null || price === undefined) return '';
   return price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
+
+const router = useRouter();
+
+const goToDetail = () => {
+  router.push({ name: 'ProductDetail', params: { id: product.id } });
+};
 </script>
 
 <template>
-  <article class="bg-neutral-900 rounded-lg shadow-lg hover:shadow-orange-400/20 transition-shadow duration-300 flex flex-col border border-neutral-800 overflow-hidden">
+  <article @click="goToDetail" class="cursor-pointer bg-neutral-900 rounded-lg shadow-lg hover:shadow-orange-400/20 transition-shadow duration-300 flex flex-col border border-neutral-800 overflow-hidden">
     
     <div class="h-48 flex items-center justify-center p-4 bg-white">
       <img :src="product.imageUrl" :alt="product.name" class="max-h-full max-w-full object-contain" />
