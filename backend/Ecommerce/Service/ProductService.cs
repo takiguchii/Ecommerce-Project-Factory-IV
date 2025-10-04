@@ -60,4 +60,8 @@ public class ProductService : IProductService
         _productRepository.SaveChanges();
         return true; 
     }
+    public List<Product> GetPromotions()
+    {
+        return _productRepository.GetPromotions();
+    }
 }

@@ -8,4 +8,6 @@ public interface IProductRepository
     Product? GetById(int id);
     void Delete(Product product);
     void SaveChanges();
+    List<Product> GetPromotions(); 
+
 }
