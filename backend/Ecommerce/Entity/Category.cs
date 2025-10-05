@@ -10,5 +10,7 @@ public class Category
     [Required]
     [StringLength(128)]
     public string Name { get; set; }
+    
+    public string ImageUrlCategory { get; set; }
     public ICollection<Product> Products { get; set; }
 }

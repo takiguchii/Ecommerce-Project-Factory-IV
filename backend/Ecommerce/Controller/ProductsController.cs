@@ -54,4 +54,10 @@ public class ProductsController : ControllerBase
         }
         return NoContent(); 
     }
+    [HttpGet("promotions")] 
+    public IActionResult GetPromotions()
+    {
+        var promotionalProducts = _productService.GetPromotions();
+        return Ok(promotionalProducts);
+    }
 }

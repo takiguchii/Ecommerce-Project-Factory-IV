@@ -1,42 +1,49 @@
-import { ref } from 'vue'
-import { apiGet, apiPost } from '../services/api'
+import { ref } from 'vue';
+import { apiGet } from '../services/api';
 
 export function useProducts() {
-  const products = ref([])
-  const loading = ref(false)
-  const error = ref(null)
+  const products = ref([]);
+  const error = ref(null);
+  const loading = ref(false);
 
-  async function fetchProducts() {
-    loading.value = true
-    error.value = null
+  const fetchProducts = async () => {
+    loading.value = true;
+    error.value = null;
+    
     try {
-      const data = await apiGet('/products')
-      products.value = (Array.isArray(data) ? data : []).map((it, idx) => ({
-        id: it.id ?? idx + 1,
-        name: it.name ?? 'Produto',
-        description: it.description ?? '',
-        originalPrice: it.originalPrice ?? 0,
-        discountPrice: it.discountPrice ?? 0,
-      }))
-    } catch (e) {
-      error.value = e.message || String(e)
+      products.value = await apiGet('/products');
+      console.log('Products loaded:', products.value);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      error.value = 'Erro ao carregar produtos. Tente novamente mais tarde.';
     } finally {
-      loading.value = false
+      loading.value = false;
     }
-  }
+  };
 
-  async function registerProduct(product) {
-    loading.value = true
-    error.value = null
+  const fetchProductsByCategory = async (categoryId) => {
+    loading.value = true;
+    error.value = null;
+
     try {
-      const response = await apiPost('/products', product)
-      return response
-    } catch (e) {
-      error.value = e.message || String(e)
+      const allProducts = await apiGet('/products');
+      console.log('Todos os produtos:', allProducts);
+      console.log('ID da categoria:', categoryId);
+      products.value = allProducts.filter(p => String(p.categoryId) === String(categoryId));
+      console.log('Produtos filtrados:', products.value);
+    } catch (err) {
+      console.error('Error fetching products by category:', err);
+      error.value = 'Erro ao carregar produtos da categoria.';
     } finally {
-      loading.value = false
+      loading.value = false;
     }
-  }
+  };
 
-  return { products, loading, error, fetchProducts, registerProduct }
+  return {
+    products,
+    error,
+    loading,
+    fetchProducts,
+    fetchProductsByCategory
+  };
 }

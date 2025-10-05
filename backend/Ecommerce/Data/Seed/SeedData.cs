@@ -1,168 +1,172 @@
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Ecommerce.Data.Context;
 using Ecommerce.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce.Data.Seed;
 
+// DTO para mapear a estrutura do nosso JSON padronizado
+public class ProductJsonDto
+{
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+
+    [JsonPropertyName("original_price")]
+    public string OriginalPrice { get; set; }
+
+    [JsonPropertyName("discount_price")]
+    public string DiscountPrice { get; set; }
+
+    [JsonPropertyName("description")]
+    public string Description { get; set; }
+    
+    [JsonPropertyName("technical_info")]
+    public string TechnicalInfo { get; set; }
+
+    [JsonPropertyName("image_url")]
+    public string ImageUrl { get; set; }
+
+    [JsonPropertyName("subcategory_name")]
+    public string SubCategoryName { get; set; }
+}
+
+
 public static class SeedData
 {
     public static void Initialize(EcommerceDbContext context)
     {
-        // Garante que o banco de dados e as tabelas foram criados
         context.Database.EnsureCreated();
 
-        // Verifica se já existe algum produto no banco. Se sim, não faz nada.
-        if (context.Products.Any())
+        if (context.Products.Any() || context.Categories.Any())
         {
             return;
         }
 
-        // 1. Criar Fornecedor, Categorias e SubCategorias
-        var techMartProvider = new Provider 
-        { 
-            Name = "TechMart Distribuição", 
-            Cnpj = "12345678000199",
-            Email = "contato@techmart.com",
-            PhoneNumber = "11999998888",
-            Address = "Rua da Tecnologia, 123, São Paulo, SP"
-        };
-
-        var hardware = new Category { Name = "Hardware" };
-        var perifericos = new Category { Name = "Periféricos" };
-        var computadores = new Category { Name = "Computadores" };
-
-        var processadores = new SubCategory { Name = "Processadores", ParentCategory = hardware };
-        var placasDeVideo = new SubCategory { Name = "Placas de Vídeo", ParentCategory = hardware };
-        var teclados = new SubCategory { Name = "Teclados", ParentCategory = perifericos };
-        var mouses = new SubCategory { Name = "Mouses", ParentCategory = perifericos };
-        var monitores = new SubCategory { Name = "Monitores", ParentCategory = perifericos };
-        var notebooks = new SubCategory { Name = "Notebooks", ParentCategory = computadores };
-
-        context.Providers.Add(techMartProvider);
-        context.Categories.AddRange(hardware, perifericos, computadores);
-        context.SubCategories.AddRange(processadores, placasDeVideo, teclados, mouses, monitores, notebooks);
-
-        // Salva as entidades auxiliares para que o banco gere seus IDs
-        context.SaveChanges();
-
-        // 2. Criar a lista de Produtos
-        var products = new List<Product>
+        var techMartProvider = new Provider
         {
-            new Product 
-            { 
-                Name = "Processador Core i9-13900K", 
-                OriginalPrice = 3899.99m, 
-                Description = "Processador de alta performance para desktops, com 24 núcleos e 32 threads.", 
-                TechnicalInfo = "Socket LGA1700, Frequência Turbo Max 5.8 GHz, Gráficos UHD Intel 770",
-                RawDescription = "Processador de alta performance para desktops, com 24 núcleos e 32 threads.", 
-                RawTechnicalInfo = "Socket LGA1700, Frequência Turbo Max 5.8 GHz, Gráficos UHD Intel 770",
-                ImageUrl = "https://i.ibb.co/bF4r2y9/cpu.png",
-                Category = hardware, SubCategory = processadores, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Placa de Vídeo RTX 4080", 
-                OriginalPrice = 7999.90m, 
-                Description = "Placa de vídeo com arquitetura Ada Lovelace, ideal para jogos em 4K.", 
-                TechnicalInfo = "16GB GDDR6X, DLSS 3, Ray Tracing de 3ª Geração",
-                RawDescription = "Placa de vídeo com arquitetura Ada Lovelace, ideal para jogos em 4K.",
-                RawTechnicalInfo = "16GB GDDR6X, DLSS 3, Ray Tracing de 3ª Geração",
-                ImageUrl = "https://i.ibb.co/P9pLwSg/gpu.png",
-                Category = hardware, SubCategory = placasDeVideo, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Teclado Mecânico Gamer K70 RGB", 
-                OriginalPrice = 899.90m, 
-                Description = "Teclado mecânico com switches Cherry MX Red e iluminação RGB customizável.", 
-                TechnicalInfo = "Layout ABNT2, Estrutura em Alumínio, Descanso de pulso removível",
-                RawDescription = "Teclado mecânico com switches Cherry MX Red e iluminação RGB customizável.",
-                RawTechnicalInfo = "Layout ABNT2, Estrutura em Alumínio, Descanso de pulso removível",
-                ImageUrl = "https://i.ibb.co/tZv3xW9/keyboard.png",
-                Category = perifericos, SubCategory = teclados, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Mouse Gamer G502 Hero", 
-                OriginalPrice = 349.99m, 
-                Description = "Mouse de alta precisão com sensor HERO 25K e 11 botões programáveis.", 
-                TechnicalInfo = "25.600 DPI, Iluminação LIGHTSYNC RGB, Sistema de pesos ajustável",
-                RawDescription = "Mouse de alta precisão com sensor HERO 25K e 11 botões programáveis.",
-                RawTechnicalInfo = "25.600 DPI, Iluminação LIGHTSYNC RGB, Sistema de pesos ajustável",
-                ImageUrl = "https://i.ibb.co/gDFtV23/mouse.png",
-                Category = perifericos, SubCategory = mouses, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Monitor Gamer UltraWide 34\" 144Hz", 
-                OriginalPrice = 2899.00m, 
-                Description = "Monitor curvo com resolução QHD para uma imersão total nos jogos.", 
-                TechnicalInfo = "Resolução 3440x1440, Tempo de resposta 1ms, HDR 400",
-                RawDescription = "Monitor curvo com resolução QHD para uma imersão total nos jogos.",
-                RawTechnicalInfo = "Resolução 3440x1440, Tempo de resposta 1ms, HDR 400",
-                ImageUrl = "https://i.ibb.co/f4c8v2x/monitor.png",
-                Category = perifericos, SubCategory = monitores, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Notebook Gamer Predator Helios", 
-                OriginalPrice = 9899.50m, 
-                Description = "Notebook potente para rodar os últimos lançamentos com alta performance.", 
-                TechnicalInfo = "Core i7, RTX 4060, 16GB RAM DDR5, SSD 1TB NVMe, Tela 16\" QHD 165Hz",
-                RawDescription = "Notebook potente para rodar os últimos lançamentos com alta performance.",
-                RawTechnicalInfo = "Core i7, RTX 4060, 16GB RAM DDR5, SSD 1TB NVMe, Tela 16\" QHD 165Hz",
-                ImageUrl = "https://i.ibb.co/hX5N2Vf/notebook.png",
-                Category = computadores, SubCategory = notebooks, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Processador Ryzen 7 7800X3D", 
-                OriginalPrice = 2799.00m, 
-                Description = "O melhor processador para jogos com tecnologia 3D V-Cache.", 
-                TechnicalInfo = "Socket AM5, 8 Núcleos, 16 Threads, Frequência Max 5.0 GHz",
-                RawDescription = "O melhor processador para jogos com tecnologia 3D V-Cache.",
-                RawTechnicalInfo = "Socket AM5, 8 Núcleos, 16 Threads, Frequência Max 5.0 GHz",
-                ImageUrl = "https://i.ibb.co/bF4r2y9/cpu.png",
-                Category = hardware, SubCategory = processadores, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Placa de Vídeo RX 7900 XTX", 
-                OriginalPrice = 6999.90m, 
-                Description = "Performance incrível com a arquitetura RDNA 3 e 24GB de memória.", 
-                TechnicalInfo = "24GB GDDR6, FSR, Ray Tracing de 2ª Geração",
-                RawDescription = "Performance incrível com a arquitetura RDNA 3 e 24GB de memória.",
-                RawTechnicalInfo = "24GB GDDR6, FSR, Ray Tracing de 2ª Geração",
-                ImageUrl = "https://i.ibb.co/P9pLwSg/gpu.png",
-                Category = hardware, SubCategory = placasDeVideo, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Mouse Sem Fio G Pro X Superlight", 
-                OriginalPrice = 699.90m, 
-                Description = "Mouse ultraleve projetado para performance profissional em e-sports.", 
-                TechnicalInfo = "Menos de 63g, Sensor HERO 25K, Tecnologia sem fio LIGHTSPEED",
-                RawDescription = "Mouse ultraleve projetado para performance profissional em e-sports.",
-                RawTechnicalInfo = "Menos de 63g, Sensor HERO 25K, Tecnologia sem fio LIGHTSPEED",
-                ImageUrl = "https://i.ibb.co/gDFtV23/mouse.png",
-                Category = perifericos, SubCategory = mouses, Provider = techMartProvider 
-            },
-            new Product 
-            { 
-                Name = "Notebook Swift Go 14", 
-                OriginalPrice = 5299.00m, 
-                Description = "Notebook ultrafino e leve com tela OLED, ideal para trabalho e estudos.", 
-                TechnicalInfo = "Core i5, 16GB RAM LPDDR5, SSD 512GB NVMe, Tela 14\" 2.8K OLED",
-                RawDescription = "Notebook ultrafino e leve com tela OLED, ideal para trabalho e estudos.",
-                RawTechnicalInfo = "Core i5, 16GB RAM LPDDR5, SSD 512GB NVMe, Tela 14\" 2.8K OLED",
-                ImageUrl = "https://i.ibb.co/hX5N2Vf/notebook.png",
-                Category = computadores, SubCategory = notebooks, Provider = techMartProvider 
-            }
+            Name = "TechMart Distribuição", Cnpj = "12345678000199", Email = "contato@techmart.com",
+            PhoneNumber = "11999998888", Address = "Rua da Tecnologia, 123, São Paulo, SP"
         };
+        context.Providers.Add(techMartProvider);
 
-        context.Products.AddRange(products);
+        var hardware = new Category { Name = "Hardware", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FHARDWARE_1700588665.png&w=256&q=75" };
+        var perifericos = new Category { Name = "Periféricos", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FPERIFERICOS_1700588652.png&w=256&q=75" };
+        var computadores = new Category { Name = "Computadores", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCOMPUTADORES_1731081639.png&w=256&q=75" };
+        var videoGames = new Category { Name = "Video Games", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FGAMER_1700588706.png&w=256&q=75" };
+        var celulares = new Category { Name = "Celular & Smartphones", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCELULAR-SMARTPHONE_1731081407.png&w=256&q=75" };
+        var tv = new Category { Name = "TV", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FTV_1700588559.png&w=256&q=75" };
+        var audio = new Category { Name = "Áudio", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FAUDIO_1700588544.png&w=256&q=75" };
+        var casaInteligente = new Category { Name = "Casa Inteligente", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCASA-INTELIGENTE_1731081391.png&w=256&q=75" };
         
-        // 3. Salvar tudo no banco de dados
+        context.Categories.AddRange(hardware, perifericos, computadores, videoGames, celulares, tv, audio, casaInteligente);
+
+        var placasDeVideo = new SubCategory { Name = "Placas de Vídeo", ParentCategory = hardware };
+        var notebooks = new SubCategory { Name = "Notebooks", ParentCategory = computadores };
+        var mouses = new SubCategory { Name = "Mouses", ParentCategory = perifericos };
+        var headsets = new SubCategory { Name = "Headsets", ParentCategory = perifericos };
+        var consoles = new SubCategory { Name = "Consoles", ParentCategory = videoGames };
+        var acessoriosGamer = new SubCategory { Name = "Acessórios Gamer", ParentCategory = perifericos };
+        var monitores = new SubCategory { Name = "Monitores", ParentCategory = perifericos };
+        var smartphones = new SubCategory { Name = "Smartphones", ParentCategory = celulares };
+        var smartTvs = new SubCategory { Name = "Smart TVs", ParentCategory = tv };
+        var fonesDeOuvido = new SubCategory { Name = "Fones de Ouvido", ParentCategory = audio };
+        var assistentesVirtuais = new SubCategory { Name = "Assistentes Virtuais", ParentCategory = casaInteligente };
+        var placasMae = new SubCategory { Name = "Placas-Mãe", ParentCategory = hardware };
+        var armazenamento = new SubCategory { Name = "Armazenamento", ParentCategory = hardware };
+
+        context.SubCategories.AddRange(placasDeVideo, notebooks, mouses, headsets, consoles, acessoriosGamer, monitores, smartphones, smartTvs, fonesDeOuvido, assistentesVirtuais, placasMae, armazenamento);
+        
         context.SaveChanges();
+        
+        var allProductsToSeed = new List<Product>();
+        var jsonDataPath = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "JsonData");
+
+        if (Directory.Exists(jsonDataPath))
+        {
+            var jsonFiles = Directory.GetFiles(jsonDataPath, "*.json");
+
+            foreach (var file in jsonFiles)
+            {
+                var jsonString = File.ReadAllText(file);
+                var productDtos = JsonSerializer.Deserialize<List<ProductJsonDto>>(jsonString);
+
+                if (productDtos == null || !productDtos.Any()) continue;
+                
+                var subCategoryName = productDtos.First().SubCategoryName;
+                var subCategory = context.SubCategories.Include(sc => sc.ParentCategory)
+                                           .FirstOrDefault(sc => sc.Name == subCategoryName);
+
+                if (subCategory == null)
+                {
+                    Console.WriteLine($"AVISO: Subcategoria '{subCategoryName}' do arquivo '{Path.GetFileName(file)}' não encontrada. Pulando produtos.");
+                    continue;
+                }
+
+                foreach (var dto in productDtos)
+                {
+                    allProductsToSeed.Add(new Product
+                    {
+                        Name = dto.Name,
+                        OriginalPrice = ParsePrice(dto.OriginalPrice) ?? 0m,
+                        DiscountPrice = ParsePrice(dto.DiscountPrice),
+                        Description = dto.Description,
+                        TechnicalInfo = dto.TechnicalInfo,
+                        RawDescription = dto.Description,
+                        RawTechnicalInfo = dto.TechnicalInfo,
+                        ImageUrl = NormalizeImageUrl(dto.ImageUrl),
+                        Rating = 0,
+                        RatingQuantity = 0,
+                        Category = subCategory.ParentCategory,
+                        SubCategory = subCategory,
+                        Provider = techMartProvider
+                    });
+                }
+            }
+        }
+        
+        if(allProductsToSeed.Any())
+        {
+            context.Products.AddRange(allProductsToSeed);
+            context.SaveChanges();
+        }
+    }
+
+    private static decimal? ParsePrice(string priceString)
+    {
+        if (string.IsNullOrWhiteSpace(priceString)) return null;
+        var culture = new CultureInfo("pt-BR");
+        var cleanString = priceString.Replace("R$", "").Trim();
+        if (decimal.TryParse(cleanString, NumberStyles.Currency, culture, out decimal price))
+        {
+            return price;
+        }
+        return null;
+    }
+
+    private static string NormalizeImageUrl(string endpointImage)
+    {
+        if (string.IsNullOrEmpty(endpointImage))
+        {
+            return "";
+        }
+
+        if (endpointImage.StartsWith("http"))
+        {
+            return endpointImage;
+        }
+
+        if (endpointImage.StartsWith("/_next/image"))
+        {
+            return "https://www.kabum.com.br" + endpointImage;
+        }
+
+        if (endpointImage.StartsWith("/produtos/fotos"))
+        {
+            return "https://images.kabum.com.br" + endpointImage;
+        }
+
+        return endpointImage;
     }
 }

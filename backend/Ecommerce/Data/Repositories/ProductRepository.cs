@@ -31,4 +31,10 @@ public class ProductRepository : IProductRepository
     {
         _dbContext.SaveChanges();
     }
+    public List<Product> GetPromotions()
+    {
+        return _dbContext.Products
+            .Where(p => p.DiscountPrice != null)
+            .ToList();
+    }
 }
