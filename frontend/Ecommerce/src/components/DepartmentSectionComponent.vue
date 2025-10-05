@@ -1,13 +1,18 @@
 <script setup>
 import { onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { useCategories } from '@/composables/useCategories';
 
 const { categories, loading, error, fetchCategories } = useCategories();
+const router = useRouter();
 
 onMounted(() => {
   fetchCategories();
 });
+
+function goToCategory(categoryId) {
+  router.push(`/category/${categoryId}`);
+}
 </script>
 <template>
     <section class="py-12 bg-black">
