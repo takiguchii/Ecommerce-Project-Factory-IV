@@ -21,10 +21,29 @@ export function useProducts() {
     }
   };
 
+  const fetchProductsByCategory = async (categoryId) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const allProducts = await apiGet('/products');
+      console.log('Todos os produtos:', allProducts);
+      console.log('ID da categoria:', categoryId);
+      products.value = allProducts.filter(p => String(p.categoryId) === String(categoryId));
+      console.log('Produtos filtrados:', products.value);
+    } catch (err) {
+      console.error('Error fetching products by category:', err);
+      error.value = 'Erro ao carregar produtos da categoria.';
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     products,
     error,
     loading,
-    fetchProducts
+    fetchProducts,
+    fetchProductsByCategory
   };
 }

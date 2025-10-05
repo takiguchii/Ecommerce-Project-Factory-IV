@@ -1,19 +1,28 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
+import { useCategories } from '@/composables/useCategories';
 
 const isDepartmentsOpen = ref(false);
+const hoveredCategoryId = ref(null);
 
-// Gambiarra momentando utilizando valores pre declarados, Futuramente 
-const categories = ref([
-  { id: 1, name: 'Hardware' },
-  { id: 2, name: 'Periféricos' },
-  { id: 3, name: 'Computadores' },
-  { id: 4, name: 'Video Games' },
-]);
+const { categories, fetchCategories, subcategories, fetchSubCategories } = useCategories();
+
+onMounted(async () => {
+  await fetchCategories();
+  await fetchSubCategories();
+});
 
 function toggleDepartments() {
   isDepartmentsOpen.value = !isDepartmentsOpen.value;
+}
+
+function showSubcategories(categoryId) {
+  hoveredCategoryId.value = categoryId;
+}
+
+function hideSubcategories() {
+  hoveredCategoryId.value = null;
 }
 </script>
 
@@ -35,10 +44,31 @@ function toggleDepartments() {
             <transition name="fade">
               <div v-if="isDepartmentsOpen" class="absolute mt-2 w-56 rounded-md shadow-lg bg-neutral-800 ring-1 ring-black ring-opacity-5 z-10">
                 <div class="py-1" role="menu" aria-orientation="vertical">
-                  <RouterLink v-for="category in categories" :key="category.id" :to="`/category/${category.id}`"
-                    class="block px-4 py-2 text-sm text-gray-300 hover:bg-neutral-700 hover:text-orange-400" role="menuitem">
-                    {{ category.name }}
-                  </RouterLink>
+                  <div v-for="category in categories" :key="category.id" class="relative group">
+                    <RouterLink
+                      :to="`/category/${category.id}`"
+                      class="block px-4 py-2 text-sm text-gray-300 hover:bg-neutral-700 hover:text-orange-400"
+                      role="menuitem"
+                      @mouseenter="showSubcategories(category.id)"
+                      @mouseleave="hideSubcategories"
+                    >
+                      {{ category.name }}
+                    </RouterLink>
+                    <!-- Subcategorias -->
+                    <div
+                      v-if="hoveredCategoryId === category.id"
+                      class="absolute left-full top-0 w-56 bg-neutral-900 shadow-lg rounded-md z-20"
+                      @mouseenter="showSubcategories(category.id)"
+                      @mouseleave="hideSubcategories"
+                    >
+                      <div v-for="sub in subcategories.filter(s => s.parentCategoryid === category.id)" :key="sub.id"
+                        class="px-4 py-2 text-sm text-gray-300 hover:bg-neutral-700 hover:text-orange-400">
+                        <RouterLink :to="`/subcategory/${sub.id}`">
+                          {{ sub.name }}
+                        </RouterLink>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </transition>
