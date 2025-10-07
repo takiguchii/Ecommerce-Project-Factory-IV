@@ -27,6 +27,15 @@ public class ProductJsonDto
 
     [JsonPropertyName("image_url")]
     public string ImageUrl { get; set; }
+    [JsonPropertyName("image_url_2")] 
+    public string ImageUrl2 { get; set; }
+
+    [JsonPropertyName("image_url_3")] 
+    public string ImageUrl3 { get; set; }
+
+    [JsonPropertyName("image_url_4")] 
+    public string ImageUrl4 { get; set; }
+
 
     [JsonPropertyName("subcategory_name")]
     public string SubCategoryName { get; set; }
@@ -116,6 +125,9 @@ public static class SeedData
                         RawDescription = dto.Description,
                         RawTechnicalInfo = dto.TechnicalInfo,
                         ImageUrl = NormalizeImageUrl(dto.ImageUrl),
+                        ImageUrl2 = NormalizeImageUrl(dto.ImageUrl2), 
+                        ImageUrl3 = NormalizeImageUrl(dto.ImageUrl3), 
+                        ImageUrl4 = NormalizeImageUrl(dto.ImageUrl4),
                         Rating = 0,
                         RatingQuantity = 0,
                         Category = subCategory.ParentCategory,
