@@ -11,28 +11,45 @@ const { products, loading: productsLoading, error: productsError, fetchProducts 
 
 <template>
   <!-- padding-top para o navbar fixo -->
-  <div class="bg-black pt-20 md:pt-24">
+  <div class="bg-gradient-to-b from-neutral-950 via-neutral-900 to-black text-white pt-20 md:pt-24">
     <HeroCarouselComponent />
 
-    <main class="container mx-auto px-4">
+    <main class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
 
-      <ProductSectionComponent 
-        title="🔥 Hora de Dar Play!"
-        :products="promotions"
-        :loading="promotionsLoading"
-        :error="promotionsError"
-        @fetch-needed="fetchPromotions"
-      />
+      <!-- Promoções -->
+      <section
+        class="rounded-2xl bg-neutral-900/60 border border-neutral-800/60 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6"
+      >
+        <ProductSectionComponent 
+          title="🔥 Hora de Dar Play!"
+          :products="promotions"
+          :loading="promotionsLoading"
+          :error="promotionsError"
+          @fetch-needed="fetchPromotions"
+        />
+      </section>
 
-      <DepartmentSectionComponent />
+      <!-- Departamentos -->
+      <section
+        class="rounded-2xl bg-neutral-900/40 border border-neutral-800/60 shadow-lg ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6"
+        id="departamentos"
+      >
+        <DepartmentSectionComponent />
+      </section>
 
-      <ProductSectionComponent 
-        title="Nossos Produtos"
-        :products="products"
-        :loading="productsLoading"
-        :error="productsError"
-        @fetch-needed="fetchProducts"
-      />
+      <!-- Lista de produtos -->
+      <section
+        class="rounded-2xl bg-neutral-900/60 border border-neutral-800/60 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6"
+      >
+        <ProductSectionComponent 
+          title="Nossos Produtos"
+          :products="products"
+          :loading="productsLoading"
+          :error="productsError"
+          @fetch-needed="fetchProducts"
+        />
+      </section>
+
     </main>
   </div>
 </template>
