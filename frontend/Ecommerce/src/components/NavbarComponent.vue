@@ -39,7 +39,7 @@ function hideSubcategories() {
           <div class="relative hidden md:block">
             <button @click="toggleDepartments" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-md transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
-              <span>Departamentos</span>
+              <span class="font-semibold">Departamentos</span>
             </button>
             <transition name="fade">
               <div v-if="isDepartmentsOpen" class="absolute mt-2 w-56 rounded-md shadow-lg bg-neutral-800 ring-1 ring-black ring-opacity-5 z-10">
@@ -48,7 +48,7 @@ function hideSubcategories() {
                     <RouterLink
                       :to="`/category/${category.id}`"
                       class="block px-4 py-2 text-sm text-gray-300 hover:bg-neutral-700 hover:text-orange-400"
-                      role="menuitem"
+                      role="menuitem"n-600 
                       @mouseenter="showSubcategories(category.id)"
                       @mouseleave="hideSubcategories"
                     >
@@ -73,6 +73,22 @@ function hideSubcategories() {
               </div>
             </transition>
           </div>
+        </div>
+        <!--Botao de cupom-->
+        <div>
+          <button
+            class="flex items-center justify-center bg-neutral-800 hover:bg-green-600 p-2 rounded-md shadow-md mx-4 transition-colors"
+            title="Cupom de desconto"
+          >
+            <img
+              width="28"
+              height="28"
+              src="https://img.icons8.com/color/48/ticket.png"
+              alt="ticket"
+              class="w-7 h-7"
+            />
+            <p class="mx-2 font-semibold" >Cupom</p>
+          </button>
         </div>
 
         <div class="flex-1 flex justify-center px-8">
