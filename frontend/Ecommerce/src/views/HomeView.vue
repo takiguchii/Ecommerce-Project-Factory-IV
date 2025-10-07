@@ -10,7 +10,8 @@ const { products, loading: productsLoading, error: productsError, fetchProducts 
 </script>
 
 <template>
-  <div class="bg-black">
+  <!-- padding-top para o navbar fixo -->
+  <div class="bg-black pt-20 md:pt-24">
     <HeroCarouselComponent />
 
     <main class="container mx-auto px-4">
@@ -22,6 +23,7 @@ const { products, loading: productsLoading, error: productsError, fetchProducts 
         :error="promotionsError"
         @fetch-needed="fetchPromotions"
       />
+
       <DepartmentSectionComponent />
 
       <ProductSectionComponent 
