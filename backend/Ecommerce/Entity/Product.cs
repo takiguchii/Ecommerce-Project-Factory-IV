@@ -9,6 +9,10 @@ public class Product
     public string Name { get; set; }
     
     public string ImageUrl { get; set; }
+    
+    public string ImageUrl2 { get; set; }
+    public string ImageUrl3 { get; set; }
+    public string ImageUrl4 { get; set; }
     public decimal OriginalPrice { get; set; } 
     public decimal? DiscountPrice { get; set; }
     public string Description { get; set; }
