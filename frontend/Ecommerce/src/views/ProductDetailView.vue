@@ -1,19 +1,34 @@
 <template>
   <!-- fundo e padding pro navbar fixo -->
-  <div class="bg-gradient-to-b from-neutral-950 via-neutral-900 to-black text-white min-h-[calc(100vh-5rem)] pt-24 px-4">
+  <div
+    class="bg-gradient-to-b from-neutral-950 via-neutral-900 to-black text-white min-h-[calc(100vh-5rem)] pt-24 px-4">
     <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
 
       <!-- COLUNA ESQUERDA: imagem / skeleton -->
       <div class="flex flex-col items-center">
         <!-- Skeleton enquanto não tem produto -->
-        <div v-if="!product" class="w-full max-w-md aspect-square rounded-2xl bg-neutral-900/60 border border-neutral-800 ring-1 ring-black/5 shadow-xl animate-pulse" />
-        <!-- Card de imagem -->
-        <div v-else class="group w-full max-w-md aspect-square bg-neutral-900/60 border border-neutral-800 rounded-2xl shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 overflow-hidden">
-          <img
-            :src="product?.imageUrl"
-            :alt="product?.name"
-            class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
-          />
+        <div v-if="!product"
+          class="w-full max-w-md aspect-square rounded-2xl bg-neutral-900/60 border border-neutral-800 ring-1 ring-black/5 shadow-xl animate-pulse" />
+
+        <!-- Card de imagem + miniaturas -->
+        <div v-else
+          class="w-full max-w-md bg-neutral-900/60 border border-neutral-800 rounded-2xl shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4">
+          <!-- Imagem principal -->
+          <div class="w-full aspect-square overflow-hidden rounded-xl">
+            <img :src="currentImage" :alt="product?.name"
+              class="w-full h-full object-contain transition-transform duration-300 hover:scale-[1.02]"
+              @error="onImgError" />
+          </div>
+
+          <!-- Miniaturas (exibe só 3: todas menos a selecionada) -->
+          <div class="mt-4 grid grid-cols-3 gap-3">
+            <button v-for="thumb in thumbs" :key="thumb.index" type="button"
+              class="rounded-lg border border-neutral-800 overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500/60"
+              :aria-label="`alternar para imagem ${thumb.index + 1}`" @click="selectIndex(thumb.index)">
+              <img :src="thumb.src" :alt="product?.name"
+                class="w-full aspect-square object-contain transition-all duration-200 hover:opacity-90" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -42,32 +57,30 @@
           </div>
 
           <div class="mb-6">
-            <span class="inline-flex items-center gap-2 bg-green-600/90 text-white px-2.5 py-1 rounded-full text-xs ring-1 ring-green-400/30">
+            <span
+              class="inline-flex items-center gap-2 bg-green-600/90 text-white px-2.5 py-1 rounded-full text-xs ring-1 ring-green-400/30">
               <span class="inline-block w-2 h-2 rounded-full bg-white/90"></span>
               Em estoque
             </span>
           </div>
 
           <button
-            class="bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-black font-semibold py-3 px-4 rounded-xl transition-all duration-200 w-full shadow-md ring-1 ring-orange-500/20 hover:ring-orange-500/40 mb-6"
-          >
+            class="bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-black font-semibold py-3 px-4 rounded-xl transition-all duration-200 w-full shadow-md ring-1 ring-orange-500/20 hover:ring-orange-500/40 mb-6">
             Adicionar ao Carrinho
           </button>
 
           <!-- Card de infos -->
-          <div class="rounded-2xl bg-neutral-900/60 border border-neutral-800 ring-1 ring-black/5 shadow-lg divide-y divide-neutral-800 overflow-hidden">
+          <div
+            class="rounded-2xl bg-neutral-900/60 border border-neutral-800 ring-1 ring-black/5 shadow-lg divide-y divide-neutral-800 overflow-hidden">
             <!-- Descrição -->
             <div class="p-5">
               <h2 class="text-lg font-semibold text-neutral-200 mb-2">Descrição</h2>
               <p class="text-neutral-300 leading-relaxed whitespace-pre-line">
                 {{ descriptionDisplay }}
               </p>
-              <button
-                v-if="isDescLong"
-                @click="showDesc = !showDesc"
+              <button v-if="isDescLong" @click="showDesc = !showDesc"
                 class="mt-3 text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors"
-                :aria-expanded="showDesc"
-              >
+                :aria-expanded="showDesc">
                 {{ showDesc ? 'Ver menos' : 'Ler mais' }}
               </button>
             </div>
@@ -78,12 +91,9 @@
               <p class="text-neutral-300 whitespace-pre-line leading-relaxed">
                 {{ techDisplay }}
               </p>
-              <button
-                v-if="isTechLong"
-                @click="showTech = !showTech"
+              <button v-if="isTechLong" @click="showTech = !showTech"
                 class="mt-3 text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors"
-                :aria-expanded="showTech"
-              >
+                :aria-expanded="showTech">
                 {{ showTech ? 'Ver menos' : 'Ler mais' }}
               </button>
             </div>
@@ -96,12 +106,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { getProductById } from '../services/api';
 
 const route = useRoute();
 const product = ref(null);
+
+/* --- imagens: principal + 3 extras --- */
+const images = computed(() => [
+  product.value?.imageUrl,
+  product.value?.imageUrl2,
+  product.value?.imageUrl3,
+  product.value?.imageUrl4,
+].filter(Boolean));
+
+const currentIndex = ref(0);
+const currentImage = computed(() => images.value[currentIndex.value] ?? '');
+
+/* Miniaturas = todas as imagens MENOS a selecionada (máx 3) */
+const thumbs = computed(() =>
+  images.value
+    .map((src, index) => ({ src, index }))
+    .filter(img => img.index !== currentIndex.value)
+    .slice(0, 3)
+);
+
+/* seleção por clique: a clicada sobe, a atual desce automaticamente */
+function selectIndex(idx) {
+  if (idx >= 0 && idx < images.value.length) currentIndex.value = idx;
+}
+
+/* fallback quando alguma imagem falhar */
+function onImgError() {
+  currentIndex.value = 0; // volta para principal
+}
 
 /* --- formatação de preço --- */
 const formatPrice = (price) => {
@@ -134,9 +173,14 @@ const techDisplay = computed(() =>
     : techText.value.slice(0, TECH_LIMIT).trimEnd() + '…'
 );
 
-/* --- carregar produto --- */
+/* --- carregar produto e iniciar galeria --- */
 onMounted(async () => {
   const id = route.params.id;
   product.value = await getProductById(id);
 });
+
+/* sempre que as imagens mudarem (produto carregado), volta para a principal */
+watch(images, (arr) => {
+  if (arr.length) currentIndex.value = 0;
+}, { immediate: true });
 </script>
