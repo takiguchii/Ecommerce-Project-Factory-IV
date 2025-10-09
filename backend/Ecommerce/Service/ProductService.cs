@@ -3,6 +3,7 @@ using Ecommerce.Entity;
 using Ecommerce.Interfaces;
 using Ecommerce.Interfaces.Repositories; 
 using Ecommerce.Interfaces.Services;
+using Ecommerce.DTOs;
 
 namespace Ecommerce.Service;
 
@@ -63,5 +64,9 @@ public class ProductService : IProductService
     public List<Product> GetPromotions()
     {
         return _productRepository.GetPromotions();
+    }
+    public async Task<PaginatedResult<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize)
+    {
+        return await _productRepository.GetByCategoryPaginatedAsync(categoryId, pageNumber, pageSize);
     }
 }
