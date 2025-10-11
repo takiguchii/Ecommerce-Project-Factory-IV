@@ -131,8 +131,8 @@ public static class SeedData
                         AdditionalImageUrl2 = NormalizeImageUrl(dto.AdditionalImageUrl2), 
                         AdditionalImageUrl3 = NormalizeImageUrl(dto.AdditionalImageUrl3),
                         
-                        AverageStars = 0,
-                        ReviewCount = 0,
+                        //AverageStars = 0,
+                        //ReviewCount = 0,
                         
                         Category = subCategory.ParentCategory,
                         SubCategory = subCategory,
