@@ -12,7 +12,7 @@ public class EcommerceDbContext : DbContext
     public DbSet<Category> Categories { get; set; }
     public DbSet<SubCategory> SubCategories { get; set; }
     public DbSet<Provider> Providers { get; set; }
-
+    public DbSet<Brand> Brands { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Relação do produto com a categoria ( Um para muitos ) 
