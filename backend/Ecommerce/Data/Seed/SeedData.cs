@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce.Data.Seed;
 
-// DTO para mapear a estrutura do nosso JSON padronizado
+// DTO para mapear a estrutura do nosso JSON padronizado com os novos nomes
 public class ProductJsonDto
 {
     [JsonPropertyName("name")]
@@ -25,17 +25,18 @@ public class ProductJsonDto
     [JsonPropertyName("technical_info")]
     public string TechnicalInfo { get; set; }
 
-    [JsonPropertyName("image_url")]
-    public string ImageUrl { get; set; }
-    [JsonPropertyName("image_url_2")] 
-    public string ImageUrl2 { get; set; }
+    // --- NOMES ATUALIZADOS AQUI ---
+    [JsonPropertyName("cover_image_url")]
+    public string CoverImageUrl { get; set; }
 
-    [JsonPropertyName("image_url_3")] 
-    public string ImageUrl3 { get; set; }
+    [JsonPropertyName("additional_image_url_1")] 
+    public string AdditionalImageUrl1 { get; set; }
 
-    [JsonPropertyName("image_url_4")] 
-    public string ImageUrl4 { get; set; }
+    [JsonPropertyName("additional_image_url_2")] 
+    public string AdditionalImageUrl2 { get; set; }
 
+    [JsonPropertyName("additional_image_url_3")] 
+    public string AdditionalImageUrl3 { get; set; }
 
     [JsonPropertyName("subcategory_name")]
     public string SubCategoryName { get; set; }
@@ -124,12 +125,15 @@ public static class SeedData
                         TechnicalInfo = dto.TechnicalInfo,
                         RawDescription = dto.Description,
                         RawTechnicalInfo = dto.TechnicalInfo,
-                        ImageUrl = NormalizeImageUrl(dto.ImageUrl),
-                        ImageUrl2 = NormalizeImageUrl(dto.ImageUrl2), 
-                        ImageUrl3 = NormalizeImageUrl(dto.ImageUrl3), 
-                        ImageUrl4 = NormalizeImageUrl(dto.ImageUrl4),
-                        Rating = 0,
-                        RatingQuantity = 0,
+                        
+                        CoverImageUrl = NormalizeImageUrl(dto.CoverImageUrl),
+                        AdditionalImageUrl1 = NormalizeImageUrl(dto.AdditionalImageUrl1), 
+                        AdditionalImageUrl2 = NormalizeImageUrl(dto.AdditionalImageUrl2), 
+                        AdditionalImageUrl3 = NormalizeImageUrl(dto.AdditionalImageUrl3),
+                        
+                        AverageStars = 0,
+                        ReviewCount = 0,
+                        
                         Category = subCategory.ParentCategory,
                         SubCategory = subCategory,
                         Provider = techMartProvider

@@ -52,7 +52,7 @@ public class ProductsController : ControllerBase
     }
     
     [HttpGet("category/{categoryId}")]
-    public async Task<ActionResult<PaginatedResult<Product>>> GetProductsByCategory(int categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<CreatePaginatedResultDto<Product>>> GetProductsByCategory(int categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var products = await _productService.GetByCategoryPaginatedAsync(categoryId, pageNumber, pageSize);
         

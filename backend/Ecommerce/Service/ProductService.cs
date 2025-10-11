@@ -23,7 +23,7 @@ public class ProductService : IProductService
         var newProduct = new Product
         {
             Name = productDto.Name,
-            ImageUrl = productDto.ImageUrl,
+            CoverImageUrl = productDto.CoverImageUrl,
             OriginalPrice = productDto.OriginalPrice,
             DiscountPrice = productDto.DiscountPrice,
             Description = productDto.Description,
@@ -65,7 +65,7 @@ public class ProductService : IProductService
     {
         return _productRepository.GetPromotions();
     }
-    public async Task<PaginatedResult<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize)
+    public async Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize)
     {
         return await _productRepository.GetByCategoryPaginatedAsync(categoryId, pageNumber, pageSize);
     }

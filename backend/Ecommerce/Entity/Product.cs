@@ -7,12 +7,10 @@ public class Product
     [Key]
     public int Id { get; set; } 
     public string Name { get; set; }
-    
-    public string ImageUrl { get; set; }
-    
-    public string ImageUrl2 { get; set; }
-    public string ImageUrl3 { get; set; }
-    public string ImageUrl4 { get; set; }
+    public string CoverImageUrl { get; set; }
+    public string AdditionalImageUrl1 { get; set; }
+    public string AdditionalImageUrl2 { get; set; }
+    public string AdditionalImageUrl3 { get; set; }
     public decimal OriginalPrice { get; set; } 
     public decimal? DiscountPrice { get; set; }
     public string Description { get; set; }
