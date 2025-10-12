@@ -8,3 +8,9 @@ global.json
 
 [Bb]in/
 [Oo]bj/
+[Data]/
+
+appsettings.json
+appsettings.*.json
+
+Data/Seed/JsonData/

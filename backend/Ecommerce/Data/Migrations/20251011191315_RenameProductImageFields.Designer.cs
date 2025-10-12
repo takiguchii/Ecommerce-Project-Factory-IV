@@ -4,6 +4,7 @@ using Ecommerce.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    partial class EcommerceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251011191315_RenameProductImageFields")]
+    partial class RenameProductImageFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,27 +24,6 @@ namespace Ecommerce.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("Ecommerce.Entity.Brand", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Brands");
-                });
 
             modelBuilder.Entity("Ecommerce.Entity.Category", b =>
                 {
@@ -85,22 +67,8 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("AdditionalImageUrl4")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("AverageStars")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<int>("BrandId")
-                        .HasColumnType("int");
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("CoverImageUrl")
                         .IsRequired()
@@ -123,6 +91,12 @@ namespace Ecommerce.Migrations
                     b.Property<int>("ProviderId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RatingQuantity")
+                        .HasColumnType("int");
+
                     b.Property<string>("RawDescription")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -130,9 +104,6 @@ namespace Ecommerce.Migrations
                     b.Property<string>("RawTechnicalInfo")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int>("ReviewCount")
-                        .HasColumnType("int");
 
                     b.Property<int>("SubCategoryId")
                         .HasColumnType("int");
@@ -142,8 +113,6 @@ namespace Ecommerce.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BrandId");
 
                     b.HasIndex("CategoryId");
 
@@ -217,12 +186,6 @@ namespace Ecommerce.Migrations
 
             modelBuilder.Entity("Ecommerce.Entity.Product", b =>
                 {
-                    b.HasOne("Ecommerce.Entity.Brand", "Brand")
-                        .WithMany()
-                        .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Ecommerce.Entity.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
@@ -240,8 +203,6 @@ namespace Ecommerce.Migrations
                         .HasForeignKey("SubCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Brand");
 
                     b.Navigation("Category");
 

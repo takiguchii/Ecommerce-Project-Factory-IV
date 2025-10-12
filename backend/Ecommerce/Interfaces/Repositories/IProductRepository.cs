@@ -10,7 +10,7 @@ public interface IProductRepository
     void Delete(Product product);
     void SaveChanges();
     List<Product> GetPromotions(); 
-    Task<PaginatedResult<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize);
+    Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize);
 
 
 }

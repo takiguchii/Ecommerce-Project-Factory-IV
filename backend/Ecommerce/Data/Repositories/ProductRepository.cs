@@ -42,7 +42,7 @@ public class ProductRepository : IProductRepository
     }
     
     //METODO DA PAGINAÇÃO
-    public async Task<PaginatedResult<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize)
+    public async Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize)
     {
         //  ANOTAÇÕES PARA O FRONT
         
@@ -60,7 +60,7 @@ public class ProductRepository : IProductRepository
             .ToListAsync();
 
         // 4. Retorna o resultado no nosso DTO de paginação
-        return new PaginatedResult<Product>
+        return new CreatePaginatedResultDto<Product>
         {
             Items = items,
             PageNumber = pageNumber,
