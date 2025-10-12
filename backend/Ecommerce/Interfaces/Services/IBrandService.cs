@@ -1,8 +1,11 @@
+using Ecommerce.DTOs;
 using Ecommerce.Entity;
 
 namespace Ecommerce.Interfaces.Services;
 
 public interface IBrandService
 {
-    Task<List<Brand>> GetAllAsync();
+    List<Brand> GetAll();
+    Brand CreateBrand(CreateBrandDto brandDto);
+    bool DeleteBrand(int id);
 }

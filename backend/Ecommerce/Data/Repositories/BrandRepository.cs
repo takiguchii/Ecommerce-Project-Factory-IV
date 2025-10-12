@@ -14,8 +14,28 @@ public class BrandRepository : IBrandRepository
         _context = context;
     }
 
-    public async Task<List<Brand>> GetAllAsync()
+    public List<Brand> GetAll()
     {
-        return await _context.Brands.ToListAsync();
+        return _context.Brands.ToList();
+    }
+
+    public Brand? GetById(int id)
+    {
+        return _context.Brands.FirstOrDefault(b => b.Id == id);
+    }
+
+    public void Add(Brand brand)
+    {
+        _context.Brands.Add(brand);
+    }
+
+    public void Delete(Brand brand)
+    {
+        _context.Brands.Remove(brand);
+    }
+
+    public void SaveChanges()
+    {
+        _context.SaveChanges();
     }
 }

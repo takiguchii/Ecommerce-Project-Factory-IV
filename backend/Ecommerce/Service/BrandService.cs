@@ -1,3 +1,4 @@
+using Ecommerce.DTOs;
 using Ecommerce.Entity;
 using Ecommerce.Interfaces.Repositories;
 using Ecommerce.Interfaces.Services;
@@ -13,8 +14,32 @@ public class BrandService : IBrandService
         _brandRepository = brandRepository;
     }
 
-    public async Task<List<Brand>> GetAllAsync()
+    public List<Brand> GetAll()
     {
-        return await _brandRepository.GetAllAsync();
+        return _brandRepository.GetAll();
+    }
+
+    public Brand CreateBrand(CreateBrandDto brandDto)
+    {
+        var newBrand = new Brand
+        {
+            Name = brandDto.Name,
+            ImageUrl = brandDto.ImageUrl
+        };
+        _brandRepository.Add(newBrand);
+        _brandRepository.SaveChanges();
+        return newBrand;
+    }
+
+    public bool DeleteBrand(int id)
+    {
+        var brand = _brandRepository.GetById(id);
+        if (brand == null)
+        {
+            return false;
+        }
+        _brandRepository.Delete(brand);
+        _brandRepository.SaveChanges();
+        return true;
     }
 }

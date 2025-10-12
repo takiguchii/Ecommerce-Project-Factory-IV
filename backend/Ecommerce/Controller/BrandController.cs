@@ -1,3 +1,4 @@
+using Ecommerce.DTOs;
 using Ecommerce.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +16,27 @@ public class BrandController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllBrands()
+    public IActionResult GetAllBrands()
     {
-        var brands = await _brandService.GetAllAsync();
+        var brands = _brandService.GetAll();
         return Ok(brands);
+    }
+
+    [HttpPost]
+    public IActionResult CreateBrand([FromBody] CreateBrandDto brandDto)
+    {
+        var brand = _brandService.CreateBrand(brandDto);
+        return CreatedAtAction(nameof(GetAllBrands), new { id = brand.Id }, brand);
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteBrand(int id)
+    {
+        var success = _brandService.DeleteBrand(id);
+        if (!success)
+        {
+            return NotFound();
+        }
+        return NoContent();
     }
 }
