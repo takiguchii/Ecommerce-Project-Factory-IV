@@ -4,14 +4,30 @@ using System.Text.Json.Serialization;
 using Ecommerce.Data.Context;
 using Ecommerce.Entity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Ecommerce.Data.Seed;
 
-// DTO para mapear a estrutura do nosso JSON padronizado com os novos nomes
+// 1. DTO 100% alinhado com o JSON final
 public class ProductJsonDto
 {
+    [JsonPropertyName("code")]
+    public string Code { get; set; }
+
     [JsonPropertyName("name")]
     public string Name { get; set; }
+
+    [JsonPropertyName("brand")]
+    public string BrandName { get; set; }
+    
+    [JsonPropertyName("brand_image")]
+    public string BrandImage { get; set; }
+
+    [JsonPropertyName("category")]
+    public string CategoryName { get; set; }
+
+    [JsonPropertyName("sub_category")]
+    public string SubCategoryName { get; set; }
 
     [JsonPropertyName("original_price")]
     public string OriginalPrice { get; set; }
@@ -25,21 +41,32 @@ public class ProductJsonDto
     [JsonPropertyName("technical_info")]
     public string TechnicalInfo { get; set; }
 
-    // --- NOMES ATUALIZADOS AQUI ---
-    [JsonPropertyName("cover_image_url")]
+    [JsonPropertyName("raw_description")]
+    public string RawDescription { get; set; }
+
+    [JsonPropertyName("raw_technical_info")]
+    public string RawTechnicalInfo { get; set; }
+    
+    [JsonPropertyName("image_url0")]
     public string CoverImageUrl { get; set; }
 
-    [JsonPropertyName("additional_image_url_1")] 
+    [JsonPropertyName("image_url1")] 
     public string AdditionalImageUrl1 { get; set; }
 
-    [JsonPropertyName("additional_image_url_2")] 
+    [JsonPropertyName("image_url2")] 
     public string AdditionalImageUrl2 { get; set; }
 
-    [JsonPropertyName("additional_image_url_3")] 
+    [JsonPropertyName("image_url3")] 
     public string AdditionalImageUrl3 { get; set; }
+    
+    [JsonPropertyName("image_url4")]
+    public string AdditionalImageUrl4 { get; set; }
 
-    [JsonPropertyName("subcategory_name")]
-    public string SubCategoryName { get; set; }
+    [JsonPropertyName("stars")]
+    public decimal AverageStars { get; set; }
+
+    [JsonPropertyName("rating")]
+    public string ReviewCount { get; set; }
 }
 
 
@@ -49,49 +76,35 @@ public static class SeedData
     {
         context.Database.EnsureCreated();
 
-        if (context.Products.Any() || context.Categories.Any())
+        // Se já existirem produtos, não faz nada.
+        if (context.Products.Any())
         {
             return;
         }
 
-        var techMartProvider = new Provider
+        // Seed inicial de entidades base (roda apenas uma vez no banco vazio)
+        if (!context.Categories.Any())
         {
-            Name = "TechMart Distribuição", Cnpj = "12345678000199", Email = "contato@techmart.com",
-            PhoneNumber = "11999998888", Address = "Rua da Tecnologia, 123, São Paulo, SP"
-        };
-        context.Providers.Add(techMartProvider);
+            var techMartProvider = new Provider
+            {
+                Name = "TechMart Distribuição", Cnpj = "12345678000199", Email = "contato@techmart.com",
+                PhoneNumber = "11999998888", Address = "Rua da Tecnologia, 123, São Paulo, SP"
+            };
+            context.Providers.Add(techMartProvider);
 
-        var hardware = new Category { Name = "Hardware", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FHARDWARE_1700588665.png&w=256&q=75" };
-        var perifericos = new Category { Name = "Periféricos", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FPERIFERICOS_1700588652.png&w=256&q=75" };
-        var computadores = new Category { Name = "Computadores", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCOMPUTADORES_1731081639.png&w=256&q=75" };
-        var videoGames = new Category { Name = "Video Games", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FGAMER_1700588706.png&w=256&q=75" };
-        var celulares = new Category { Name = "Celular & Smartphones", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCELULAR-SMARTPHONE_1731081407.png&w=256&q=75" };
-        var tv = new Category { Name = "TV", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FTV_1700588559.png&w=256&q=75" };
-        var audio = new Category { Name = "Áudio", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FAUDIO_1700588544.png&w=256&q=75" };
-        var casaInteligente = new Category { Name = "Casa Inteligente", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCASA-INTELIGENTE_1731081391.png&w=256&q=75" };
-        
-        context.Categories.AddRange(hardware, perifericos, computadores, videoGames, celulares, tv, audio, casaInteligente);
+            var hardware = new Category { Name = "Hardware", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FHARDWARE_1700588665.png&w=256&q=75" };
+            context.Categories.Add(hardware);
 
-        var placasDeVideo = new SubCategory { Name = "Placas de Vídeo", ParentCategory = hardware };
-        var notebooks = new SubCategory { Name = "Notebooks", ParentCategory = computadores };
-        var mouses = new SubCategory { Name = "Mouses", ParentCategory = perifericos };
-        var headsets = new SubCategory { Name = "Headsets", ParentCategory = perifericos };
-        var consoles = new SubCategory { Name = "Consoles", ParentCategory = videoGames };
-        var acessoriosGamer = new SubCategory { Name = "Acessórios Gamer", ParentCategory = perifericos };
-        var monitores = new SubCategory { Name = "Monitores", ParentCategory = perifericos };
-        var smartphones = new SubCategory { Name = "Smartphones", ParentCategory = celulares };
-        var smartTvs = new SubCategory { Name = "Smart TVs", ParentCategory = tv };
-        var fonesDeOuvido = new SubCategory { Name = "Fones de Ouvido", ParentCategory = audio };
-        var assistentesVirtuais = new SubCategory { Name = "Assistentes Virtuais", ParentCategory = casaInteligente };
-        var placasMae = new SubCategory { Name = "Placas-Mãe", ParentCategory = hardware };
-        var armazenamento = new SubCategory { Name = "Armazenamento", ParentCategory = hardware };
-
-        context.SubCategories.AddRange(placasDeVideo, notebooks, mouses, headsets, consoles, acessoriosGamer, monitores, smartphones, smartTvs, fonesDeOuvido, assistentesVirtuais, placasMae, armazenamento);
-        
-        context.SaveChanges();
+            var ssd = new SubCategory { Name = "SSD", ParentCategory = hardware };
+            context.SubCategories.Add(ssd);
+            
+            context.SaveChanges();
+        }
         
         var allProductsToSeed = new List<Product>();
         var jsonDataPath = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "JsonData");
+        
+        var defaultProvider = context.Providers.First();
 
         if (Directory.Exists(jsonDataPath))
         {
@@ -103,40 +116,51 @@ public static class SeedData
                 var productDtos = JsonSerializer.Deserialize<List<ProductJsonDto>>(jsonString);
 
                 if (productDtos == null || !productDtos.Any()) continue;
-                
-                var subCategoryName = productDtos.First().SubCategoryName;
-                var subCategory = context.SubCategories.Include(sc => sc.ParentCategory)
-                                           .FirstOrDefault(sc => sc.Name == subCategoryName);
-
-                if (subCategory == null)
-                {
-                    Console.WriteLine($"AVISO: Subcategoria '{subCategoryName}' do arquivo '{Path.GetFileName(file)}' não encontrada. Pulando produtos.");
-                    continue;
-                }
 
                 foreach (var dto in productDtos)
                 {
+                    // 2. Lógica para garantir que a marca exista ("Get or Create")
+                    var brand = context.Brands.FirstOrDefault(b => b.Name == dto.BrandName);
+                    if (brand == null)
+                    {
+                        brand = new Brand { Name = dto.BrandName, ImageUrl = NormalizeImageUrl(dto.BrandImage) };
+                        context.Brands.Add(brand);
+                    }
+
+                    // 3. Encontra categoria e subcategoria
+                    var cleanCategoryName = dto.CategoryName.Replace(">", "").Trim();
+                    var cleanSubCategoryName = dto.SubCategoryName.Replace(">", "").Trim();
+                    var category = context.Categories.FirstOrDefault(c => c.Name == cleanCategoryName);
+                    var subCategory = context.SubCategories.FirstOrDefault(sc => sc.Name == cleanSubCategoryName);
+
+                    if (category == null || subCategory == null)
+                    {
+                        Console.WriteLine($"AVISO: Categoria '{cleanCategoryName}' ou Subcategoria '{cleanSubCategoryName}' não encontrada para '{dto.Name}'. Pulando.");
+                        continue;
+                    }
+
+                    // 4. Mapeamento final, incluindo os novos campos e a limpeza de dados
                     allProductsToSeed.Add(new Product
                     {
+                        Code = dto.Code,
                         Name = dto.Name,
                         OriginalPrice = ParsePrice(dto.OriginalPrice) ?? 0m,
                         DiscountPrice = ParsePrice(dto.DiscountPrice),
                         Description = dto.Description,
                         TechnicalInfo = dto.TechnicalInfo,
-                        RawDescription = dto.Description,
-                        RawTechnicalInfo = dto.TechnicalInfo,
-                        
+                        RawDescription = dto.RawDescription,
+                        RawTechnicalInfo = dto.RawTechnicalInfo,
                         CoverImageUrl = NormalizeImageUrl(dto.CoverImageUrl),
                         AdditionalImageUrl1 = NormalizeImageUrl(dto.AdditionalImageUrl1), 
                         AdditionalImageUrl2 = NormalizeImageUrl(dto.AdditionalImageUrl2), 
                         AdditionalImageUrl3 = NormalizeImageUrl(dto.AdditionalImageUrl3),
-                        
-                        //AverageStars = 0,
-                        //ReviewCount = 0,
-                        
-                        Category = subCategory.ParentCategory,
+                        AdditionalImageUrl4 = NormalizeImageUrl(dto.AdditionalImageUrl4),
+                        AverageStars = dto.AverageStars,
+                        ReviewCount = ParseReviewCount(dto.ReviewCount),
+                        Category = category,
                         SubCategory = subCategory,
-                        Provider = techMartProvider
+                        Brand = brand,
+                        Provider = defaultProvider
                     });
                 }
             }
@@ -153,12 +177,24 @@ public static class SeedData
     {
         if (string.IsNullOrWhiteSpace(priceString)) return null;
         var culture = new CultureInfo("pt-BR");
-        var cleanString = priceString.Replace("R$", "").Trim();
+        var cleanString = Regex.Replace(priceString, @"[R$\s]", "").Trim();
         if (decimal.TryParse(cleanString, NumberStyles.Currency, culture, out decimal price))
         {
             return price;
         }
         return null;
+    }
+    
+    // 5. Novo método auxiliar para limpar e converter o número de avaliações
+    private static int ParseReviewCount(string reviewString)
+    {
+        if (string.IsNullOrWhiteSpace(reviewString)) return 0;
+        var cleanString = Regex.Replace(reviewString, @"[()]", "").Trim();
+        if (int.TryParse(cleanString, out int count))
+        {
+            return count;
+        }
+        return 0;
     }
 
     private static string NormalizeImageUrl(string endpointImage)
@@ -167,22 +203,18 @@ public static class SeedData
         {
             return "";
         }
-
         if (endpointImage.StartsWith("http"))
         {
             return endpointImage;
         }
-
         if (endpointImage.StartsWith("/_next/image"))
         {
             return "https://www.kabum.com.br" + endpointImage;
         }
-
         if (endpointImage.StartsWith("/produtos/fotos"))
         {
             return "https://images.kabum.com.br" + endpointImage;
         }
-
         return endpointImage;
     }
 }
