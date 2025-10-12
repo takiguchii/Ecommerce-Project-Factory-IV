@@ -30,8 +30,7 @@ public class ProductService : IProductService
             TechnicalInfo = productDto.TechnicalInfo,
             RawDescription = productDto.RawDescription,
             RawTechnicalInfo = productDto.RawTechnicalInfo,
-            Rating = 0,
-            RatingQuantity = 0
+
         };
 
         _productRepository.Add(newProduct);
