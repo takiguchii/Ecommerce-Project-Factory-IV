@@ -6,21 +6,28 @@ public class Product
 {
     [Key]
     public int Id { get; set; } 
+    public string Code { get; set; }
     public string Name { get; set; }
-    
-    public string ImageUrl { get; set; }
+    public string CoverImageUrl { get; set; }
+    public string AdditionalImageUrl1 { get; set; }
+    public string AdditionalImageUrl2 { get; set; }
+    public string AdditionalImageUrl3 { get; set; }
+    public string AdditionalImageUrl4 { get; set; }
+    public decimal AverageStars { get; set; } 
+    public int ReviewCount { get; set; }  
     public decimal OriginalPrice { get; set; } 
     public decimal? DiscountPrice { get; set; }
     public string Description { get; set; }
     public string TechnicalInfo { get; set; }
     public string RawDescription { get; set; }
     public string RawTechnicalInfo { get; set; }
-    public int Rating { get; set; }
-    public int RatingQuantity { get; set; }
     public int CategoryId { get; set; }
     public Category Category { get; set; }
     public int SubCategoryId { get; set; }
     public SubCategory SubCategory { get; set; }
     public int ProviderId { get; set; }
     public Provider Provider { get; set; }
+    
+    public int BrandId { get; set; }
+    public Brand Brand { get; set; }
 }

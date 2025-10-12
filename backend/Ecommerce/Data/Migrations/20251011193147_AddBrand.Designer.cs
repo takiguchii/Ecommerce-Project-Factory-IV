@@ -4,6 +4,7 @@ using Ecommerce.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    partial class EcommerceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251011193147_AddBrand")]
+    partial class AddBrand
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,22 +88,11 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("AdditionalImageUrl4")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("AverageStars")
-                        .HasColumnType("decimal(65,30)");
-
                     b.Property<int>("BrandId")
                         .HasColumnType("int");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("CoverImageUrl")
                         .IsRequired()
@@ -123,6 +115,12 @@ namespace Ecommerce.Migrations
                     b.Property<int>("ProviderId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RatingQuantity")
+                        .HasColumnType("int");
+
                     b.Property<string>("RawDescription")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -130,9 +128,6 @@ namespace Ecommerce.Migrations
                     b.Property<string>("RawTechnicalInfo")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int>("ReviewCount")
-                        .HasColumnType("int");
 
                     b.Property<int>("SubCategoryId")
                         .HasColumnType("int");

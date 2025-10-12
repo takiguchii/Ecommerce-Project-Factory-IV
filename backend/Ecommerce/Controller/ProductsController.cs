@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Ecommerce.Dto;
 using Ecommerce.Entity;
-using Ecommerce.Interfaces; 
+using Ecommerce.Interfaces;
+using Ecommerce.DTOs; 
 
 namespace Ecommerce.Api.Controllers;
 
@@ -31,7 +32,7 @@ public class ProductsController : ControllerBase
 
         if (product == null)
         {
-            return NotFound(); // Retorna 404 se não encontrar o produto
+            return NotFound(); 
         }
 
         return Ok(product);
@@ -41,6 +42,25 @@ public class ProductsController : ControllerBase
     public IActionResult GetAllProducts()
     {
         var products = _productService.GetAllProducts();
+        return Ok(products);
+    }
+    [HttpGet("promotions")] 
+    public IActionResult GetPromotions()
+    {
+        var promotionalProducts = _productService.GetPromotions();
+        return Ok(promotionalProducts);
+    }
+    
+    [HttpGet("category/{categoryId}")]
+    public async Task<ActionResult<CreatePaginatedResultDto<Product>>> GetProductsByCategory(int categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var products = await _productService.GetByCategoryPaginatedAsync(categoryId, pageNumber, pageSize);
+        
+        if (products == null || !products.Items.Any())
+        {
+            return NotFound("Nenhum produto encontrado para esta categoria.");
+        }
+        
         return Ok(products);
     }
     
@@ -54,10 +74,5 @@ public class ProductsController : ControllerBase
         }
         return NoContent(); 
     }
-    [HttpGet("promotions")] 
-    public IActionResult GetPromotions()
-    {
-        var promotionalProducts = _productService.GetPromotions();
-        return Ok(promotionalProducts);
-    }
+
 }

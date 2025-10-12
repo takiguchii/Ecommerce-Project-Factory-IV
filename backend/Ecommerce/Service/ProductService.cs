@@ -3,6 +3,7 @@ using Ecommerce.Entity;
 using Ecommerce.Interfaces;
 using Ecommerce.Interfaces.Repositories; 
 using Ecommerce.Interfaces.Services;
+using Ecommerce.DTOs;
 
 namespace Ecommerce.Service;
 
@@ -22,15 +23,14 @@ public class ProductService : IProductService
         var newProduct = new Product
         {
             Name = productDto.Name,
-            ImageUrl = productDto.ImageUrl,
+            CoverImageUrl = productDto.CoverImageUrl,
             OriginalPrice = productDto.OriginalPrice,
             DiscountPrice = productDto.DiscountPrice,
             Description = productDto.Description,
             TechnicalInfo = productDto.TechnicalInfo,
             RawDescription = productDto.RawDescription,
             RawTechnicalInfo = productDto.RawTechnicalInfo,
-            Rating = 0,
-            RatingQuantity = 0
+
         };
 
         _productRepository.Add(newProduct);
@@ -63,5 +63,9 @@ public class ProductService : IProductService
     public List<Product> GetPromotions()
     {
         return _productRepository.GetPromotions();
+    }
+    public async Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize)
+    {
+        return await _productRepository.GetByCategoryPaginatedAsync(categoryId, pageNumber, pageSize);
     }
 }

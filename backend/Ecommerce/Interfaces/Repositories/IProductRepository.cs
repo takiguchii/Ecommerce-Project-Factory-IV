@@ -1,4 +1,5 @@
 using Ecommerce.Entity;
+using Ecommerce.DTOs;
 
 namespace Ecommerce.Interfaces.Repositories;
 public interface IProductRepository
@@ -9,5 +10,7 @@ public interface IProductRepository
     void Delete(Product product);
     void SaveChanges();
     List<Product> GetPromotions(); 
+    Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize);
+
 
 }
