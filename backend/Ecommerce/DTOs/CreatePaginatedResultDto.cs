@@ -1,6 +1,6 @@
 namespace Ecommerce.DTOs;
 
-public class PaginatedResult<T>
+public class CreatePaginatedResultDto<T>
 {
     public List<T> Items { get; set; }
     
