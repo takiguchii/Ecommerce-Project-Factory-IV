@@ -27,7 +27,7 @@
     <article @click="goToDetail" class="cursor-pointer bg-neutral-900 rounded-lg shadow-lg hover:shadow-orange-400/20 transition-shadow duration-300 flex flex-col border border-neutral-800 overflow-hidden">
       
       <div class="h-48 flex items-center justify-center p-4 bg-white">
-        <img :src="props.product.imageUrl" :alt="props.product.name" class="max-h-full max-w-full object-contain" />
+        <img :src="props.product.coverImageUrl" :alt="props.product.name" class="max-h-full max-w-full object-contain" />
       </div>
 
       <div class="p-4 flex flex-col flex-grow">

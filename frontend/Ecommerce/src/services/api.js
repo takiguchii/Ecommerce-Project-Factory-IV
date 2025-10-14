@@ -1,3 +1,4 @@
+// src/services/api.js
 import axios from 'axios';
 
 const api = axios.create({
@@ -8,7 +9,7 @@ const api = axios.create({
   }
 });
 
-// API methods
+// API methods 
 export const apiGet = async (url) => {
   const response = await api.get(url);
   return response.data;
@@ -29,24 +30,41 @@ export const apiDelete = async (url) => {
   return response.data;
 };
 
-api.interceptors.request.use(config => {
-  console.log('API Request:', config.method.toUpperCase(), config.url);
-  return config;
-});
-
-api.interceptors.response.use(
-  response => {
-    console.log('API Response:', response.status, response.data);
-    return response;
-  },
-  error => {
-    console.error('API Error:', error.response?.status, error.response?.data);
-    return Promise.reject(error);
-  }
-);
+function normalizeBrand(raw) {
+  if (!raw) return null;
+  return {
+    id: raw.id ?? raw.ID ?? null,
+    name: raw.name ?? raw.Nome ?? '',
+    imageUrl: raw.imageUrl ?? raw.imageurl ?? raw.logoUrl ?? raw.logoURL ?? '',
+  };
+}
 
 export async function getProductById(id) {
   return await apiGet(`/products/${id}`);
+}
+
+export async function getBrands() {
+  const list = await apiGet('/brands');
+  return Array.isArray(list) ? list.map(normalizeBrand) : [];
+}
+
+export async function getBrandById(id) {
+  try {
+    const brand = await apiGet(`/brands/${id}`);
+    return normalizeBrand(brand);
+  } catch (_) {
+    const list = await getBrands();
+    return list.find(b => String(b?.id) === String(id)) || null;
+  }
+}
+
+const brandCache = new Map();
+export async function getBrandCached(id) {
+  const key = String(id);
+  if (brandCache.has(key)) return brandCache.get(key);
+  const data = await getBrandById(key);
+  brandCache.set(key, data);
+  return data;
 }
 
 export default api;
