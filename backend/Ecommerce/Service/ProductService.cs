@@ -2,7 +2,6 @@ using Ecommerce.Dto;
 using Ecommerce.Entity;
 using Ecommerce.Interfaces;
 using Ecommerce.Interfaces.Repositories; 
-using Ecommerce.Interfaces.Services;
 using Ecommerce.DTOs;
 
 namespace Ecommerce.Service;
@@ -18,8 +17,6 @@ public class ProductService : IProductService
 
     public Product CreateProduct(CreateProductDto productDto)
     {
-        // Futuras regras de negocio, Por enquanto apenas os DTOS
-
         var newProduct = new Product
         {
             Name = productDto.Name,
@@ -64,8 +61,8 @@ public class ProductService : IProductService
     {
         return _productRepository.GetPromotions();
     }
-    public async Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize)
+    public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
     {
-        return await _productRepository.GetByCategoryPaginatedAsync(categoryId, pageNumber, pageSize);
+        return await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
     }
 }

@@ -51,14 +51,19 @@ public class ProductsController : ControllerBase
         return Ok(promotionalProducts);
     }
     
-    [HttpGet("category/{categoryId}")]
-    public async Task<ActionResult<CreatePaginatedResultDto<Product>>> GetProductsByCategory(int categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    [HttpGet("filter")] 
+    public async Task<ActionResult<CreatePaginatedResultDto<Product>>> GetProductsByFilter(
+        [FromQuery] int pageNumber = 1, 
+        [FromQuery] int pageSize = 10,
+        [FromQuery] int? categoryId = null,
+        [FromQuery] int? subCategoryId = null,
+        [FromQuery] int? brandId = null)
     {
-        var products = await _productService.GetByCategoryPaginatedAsync(categoryId, pageNumber, pageSize);
+        var products = await _productService.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
         
         if (products == null || !products.Items.Any())
         {
-            return NotFound("Nenhum produto encontrado para esta categoria.");
+            return NotFound("Nenhum produto encontrado para os filtros aplicados.");
         }
         
         return Ok(products);
