@@ -10,15 +10,14 @@ const { products, loading: productsLoading, error: productsError, fetchProducts 
 </script>
 
 <template>
-  <!-- padding-top para o navbar fixo -->
   <div class="bg-gradient-to-b from-neutral-950 via-neutral-900 to-black text-white pt-20 md:pt-24">
     <HeroCarouselComponent />
 
-    <main class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
+    <main class="container mx-auto space-y-10 md:space-y-12">
 
       <!-- Promoções -->
       <section
-        class="rounded-2xl bg-neutral-900/60 border border-neutral-800/60 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6"
+        class="rounded-2xl bg-neutral-900/60 border-[1.5px] md:border-4 border-neutral-700/70 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6 hover:border-orange-500/40 transition-all duration-300"
       >
         <ProductSectionComponent 
           title="🔥 Hora de Dar Play!"
@@ -31,15 +30,15 @@ const { products, loading: productsLoading, error: productsError, fetchProducts 
 
       <!-- Departamentos -->
       <section
-        class="rounded-2xl bg-neutral-900/40 border border-neutral-800/60 shadow-lg ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6"
         id="departamentos"
+        class="rounded-2xl bg-neutral-900/50 border-[1.5px] md:border-4 border-neutral-700/70 shadow-lg ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6 hover:border-orange-500/40 transition-all duration-300"
       >
         <DepartmentSectionComponent />
       </section>
 
       <!-- Lista de produtos -->
       <section
-        class="rounded-2xl bg-neutral-900/60 border border-neutral-800/60 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6"
+        class="rounded-2xl bg-neutral-900/60 border-[1.5px] md:border-4 border-neutral-700/70 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6 hover:border-orange-500/40 transition-all duration-300"
       >
         <ProductSectionComponent 
           title="Nossos Produtos"
