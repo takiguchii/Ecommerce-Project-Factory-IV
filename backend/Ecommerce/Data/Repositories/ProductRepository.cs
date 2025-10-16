@@ -4,7 +4,6 @@ using Ecommerce.Interfaces.Repositories;
 using Ecommerce.DTOs;
 using Microsoft.EntityFrameworkCore; 
 
-
 namespace Ecommerce.Repositories;
 
 public class ProductRepository : IProductRepository
@@ -76,4 +75,6 @@ public class ProductRepository : IProductRepository
             TotalCount = totalCount
         };
     }
+    // Adicionando metodo da barra de pesquisa ( experimental ) 
+    //Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm, int limit);
 }
