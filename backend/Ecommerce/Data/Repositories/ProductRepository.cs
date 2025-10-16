@@ -39,6 +39,19 @@ public class ProductRepository : IProductRepository
             .Where(p => p.DiscountPrice != null)
             .ToList();
     }
+    public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm, int limit)
+    {
+        return await _dbContext.Products
+            .Where(p => p.Name.ToLower().Contains(searchTerm.ToLower()))
+            .Select(p => new ProductSearchSuggestionDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                CoverImageUrl = p.CoverImageUrl
+            })
+            .Take(limit)
+            .ToListAsync();
+    }
     
     //Paginação ( em teste usando o Dto ) 
     public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
@@ -75,6 +88,5 @@ public class ProductRepository : IProductRepository
             TotalCount = totalCount
         };
     }
-    // Adicionando metodo da barra de pesquisa ( experimental ) 
-    //Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm, int limit);
+
 }
