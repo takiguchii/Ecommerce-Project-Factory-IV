@@ -4,7 +4,6 @@ using Ecommerce.Interfaces.Repositories;
 using Ecommerce.DTOs;
 using Microsoft.EntityFrameworkCore; 
 
-
 namespace Ecommerce.Repositories;
 
 public class ProductRepository : IProductRepository
@@ -39,6 +38,19 @@ public class ProductRepository : IProductRepository
         return _dbContext.Products
             .Where(p => p.DiscountPrice != null)
             .ToList();
+    }
+    public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm, int limit)
+    {
+        return await _dbContext.Products
+            .Where(p => p.Name.ToLower().Contains(searchTerm.ToLower()))
+            .Select(p => new ProductSearchSuggestionDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                CoverImageUrl = p.CoverImageUrl
+            })
+            .Take(limit)
+            .ToListAsync();
     }
     
     //Paginação ( em teste usando o Dto ) 
@@ -76,4 +88,5 @@ public class ProductRepository : IProductRepository
             TotalCount = totalCount
         };
     }
+
 }

@@ -68,6 +68,12 @@ public class ProductsController : ControllerBase
         
         return Ok(products);
     }
+    [HttpGet("search-suggestions")]
+    public async Task<IActionResult> GetSearchSuggestions([FromQuery] string query)
+    {
+        var suggestions = await _productService.GetSearchSuggestionsAsync(query);
+        return Ok(suggestions);
+    }
     
     [HttpDelete("{id}")]
     public IActionResult DeleteProduct(int id)

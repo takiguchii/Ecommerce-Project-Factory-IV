@@ -14,6 +14,9 @@ public interface IProductService
     List<Product> GetPromotions();
     //Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize);
     Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId);
+    
+    //Adicionando metodo da barra de pesquisa
+    Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm);
 
 
 }
