@@ -65,4 +65,16 @@ public class ProductService : IProductService
     {
         return await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
     }
-}
+  
+        public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm)
+        {
+            const int suggestionLimit = 5; // Limitandoo a sugestão para 5 itens 
+            
+            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) // Definindo o limite para aparecer a sugestão ( só aprece depois de 3 caracters )
+            {
+                return new List<ProductSearchSuggestionDto>(); 
+            }
+    
+            return await _productRepository.GetSearchSuggestionsAsync(searchTerm, suggestionLimit);
+        }
+    }
