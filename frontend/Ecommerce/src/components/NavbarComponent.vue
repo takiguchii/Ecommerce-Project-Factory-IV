@@ -1,28 +1,39 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
-import { useCategories } from '@/composables/useCategories';
+import { ref, onMounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { useCategories } from '@/composables/useCategories'
 
-const isDepartmentsOpen = ref(false);
-const hoveredCategoryId = ref(null);
+const router = useRouter()
 
-const { categories, fetchCategories, subcategories, fetchSubCategories } = useCategories();
+const isDepartmentsOpen = ref(false)
+const hoveredCategoryId = ref(null)
+const searchTerm = ref('')
+
+const { categories, fetchCategories, subcategories, fetchSubCategories } = useCategories()
 
 onMounted(async () => {
-  await fetchCategories();
-  await fetchSubCategories();
-});
+  await fetchCategories()
+  await fetchSubCategories()
+})
 
-function toggleDepartments() {
-  isDepartmentsOpen.value = !isDepartmentsOpen.value;
+function showDepartments() {
+  isDepartmentsOpen.value = true
 }
-
+function hideDepartments() {
+  isDepartmentsOpen.value = false
+  hoveredCategoryId.value = null
+}
 function showSubcategories(categoryId) {
-  hoveredCategoryId.value = categoryId;
+  hoveredCategoryId.value = categoryId
+}
+function hideSubcategories() {
+  hoveredCategoryId.value = null
 }
 
-function hideSubcategories() {
-  hoveredCategoryId.value = null;
+function submitSearch() {
+  const q = searchTerm.value.trim()
+  if (!q) return
+  router.push({ name: 'search', query: { q } })
 }
 </script>
 
@@ -43,9 +54,12 @@ function hideSubcategories() {
           </RouterLink>
 
           <!-- DEPARTAMENTOS -->
-          <div class="relative hidden md:block">
+          <div
+            class="relative hidden md:block"
+            @mouseenter="showDepartments"
+            @mouseleave="hideDepartments"
+          >
             <button
-              @click="toggleDepartments"
               class="inline-flex items-center gap-2 rounded-xl bg-neutral-800/80 px-4 py-2 ring-1 ring-neutral-700/60 hover:bg-neutral-700/80 hover:ring-neutral-600 transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-200" viewBox="0 0 20 20" fill="currentColor">
@@ -101,31 +115,30 @@ function hideSubcategories() {
             class="flex items-center justify-center gap-2 bg-gradient-to-r from-neutral-800 to-neutral-800/70 hover:from-green-600 hover:to-green-600 px-3 py-2 rounded-xl shadow-md ring-4 ring-neutral-700/50 hover:ring-orange-500 transition-all duration-200 mx-4 hover:-translate-y-0.5"
             title="Cupom de desconto"
           >
-            <img
-              width="28"
-              height="28"
-              src="https://img.icons8.com/color/48/ticket.png"
-              alt="ticket"
-              class="w-7 h-7"
-            />
+            <img width="28" height="28" src="https://img.icons8.com/color/48/ticket.png" alt="ticket" class="w-7 h-7" />
             <p class="font-semibold">Cupom</p>
           </button>
         </div>
 
         <!-- BARRA DE BUSCA -->
         <div class="flex-1 flex justify-center px-4 sm:px-8">
-          <div class="relative w-full max-w-lg">
+          <form class="relative w-full max-w-lg" @submit.prevent="submitSearch">
             <input
+              v-model="searchTerm"
               type="text"
               placeholder="Busque seu produto..."
-              class="w-full bg-neutral-800/80 border border-neutral-700 rounded-full py-2 pl-11 pr-4 text-white placeholder-gray-400 focus:bg-neutral-900 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+              class="w-full bg-neutral-800/80 border border-neutral-700 rounded-full py-2 pl-11 pr-10 text-white placeholder-gray-400 focus:bg-neutral-900 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
             />
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            <button
+              type="submit"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-300 hover:text-orange-400"
+              title="Buscar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/>
               </svg>
-            </div>
-          </div>
+            </button>
+          </form>
         </div>
 
         <!-- LOGIN / CARRINHO -->
