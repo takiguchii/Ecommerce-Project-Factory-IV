@@ -4,7 +4,6 @@ using Ecommerce.Interfaces.Repositories;
 using Ecommerce.DTOs;
 using Microsoft.EntityFrameworkCore; 
 
-
 namespace Ecommerce.Repositories;
 
 public class ProductRepository : IProductRepository
@@ -40,26 +39,47 @@ public class ProductRepository : IProductRepository
             .Where(p => p.DiscountPrice != null)
             .ToList();
     }
-    
-    //METODO DA PAGINAÇÃO
-    public async Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize)
+    public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm, int limit)
     {
-        //  ANOTAÇÕES PARA O FRONT
-        
-        // 1. Cria a consulta base, filtrando por categoria
-        var query = _dbContext.Products
-            .Where(p => p.CategoryId == categoryId)
-            .AsQueryable();
+        return await _dbContext.Products
+            .Where(p => p.Name.ToLower().Contains(searchTerm.ToLower()))
+            .Select(p => new ProductSearchSuggestionDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                CoverImageUrl = p.CoverImageUrl
+            })
+            .Take(limit)
+            .ToListAsync();
+    }
+    
+    //Paginação ( em teste usando o Dto ) 
+    public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
+    {
+        var query = _dbContext.Products.AsQueryable();
 
-        // 2. Conta o total de itens (de forma assíncrona)
+        // Filtro dinamico ( Em teste )
+        if (categoryId.HasValue)
+        {
+            query = query.Where(p => p.CategoryId == categoryId.Value);
+        }
+        if (subCategoryId.HasValue)
+        {
+            query = query.Where(p => p.SubCategoryId == subCategoryId.Value);
+        }
+        if (brandId.HasValue)
+        {
+            query = query.Where(p => p.BrandId == brandId.Value);
+        }
+
         var totalCount = await query.CountAsync();
 
-        // 3. Executa a paginação na consulta
+        // Aplica a paginação
         var items = await query.Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        // 4. Retorna o resultado no nosso DTO de paginação
+        // Retorna o resultado no DTO
         return new CreatePaginatedResultDto<Product>
         {
             Items = items,
@@ -68,5 +88,5 @@ public class ProductRepository : IProductRepository
             TotalCount = totalCount
         };
     }
-    
+
 }
