@@ -197,7 +197,6 @@ function handleAddToCart(prod) {
           >
             Anterior
           </button>
-
           <button
             v-for="p in Math.min(totalPages, 7)"
             :key="`p-${p}`"
