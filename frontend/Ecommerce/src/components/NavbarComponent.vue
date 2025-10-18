@@ -13,13 +13,8 @@ onMounted(async () => {
   await fetchSubCategories();
 });
 
-function showDepartments() {
-  isDepartmentsOpen.value = true;
-}
-
-function hideDepartments() {
-  isDepartmentsOpen.value = false;
-  hoveredCategoryId.value = null;
+function toggleDepartments() {
+  isDepartmentsOpen.value = !isDepartmentsOpen.value;
 }
 
 function showSubcategories(categoryId) {
@@ -48,12 +43,9 @@ function hideSubcategories() {
           </RouterLink>
 
           <!-- DEPARTAMENTOS -->
-          <div
-            class="relative hidden md:block"
-            @mouseenter="showDepartments"
-            @mouseleave="hideDepartments"
-          >
+          <div class="relative hidden md:block">
             <button
+              @click="toggleDepartments"
               class="inline-flex items-center gap-2 rounded-xl bg-neutral-800/80 px-4 py-2 ring-1 ring-neutral-700/60 hover:bg-neutral-700/80 hover:ring-neutral-600 transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-200" viewBox="0 0 20 20" fill="currentColor">

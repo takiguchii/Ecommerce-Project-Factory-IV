@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { apiGet } from '@/services/api'
 import { useCategories } from '@/composables/useCategories'
 import { useProducts } from '@/composables/useProducts'
-import ProductCardComponent from '@/components/ProductCardComponent.vue' // 👈 seu card
+import ProductCardComponent from '@/components/ProductCardComponent.vue' 
 
 const route = useRoute()
 const { fetchCategoryById } = useCategories()
