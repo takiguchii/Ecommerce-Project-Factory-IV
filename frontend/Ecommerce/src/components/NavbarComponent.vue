@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useCategories } from '@/composables/useCategories'
+import { apiGet } from '@/services/api'
 
 const router = useRouter()
 
@@ -9,11 +10,33 @@ const isDepartmentsOpen = ref(false)
 const hoveredCategoryId = ref(null)
 const searchTerm = ref('')
 
+// AUTOCOMPLETE
+const suggestions = ref([])           
+const showSuggestions = ref(false)     
+const loadingSuggestions = ref(false)
+const highlighted = ref(-1)            
+let debounceId = null                  
+
+// Clique fora para fechar o dropdown
+function onDocClick(e) {
+  const root = document.getElementById('navbar-search-root')
+  if (root && !root.contains(e.target)) {
+    showSuggestions.value = false
+    highlighted.value = -1
+  }
+}
+
 const { categories, fetchCategories, subcategories, fetchSubCategories } = useCategories()
 
 onMounted(async () => {
   await fetchCategories()
   await fetchSubCategories()
+  document.addEventListener('click', onDocClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocClick)
+  if (debounceId) clearTimeout(debounceId)
 })
 
 function showDepartments() {
@@ -33,7 +56,73 @@ function hideSubcategories() {
 function submitSearch() {
   const q = searchTerm.value.trim()
   if (!q) return
+  showSuggestions.value = false
+  highlighted.value = -1
   router.push({ name: 'search', query: { q } })
+}
+
+async function fetchSuggestions(term) {
+  if (!term || term.length < 2) {
+    suggestions.value = []
+    showSuggestions.value = false
+    highlighted.value = -1
+    return
+  }
+  loadingSuggestions.value = true
+  try {
+    const data = await apiGet(`/products/search-suggestions?query=${encodeURIComponent(term)}`)
+    const list = Array.isArray(data) ? data : []
+    suggestions.value = list.map(p => ({
+      ...p,
+      coverImageUrl:
+        p.coverImageUrl ||
+        p.imageUrl ||
+        p.additionalImageUrl1 ||
+        'https://placehold.co/48x48?text=IMG'
+    }))
+    showSuggestions.value = suggestions.value.length > 0
+    highlighted.value = suggestions.value.length ? 0 : -1
+  } catch (e) {
+    suggestions.value = []
+    showSuggestions.value = false
+    highlighted.value = -1
+  } finally {
+    loadingSuggestions.value = false
+  }
+}
+
+function onInput() {
+  const term = searchTerm.value.trim()
+  if (debounceId) clearTimeout(debounceId)
+  debounceId = setTimeout(() => fetchSuggestions(term), 250)
+}
+
+function onKeydown(e) {
+  if (!showSuggestions.value || !suggestions.value.length) return
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    highlighted.value = (highlighted.value + 1) % suggestions.value.length
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    highlighted.value = (highlighted.value - 1 + suggestions.value.length) % suggestions.value.length
+  } else if (e.key === 'Enter') {
+    e.preventDefault()
+    if (highlighted.value >= 0) {
+      goToSuggestion(suggestions.value[highlighted.value])
+    } else {
+      submitSearch()
+    }
+  } else if (e.key === 'Escape') {
+    showSuggestions.value = false
+    highlighted.value = -1
+  }
+}
+
+function goToSuggestion(item) {
+  showSuggestions.value = false
+  highlighted.value = -1
+  router.push({ name: 'ProductDetail', params: { id: item.id } })
 }
 </script>
 
@@ -120,11 +209,13 @@ function submitSearch() {
           </button>
         </div>
 
-        <!-- BARRA DE BUSCA -->
+        <!-- BARRA DE BUSCA + AUTOCOMPLETE -->
         <div class="flex-1 flex justify-center px-4 sm:px-8">
-          <form class="relative w-full max-w-lg" @submit.prevent="submitSearch">
+          <form id="navbar-search-root" class="relative w-full max-w-lg" @submit.prevent="submitSearch">
             <input
               v-model="searchTerm"
+              @input="onInput"
+              @keydown="onKeydown"
               type="text"
               placeholder="Busque seu produto..."
               class="w-full bg-neutral-800/80 border border-neutral-700 rounded-full py-2 pl-11 pr-10 text-white placeholder-gray-400 focus:bg-neutral-900 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
@@ -138,6 +229,48 @@ function submitSearch() {
                 <path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/>
               </svg>
             </button>
+
+            <!-- DROPDOWN DE SUGESTÕES -->
+            <transition name="fade">
+              <div
+                v-if="showSuggestions"
+                class="absolute mt-2 w-full rounded-xl border border-neutral-700/60 bg-neutral-900/95 shadow-2xl ring-1 ring-black/5 z-[80] overflow-hidden"
+              >
+                <div v-if="loadingSuggestions" class="px-4 py-3 text-sm text-neutral-300">Buscando…</div>
+
+                <ul v-else class="max-h-96 overflow-auto">
+                  <li
+                    v-for="(item, idx) in suggestions"
+                    :key="item.id"
+                    class="flex items-center gap-3 px-3 py-2 cursor-pointer"
+                    :class="idx === highlighted ? 'bg-neutral-800/80 text-orange-300' : 'hover:bg-neutral-800/60'"
+                    @mouseenter="highlighted = idx"
+                    @mouseleave="highlighted = -1"
+                    @click="goToSuggestion(item)"
+                  >
+                    <img :src="item.coverImageUrl" alt="" class="w-8 h-8 rounded object-cover border border-neutral-700" />
+                    <span class="text-sm text-gray-200 line-clamp-2">{{ item.name }}</span>
+                  </li>
+
+                  <li
+                    v-if="suggestions.length"
+                    class="border-t border-neutral-800"
+                  >
+                    <button
+                      type="button"
+                      class="w-full text-left px-3 py-2 text-sm text-orange-300 hover:bg-neutral-800/60"
+                      @click="submitSearch"
+                    >
+                      Ver todos os resultados para “{{ searchTerm }}”
+                    </button>
+                  </li>
+                </ul>
+
+                <div v-if="!loadingSuggestions && !suggestions.length" class="px-4 py-3 text-sm text-neutral-300">
+                  Sem resultados
+                </div>
+              </div>
+            </transition>
           </form>
         </div>
 
