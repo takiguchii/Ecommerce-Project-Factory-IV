@@ -44,6 +44,9 @@ const router = createRouter({
       name: 'Category',
       component: () => import('../views/CategoryView.vue')
     },
+    { path: '/brand/:id',
+      name: 'Brand',
+      component: () => import('../views/BrandView.vue') },
     { path: '/search', 
       name: 'search', 
       component: SearchResultsView 
