@@ -1,15 +1,37 @@
-// src/services/api.js
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL, 
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 });
 
-// API methods 
+function tryParseJsonString(s) {
+  if (typeof s !== 'string') return s;
+  const trimmed = s.replace(/^\uFEFF/, '').trim(); 
+  const first = trimmed[0];
+  if (first !== '{' && first !== '[') return s;
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return s; 
+  }
+}
+
+api.interceptors.response.use(
+  (res) => {
+    const ct = String(res.headers?.['content-type'] || '').toLowerCase();
+    if (typeof res.data === 'string' && (ct.includes('text/plain') || ct === '')) {
+      res.data = tryParseJsonString(res.data);
+    }
+    return res;
+  },
+  (err) => Promise.reject(err)
+);
+
+//  API METHODS 
 export const apiGet = async (url) => {
   const response = await api.get(url);
   return response.data;
@@ -30,6 +52,7 @@ export const apiDelete = async (url) => {
   return response.data;
 };
 
+//  HELPERS DE MARCAS 
 function normalizeBrand(raw) {
   if (!raw) return null;
   return {
