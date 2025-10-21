@@ -2,37 +2,41 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiGet } from '@/services/api'
-import { useCategories } from '@/composables/useCategories'
+import { useBrands } from '@/composables/useBrands'
 import { useProducts } from '@/composables/useProducts'
-import ProductCardComponent from '@/components/ProductCardComponent.vue' 
+import ProductCardComponent from '@/components/ProductCardComponent.vue'
 
 const route = useRoute()
-const { fetchCategoryById } = useCategories()
-const { products, loading: loadingLegacy, error: errorLegacy, fetchProductsByCategory } = useProducts()
+const { fetchBrandById } = useBrands()
+const { products, loading: loadingLegacy, error: errorLegacy, fetchProductsByBrand } = useProducts()
 
 // Estado
-const categoryName = ref('Categoria')
+const brandName = ref('Marca')
+const brandLogo = ref(null)
+
 const loading = ref(false)
 const error = ref(null)
 const pagedItems = ref([])
 
-// Paginação (API /products/filter começa com 1)
+// Paginação
 const pageNumber = ref(1)
 const pageSize = ref(16)
 const totalPages = ref(1)
 const totalCount = ref(0)
 
-// Nome da categoria
-async function loadCategoryName() {
+// Nome/Logo da marca
+async function loadBrand() {
   try {
-    const c = await fetchCategoryById(route.params.id)
-    categoryName.value = c?.name || 'Categoria'
+    const b = await fetchBrandById(route.params.id)
+    brandName.value = b?.name || 'Marca'
+    brandLogo.value = b?.imageUrl || null
   } catch {
-    categoryName.value = 'Categoria'
+    brandName.value = 'Marca'
+    brandLogo.value = null
   }
 }
 
-// Chamada preferencial: /products/filter
+// Chamada preferencial: /products/filter?brandId=...
 async function fetchFromFilter() {
   loading.value = true
   error.value = null
@@ -40,7 +44,7 @@ async function fetchFromFilter() {
   const qs = new URLSearchParams({
     pageNumber: String(pageNumber.value),
     pageSize: String(pageSize.value),
-    categoryId: String(route.params.id),
+    brandId: String(route.params.id),
   }).toString()
 
   try {
@@ -55,10 +59,9 @@ async function fetchFromFilter() {
     )
     totalCount.value = Number(data?.totalCount ?? list.length)
 
-    // se vier vazio, usa fallback
+    // se vier vazio, cai pro fallback para não quebrar
     if (!list.length) await fetchLegacy()
   } catch (e) {
-    // se der 404 ou erro, cai pro fallback para não quebrar
     await fetchLegacy()
     error.value = e?.message || null
   } finally {
@@ -66,10 +69,10 @@ async function fetchFromFilter() {
   }
 }
 
-// Fallback: sua lógica antiga
+// Fallback: busca todos e filtra no cliente (useProducts)
 async function fetchLegacy() {
   try {
-    await fetchProductsByCategory(route.params.id)
+    await fetchProductsByBrand(route.params.id)
     totalCount.value = products.value.length
     totalPages.value = Math.max(1, Math.ceil(products.value.length / pageSize.value))
   } catch (_) {
@@ -80,7 +83,7 @@ async function fetchLegacy() {
 // Carregar tudo
 async function loadAll() {
   pageNumber.value = 1
-  await Promise.all([loadCategoryName(), fetchFromFilter()])
+  await Promise.all([loadBrand(), fetchFromFilter()])
 }
 
 // Lifecycle
@@ -94,6 +97,7 @@ watch([pageNumber, pageSize], async () => {
   window.scrollTo({ top: 0, behavior: 'auto' })
 })
 
+// Lista exibida (normaliza coverImageUrl)
 const displayed = computed(() => {
   const list = pagedItems.value?.length ? pagedItems.value : (() => {
     const start = (pageNumber.value - 1) * pageSize.value
@@ -132,7 +136,16 @@ function handleAddToCart(prod) {
 <template>
   <div class="py-12 bg-black min-h-screen text-white">
     <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-orange-400 mb-6">{{ categoryName }}</h2>
+      <!-- Cabeçalho -->
+      <div class="flex flex-col items-center gap-3 text-center mb-6">
+        <div
+          v-if="brandLogo"
+          class="w-full max-w-[280px] bg-neutral-900/80 border border-neutral-800 rounded-2xl p-4 flex justify-center items-center"
+        >
+          <img :src="brandLogo" :alt="brandName" class="max-h-24 w-auto object-contain" />
+        </div>
+        <h2 class="text-3xl font-bold text-orange-400">{{ brandName }}</h2>
+      </div>
 
       <!-- Top bar -->
       <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -184,7 +197,6 @@ function handleAddToCart(prod) {
           >
             Anterior
           </button>
-
           <button
             v-for="p in Math.min(totalPages, 7)"
             :key="`p-${p}`"

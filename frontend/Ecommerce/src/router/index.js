@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import ProductRegisterView from '../views/ProductRegisterView.vue'
 import ProductDetailView from '../views/ProductDetailView.vue';
+import SearchResultsView from '../views/SearchResultsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,13 @@ const router = createRouter({
       path: '/category/:id',
       name: 'Category',
       component: () => import('../views/CategoryView.vue')
+    },
+    { path: '/brand/:id',
+      name: 'Brand',
+      component: () => import('../views/BrandView.vue') },
+    { path: '/search', 
+      name: 'search', 
+      component: SearchResultsView 
     }
   ],
 })

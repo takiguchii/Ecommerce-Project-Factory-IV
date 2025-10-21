@@ -1,7 +1,5 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-
-// 1. Importe suas imagens (usando .webp como você sugeriu)
 import promoImage1 from '@/assets/images/promo1.webp';
 import promoImage2 from '@/assets/images/promo2.webp';
 import promoImage3 from '@/assets/images/promo3.webp';

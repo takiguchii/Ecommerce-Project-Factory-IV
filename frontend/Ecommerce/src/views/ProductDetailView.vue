@@ -55,7 +55,7 @@
             {{ product?.name }}
           </h1>
 
-          <!-- Linha: Código + Marca no mesmo chip (estilo Kabum: compacto) -->
+          <!-- Código + Marca -->
           <div class="mb-4 flex flex-wrap items-center gap-3">
             <span v-if="product?.code || brandName"
               class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-800/80 border border-neutral-700 text-neutral-200">
@@ -68,7 +68,7 @@
               {{ product?.code }}
             </span>
 
-            <!-- Estrelas + contagem -->
+            <!-- Estrelas -->
             <div class="flex items-center gap-2" :aria-label="`Avaliação ${averageStarsFixed} de 5`" role="img">
               <div class="flex">
                 <svg v-for="(s, i) in starIcons" :key="i" viewBox="0 0 24 24" class="w-4 h-4 mx-[1px]">
@@ -284,16 +284,12 @@ const techDisplay = computed(() =>
 
 /* helpers */
 async function loadBrandIfNeeded () {
-  // já tem nome dentro do produto? então para.
   if (productBrandName.value) return;
-
   const brandId =
     product.value?.brandId
     ?? product.value?.brand?.id
     ?? product.value?.brand?.ID;
-
   if (!brandId && brandId !== 0) return;
-
   try {
     brand.value = await getBrandCached(brandId);
   } catch (e) {
@@ -301,16 +297,34 @@ async function loadBrandIfNeeded () {
   }
 }
 
-/* carregar produto e depois buscar marca se precisar */
-onMounted(async () => {
-  const id = route.params.id;
-  product.value = await getProductById(id);
-  await loadBrandIfNeeded();
+/* função principal para carregar produto */
+async function loadProduct(id) {
+  if (!id) return;
+  product.value = null;
+  brand.value = null;
+  currentIndex.value = 0;
+  showDesc.value = false;
+  showTech.value = false;
+  try {
+    const p = await getProductById(id);
+    product.value = p;
+    await loadBrandIfNeeded();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  } catch (e) {
+    console.warn('Erro ao carregar produto:', e);
+  }
+}
+
+/* carregar produto inicial */
+onMounted(() => loadProduct(route.params.id));
+
+/* observar mudança de id na rota */
+watch(() => route.params.id, (newId, oldId) => {
+  if (newId !== oldId) loadProduct(newId);
 });
 
-/* se o produto trocar ou chegar depois, garante a busca da marca */
-watch(
-  () => [product.value?.brandId, product.value?.brand, productBrandName.value],
+/* se o produto mudar, garante marca */
+watch(() => [product.value?.brandId, product.value?.brand, productBrandName.value],
   async () => { await loadBrandIfNeeded(); },
   { immediate: false }
 );
