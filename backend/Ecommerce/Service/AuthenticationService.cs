@@ -10,15 +10,19 @@ namespace Ecommerce.Service
 {
     public class AuthenticationService : IAuthenticationService
     {
-        // Ferramentas necessárias (injetadas)
+ 
         private readonly UserManager<IdentityUser> _userManager;
+        
+        private readonly RoleManager<IdentityRole> _roleManager; 
         private readonly IConfiguration _configuration;
         
         public AuthenticationService(
             UserManager<IdentityUser> userManager,
+            RoleManager<IdentityRole> roleManager, 
             IConfiguration configuration)
         {
-            _userManager = userManager;
+            _userManager = userManager; 
+            _roleManager = roleManager; 
             _configuration = configuration;
         }
 
@@ -39,18 +43,16 @@ namespace Ecommerce.Service
             return tokenResponse;
         }
 
-        // --- Implementação do Registro ---
+        // --- MÉTODO REGISTER (MODIFICADO) ---
         public async Task<IdentityResult> RegisterAsync(RegisterDto dto)
         {
-            // Validação de negócio (no Service)
+            // Validações (intactas)
             var userExists = await _userManager.FindByNameAsync(dto.Username);
             if (userExists != null)
             {
-                // Retorna um erro específico do Identity
                 return IdentityResult.Failed(new IdentityError 
                     { Code = "UsernameInUse", Description = "Este nome de usuário já está em uso." });
             }
-
             var emailExists = await _userManager.FindByEmailAsync(dto.Email);
             if (emailExists != null)
             {
@@ -58,7 +60,7 @@ namespace Ecommerce.Service
                     { Code = "EmailInUse", Description = "Este e-mail já está cadastrado." });
             }
 
-            // Cria o usuário
+            // Cria o usuário (intacto)
             IdentityUser user = new()
             {
                 Email = dto.Email,
@@ -66,8 +68,28 @@ namespace Ecommerce.Service
                 UserName = dto.Username
             };
 
-            // Tenta criar e retorna o resultado (sucesso ou falha)
             var result = await _userManager.CreateAsync(user, dto.Password);
+
+            // --- ESTA É A NOVA LÓGICA ---
+            // 4. Se a criação do usuário tiver SUCESSO
+            if (result.Succeeded)
+            {
+                // 5. Define o perfil padrão
+                string defaultRole = "User";
+
+                // 6. Verifica se o perfil "User" já existe
+                var roleExist = await _roleManager.RoleExistsAsync(defaultRole);
+                if (!roleExist)
+                {
+                    // 7. Se não existir, / Agora esta linha funcionaCRIE O PERFIL "User" (e "Admin")
+                    await _roleManager.CreateAsync(new IdentityRole(defaultRole));
+                    await _roleManager.CreateAsync(new IdentityRole("Admin")); 
+                }
+
+                // 8. Adiciona o novo usuário ao perfil "User"
+                await _userManager.AddToRoleAsync(user, defaultRole);
+            }
+            
             return result;
         }
 
@@ -78,6 +100,7 @@ namespace Ecommerce.Service
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                // (AINDA VAMOS ADICIONAR OS PERFIS AQUI)
             };
             
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
@@ -90,7 +113,7 @@ namespace Ecommerce.Service
                 audience: audience,
                 expires: expiration,
                 claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256) // Você tinha HmacSha256Ldap, mas o padrão é HmacSha256
             );
 
             return new LoginResponseDto
