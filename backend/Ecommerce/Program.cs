@@ -16,14 +16,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Conexão DB (Existente) ---
 var connectionString = builder.Configuration.GetConnectionString("MySqlConnection");
 builder.Services.AddDbContext<EcommerceDbContext>(options =>
 {
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
-// --- Repositories e Services (Existentes) ---
 builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
 builder.Services.AddScoped<IProviderService, ProviderService>();
 
@@ -39,26 +37,23 @@ builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
-// --- Controllers (Existente) ---
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
 builder.Services.AddControllers();
 
-// =======================================================
-// ============= INÍCIO: BLOCO DE AUTENTICAÇÃO ===========
-// =======================================================
-        
-// 1. Configura o ASP.NET Core Identity
+
 builder.Services.AddIdentity<IdentityUser, IdentityRole>() 
     .AddEntityFrameworkStores<EcommerceDbContext>() 
     .AddDefaultTokenProviders(); 
 
-// 2. Configura a Autenticação (JWT)
+// Configura a Autenticação (JWT)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-// 3. Configura o JWT Bearer
+// Configura o JWT Bearer
 .AddJwtBearer(options =>
 {
     options.SaveToken = true;
@@ -75,16 +70,11 @@ builder.Services.AddAuthentication(options =>
 
 // 4. Adiciona a Autorização (para usar o [Authorize])
 builder.Services.AddAuthorization();
-        
-// =======================================================
-// ============== FIM: BLOCO DE AUTENTICAÇÃO =============
-// =======================================================
 
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// --- CORS (Existente) ---
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "AllowFrontend",
@@ -98,7 +88,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// --- SeedData (Existente) ---
+// SeedData 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -107,7 +97,7 @@ using (var scope = app.Services.CreateScope())
     SeedData.Initialize(context);
 }
 
-// --- Swagger (Existente) ---
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -118,7 +108,6 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
 
-// --- ADICIONADOS (Importante a ordem) ---
 app.UseAuthentication();
 app.UseAuthorization();
         
