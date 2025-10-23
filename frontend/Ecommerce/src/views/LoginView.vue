@@ -5,38 +5,27 @@
         class="rounded-2xl bg-neutral-900/70 border border-neutral-800 ring-1 ring-black/5 shadow-xl backdrop-blur p-6 sm:p-8
                transition-all duration-300 hover:shadow-orange-500/10 hover:border-neutral-700"
       >
-        <!-- Título -->
         <h1 class="text-3xl font-extrabold text-orange-400 tracking-tight mb-6">Login</h1>
 
-        <!-- Formulário -->
-        <form @submit.prevent="onSubmit" class="space-y-4">
-          <!-- E-mail -->
+        <form @submit.prevent="handleLogin" class="space-y-4">
           <div class="space-y-1.5">
-            <label class="block text-sm text-neutral-300">E-mail</label>
-            <div class="relative">
+            <label class="block text-sm text-neutral-300">Usuário</label> <div class="relative">
               <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                <!-- ícone mail -->
-                <svg class="w-5 h-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l9 6 9-6"/>
-                  <rect x="3" y="6" width="18" height="12" rx="2" ry="2" stroke-width="1.8"/>
+                <svg class="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </span>
               <input
-                v-model="form.email"
-                type="email"
-                placeholder="seu@email.com"
-                class="w-full rounded-xl bg-neutral-800/80 border border-neutral-700 pl-10 pr-4 py-3 text-white placeholder-neutral-400
+                v-model="form.username" type="text"             placeholder="nome.usuario" required                class="w-full rounded-xl bg-neutral-800/80 border border-neutral-700 pl-10 pr-4 py-3 text-white placeholder-neutral-400
                        focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
 
-          <!-- Senha -->
           <div class="space-y-1.5">
             <label class="block text-sm text-neutral-300">Senha</label>
             <div class="relative">
               <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                <!-- ícone lock -->
                 <svg class="w-5 h-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <rect x="4" y="11" width="16" height="9" rx="2" stroke-width="1.8"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 11V8a4 4 0 118 0v3"/>
@@ -46,27 +35,29 @@
                 v-model="form.password"
                 type="password"
                 placeholder="********"
-                class="w-full rounded-xl bg-neutral-800/80 border border-neutral-700 pl-10 pr-4 py-3 text-white placeholder-neutral-400
+                required                class="w-full rounded-xl bg-neutral-800/80 border border-neutral-700 pl-10 pr-4 py-3 text-white placeholder-neutral-400
                        focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
 
-          <!-- Botão -->
           <button
             type="submit"
+            :disabled="loading"
             class="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-black font-semibold py-3 rounded-xl
-                   shadow-md ring-1 ring-orange-500/20 hover:ring-orange-500/40 transition-all mt-2"
+                   shadow-md ring-1 ring-orange-500/20 hover:ring-orange-500/40 transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Entrar
+            {{ loading ? 'Entrando...' : 'Entrar' }}
           </button>
         </form>
 
-        <!-- Link para cadastro -->
+        <p v-if="error" class="text-red-500 text-sm mt-4 text-center">{{ error }}</p>
+
         <div class="text-center mt-6">
           <RouterLink to="/register" class="text-sm text-neutral-400 hover:text-orange-300 transition-colors">
             Não possui conta? <span class="text-orange-400">Cadastre-se</span>
           </RouterLink>
+           <p class="text-xs text-neutral-500 mt-2">Admin: admin / Admin@123</p>
         </div>
       </div>
     </section>
@@ -74,15 +65,58 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'; // ref para loading/error
+import { useRouter } from 'vue-router'; // Para redirecionar
+import { login } from '@/services/api'; // Importa a função login do api.js
+import { jwtDecode } from 'jwt-decode'; // Para ler o token
 
 const form = reactive({
-  email: '',
+  username: '', 
   password: ''
-})
+});
+const loading = ref(false); 
+const error = ref(''); 
+const router = useRouter(); 
 
-function onSubmit() {
-  alert(`Login com: ${form.email}`)
+async function handleLogin() {
+  loading.value = true;
+  error.value = '';
+
+  try {
+    const response = await login({
+      username: form.username,
+      password: form.password
+    });
+
+    if (response.data && response.data.token) {
+      const token = response.data.token;
+
+      localStorage.setItem('authToken', token);
+
+      const decodedToken = jwtDecode(token);
+
+      const userRole = decodedToken.role || decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+      if (userRole === 'Admin') {
+        router.push('/admin/brands');
+      } else {
+        router.push('/'); 
+      }
+    } else {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+  } catch (err) {
+    console.error("Erro no login:", err);
+    localStorage.removeItem('authToken'); 
+    if (err.response && err.response.status === 401) {
+      error.value = 'Usuário ou senha inválidos.'; 
+    } else {
+      error.value = 'Ocorreu um erro ao tentar fazer login. Verifique sua conexão ou tente mais tarde.';
+    }
+  } finally {
+    loading.value = false; 
+  }
 }
 </script>
 

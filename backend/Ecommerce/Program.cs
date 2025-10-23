@@ -1,4 +1,3 @@
-// --- Usings Existentes ---
 using Microsoft.EntityFrameworkCore;
 using Ecommerce.Data.Seed; 
 using Ecommerce.Data.Context;
@@ -7,12 +6,11 @@ using Ecommerce.Repositories;
 using Ecommerce.Service;
 using Ecommerce.Interfaces.Repositories; 
 using Ecommerce.Interfaces.Services; 
-
-// --- USINGS NOVOS PARA AUTENTICAÇÃO ---
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,40 +22,32 @@ builder.Services.AddDbContext<EcommerceDbContext>(options =>
 
 builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
 builder.Services.AddScoped<IProviderService, ProviderService>();
-
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IBrandService, BrandService>();
-
 builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
 builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
-
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
-builder.Services.AddControllers();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<EcommerceDbContext>()
+    .AddDefaultTokenProviders();
 
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>() 
-    .AddEntityFrameworkStores<EcommerceDbContext>() 
-    .AddDefaultTokenProviders(); 
-
-// Configura a Autenticação (JWT)
+// Autenticação Jwt
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-// Configura o JWT Bearer
 .AddJwtBearer(options =>
 {
     options.SaveToken = true;
-    options.RequireHttpsMetadata = false; // Em desenvolvimento. Mude para true em produção.
+    options.RequireHttpsMetadata = false; 
     options.TokenValidationParameters = new TokenValidationParameters()
     {
         ValidateIssuer = true,
@@ -68,19 +58,43 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 4. Adiciona a Autorização (para usar o [Authorize])
-builder.Services.AddAuthorization();
-
-
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ecommerce API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Autenticação JWT (Bearer). Ex: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // URL do seu frontend Vue
+            policy.WithOrigins("http://localhost:5173") 
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -88,16 +102,54 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// SeedData 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<EcommerceDbContext>();
-    context.Database.EnsureCreated(); 
-    SeedData.Initialize(context);
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var context = services.GetRequiredService<EcommerceDbContext>();
+        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+        await context.Database.MigrateAsync(); 
+
+        // Cria Perfil "Admin"
+        if (!await roleManager.RoleExistsAsync("Admin"))
+        {
+            await roleManager.CreateAsync(new IdentityRole("Admin"));
+            logger.LogInformation("Perfil 'Admin' criado.");
+        }
+        // Cria Perfil "User"
+        if (!await roleManager.RoleExistsAsync("User"))
+        {
+            await roleManager.CreateAsync(new IdentityRole("User"));
+            logger.LogInformation("Perfil 'User' criado.");
+        }
+
+        // Cria usuário "admin" fixo
+        if (await userManager.FindByNameAsync("admin") == null)
+        {
+            var adminUser = new IdentityUser
+            {
+                UserName = "admin",
+                Email = "admin@ecommerce.com",
+                EmailConfirmed = true
+            };
+            var result = await userManager.CreateAsync(adminUser, "Admin@123"); // Senha
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+                logger.LogInformation("Usuário 'admin' criado e associado ao 'Admin'.");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Ocorreu um erro durante a inicialização (seed).");
+    }
 }
 
-// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

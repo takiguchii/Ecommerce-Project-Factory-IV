@@ -5,14 +5,14 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Ecommerce.Service
 {
     public class AuthenticationService : IAuthenticationService
     {
- 
         private readonly UserManager<IdentityUser> _userManager;
-        
         private readonly RoleManager<IdentityRole> _roleManager; 
         private readonly IConfiguration _configuration;
         
@@ -26,41 +26,37 @@ namespace Ecommerce.Service
             _configuration = configuration;
         }
 
-        // --- Implementação do Login ---
+        // Login 
         public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
 
-            // Validação de negócio (no Service)
             if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             {
-                // Lança uma exceção que o Controller vai tratar
                 throw new UnauthorizedAccessException("Usuário ou senha inválidos.");
             }
 
-            // Gera o token
-            var tokenResponse = GenerateJwtToken(user);
+            // Chama o método que gera o token (e inclui os perfis)
+            var tokenResponse = await GenerateJwtToken(user);
             return tokenResponse;
         }
 
-        // --- MÉTODO REGISTER (MODIFICADO) ---
+        // registroo 
         public async Task<IdentityResult> RegisterAsync(RegisterDto dto)
         {
-            // Validações (intactas)
             var userExists = await _userManager.FindByNameAsync(dto.Username);
             if (userExists != null)
             {
                 return IdentityResult.Failed(new IdentityError 
-                    { Code = "UsernameInUse", Description = "Este nome de usuário já está em uso." });
+                    { Code = "UsernameInUse", Description = "Nome de usuário já em uso." });
             }
             var emailExists = await _userManager.FindByEmailAsync(dto.Email);
             if (emailExists != null)
             {
                 return IdentityResult.Failed(new IdentityError 
-                    { Code = "EmailInUse", Description = "Este e-mail já está cadastrado." });
+                    { Code = "EmailInUse", Description = "E-mail já cadastrado." });
             }
 
-            // Cria o usuário (intacto)
             IdentityUser user = new()
             {
                 Email = dto.Email,
@@ -70,38 +66,33 @@ namespace Ecommerce.Service
 
             var result = await _userManager.CreateAsync(user, dto.Password);
 
-            // --- ESTA É A NOVA LÓGICA ---
-            // 4. Se a criação do usuário tiver SUCESSO
             if (result.Succeeded)
             {
-                // 5. Define o perfil padrão
-                string defaultRole = "User";
-
-                // 6. Verifica se o perfil "User" já existe
-                var roleExist = await _roleManager.RoleExistsAsync(defaultRole);
-                if (!roleExist)
-                {
-                    // 7. Se não existir, / Agora esta linha funcionaCRIE O PERFIL "User" (e "Admin")
-                    await _roleManager.CreateAsync(new IdentityRole(defaultRole));
-                    await _roleManager.CreateAsync(new IdentityRole("Admin")); 
-                }
-
-                // 8. Adiciona o novo usuário ao perfil "User"
-                await _userManager.AddToRoleAsync(user, defaultRole);
+                // Adiciona o novo usuário ao perfil "User"
+                // (Não precisa checar se existe, ja criei na program)
+                await _userManager.AddToRoleAsync(user, "User");
             }
             
             return result;
         }
 
-        // --- Lógica privada de geração de token (só o Service precisa saber) ---
-        private LoginResponseDto GenerateJwtToken(IdentityUser user)
+        // Gerador de tokens com perfil 
+        private async Task<LoginResponseDto> GenerateJwtToken(IdentityUser user)
         {
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                // (AINDA VAMOS ADICIONAR OS PERFIS AQUI)
             };
+
+            // Busca os perfis (roles) do usuário
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            // Adiciona Ccada perfil como uma "Claim" (informação) no token
+            foreach (var userRole in userRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+            }
             
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
             var issuer = _configuration["JWT:ValidIssuer"];
@@ -113,7 +104,7 @@ namespace Ecommerce.Service
                 audience: audience,
                 expires: expiration,
                 claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256) // Você tinha HmacSha256Ldap, mas o padrão é HmacSha256
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
 
             return new LoginResponseDto
