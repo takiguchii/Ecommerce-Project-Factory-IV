@@ -65,25 +65,25 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'; // ref para loading/error
-import { useRouter } from 'vue-router'; // Para redirecionar
-import { login } from '@/services/api'; // Importa a função login do api.js
-import { jwtDecode } from 'jwt-decode'; // Para ler o token
+import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { login as apiLogin } from '@/services/api'; // Renomeia 'login' para evitar conflito
+// 1. Importa o composable e a função 'setLoggedIn'
+import { useAuth } from '@/composables/useAuth';
 
-const form = reactive({
-  username: '', 
-  password: ''
-});
-const loading = ref(false); 
-const error = ref(''); 
-const router = useRouter(); 
+const { setLoggedIn, user } = useAuth(); // Pega a função para setar o estado
+
+const form = reactive({ username: '', password: '' });
+const loading = ref(false);
+const error = ref('');
+const router = useRouter();
 
 async function handleLogin() {
   loading.value = true;
   error.value = '';
 
   try {
-    const response = await login({
+    const response = await apiLogin({ // Usa a função renomeada da API
       username: form.username,
       password: form.password
     });
@@ -91,31 +91,34 @@ async function handleLogin() {
     if (response.data && response.data.token) {
       const token = response.data.token;
 
-      localStorage.setItem('authToken', token);
+      // --- INÍCIO DA MODIFICAÇÃO ---
+      // 2. Chama a função do composable para guardar token e atualizar estado global
+      setLoggedIn(token);
 
-      const decodedToken = jwtDecode(token);
-
-      const userRole = decodedToken.role || decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-
-      if (userRole === 'Admin') {
+      // 3. Usa o 'user' reativo do composable para decidir o redirecionamento
+      //    (checkAuthStatus dentro de setLoggedIn já preencheu 'user')
+      if (user.value?.role === 'Admin') { // Usa optional chaining (?.)
         router.push('/admin/brands');
       } else {
-        router.push('/'); 
+        router.push('/');
       }
+      // --- FIM DA MODIFICAÇÃO ---
+
     } else {
       throw new Error('Resposta inválida do servidor');
     }
 
   } catch (err) {
     console.error("Erro no login:", err);
-    localStorage.removeItem('authToken'); 
+    localStorage.removeItem('authToken'); // Segurança extra
+    // A lógica de erro continua igual
     if (err.response && err.response.status === 401) {
-      error.value = 'Usuário ou senha inválidos.'; 
+      error.value = 'Usuário ou senha inválidos.';
     } else {
-      error.value = 'Ocorreu um erro ao tentar fazer login. Verifique sua conexão ou tente mais tarde.';
+      error.value = 'Ocorreu um erro ao tentar fazer login.';
     }
   } finally {
-    loading.value = false; 
+    loading.value = false;
   }
 }
 </script>
