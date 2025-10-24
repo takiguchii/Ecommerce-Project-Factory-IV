@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   headers: {
@@ -11,45 +12,19 @@ const api = axios.create({
 // Interceptor para adicionar o token JWT automaticamente
 api.interceptors.request.use(
   (config) => {
-    try {
-      config.headers = config.headers || {};
-      const token = localStorage.getItem('authToken'); // Busca o token
-      if (token) {
-        // Se existir, adiciona ao cabeçalho Authorization
-        config.headers['Authorization'] = `Bearer ${token}`;
-      }
-    } catch (e) {
-      // noop
+    const token = localStorage.getItem('authToken'); // Busca o token
+    if (token) {
+      // Se existir, adiciona ao cabeçalho Authorization
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config; // Continua a requisição
   },
-  (error) => Promise.reject(error)
-);
-
-function tryParseJsonString(s) {
-  if (typeof s !== 'string') return s;
-  const trimmed = s.replace(/^\uFEFF/, '').trim();
-  const first = trimmed[0];
-  if (first !== '{' && first !== '[') return s;
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    return s;
+  (error) => {
+    // Se houver erro na configuração da requisição
+    return Promise.reject(error);
   }
-}
-
-api.interceptors.response.use(
-  (res) => {
-    const ct = String(res.headers?.['content-type'] || '').toLowerCase();
-    if (typeof res.data === 'string' && (ct.includes('text/plain') || ct === '')) {
-      res.data = tryParseJsonString(res.data);
-    }
-    return res;
-  },
-  (err) => Promise.reject(err)
 );
 
-//  API METHODS 
 export const apiGet = async (url) => {
   const response = await api.get(url);
   return response.data;
@@ -70,7 +45,7 @@ export const apiDelete = async (url) => {
   return response.data;
 };
 
-// Funções específicas / HELPERS DE MARCAS
+// Funções específicas (mantidas)
 function normalizeBrand(raw) {
   if (!raw) return null;
   return {
@@ -108,7 +83,7 @@ export async function getBrandCached(id) {
   return data;
 }
 
-// Auth / Brand CRUD helpers
+
 export function login(credentials) {
   return api.post('/auth/login', credentials);
 }
