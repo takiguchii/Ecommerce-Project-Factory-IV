@@ -143,6 +143,7 @@ using (var scope = app.Services.CreateScope())
                 logger.LogInformation("Usuário 'admin' criado e associado ao 'Admin'.");
             }
         }
+        SeedData.Initialize(context);
     }
     catch (Exception ex)
     {
