@@ -108,7 +108,6 @@ public static class SeedData
         
         var defaultProvider = context.Providers.First();
         
-        // <<< NOSSOS FILTROS/CACHES PARA TODAS AS ENTIDADES >>>
         var processedBrands = new Dictionary<string, Brand>();
         var processedCategories = new Dictionary<string, Category>();
         var processedSubCategories = new Dictionary<string, SubCategory>();
