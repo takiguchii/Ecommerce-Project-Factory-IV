@@ -27,7 +27,7 @@ public class ProductRepository : IProductRepository
     }
     public Product? GetById(int id)
     {
-        return _dbContext.Products.FirstOrDefault(p => p.Id == id);
+        return _dbContext.Products.FirstOrDefault(p => p.id == id);
     }
     public void SaveChanges()
     {
@@ -36,18 +36,18 @@ public class ProductRepository : IProductRepository
     public List<Product> GetPromotions()
     {
         return _dbContext.Products
-            .Where(p => p.DiscountPrice != null)
+            .Where(p => p.discount_price != null)
             .ToList();
     }
     public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm, int limit)
     {
         return await _dbContext.Products
-            .Where(p => p.Name.ToLower().Contains(searchTerm.ToLower()))
+            .Where(p => p.name.ToLower().Contains(searchTerm.ToLower()))
             .Select(p => new ProductSearchSuggestionDto
             {
-                Id = p.Id,
-                Name = p.Name,
-                CoverImageUrl = p.CoverImageUrl
+                Id = p.id,
+                Name = p.name,
+                CoverImageUrl = p.image_url0
             })
             .Take(limit)
             .ToListAsync();
@@ -61,15 +61,15 @@ public class ProductRepository : IProductRepository
         // Filtro dinamico ( Em teste )
         if (categoryId.HasValue)
         {
-            query = query.Where(p => p.CategoryId == categoryId.Value);
+            query = query.Where(p => p.category_id == categoryId.Value);
         }
         if (subCategoryId.HasValue)
         {
-            query = query.Where(p => p.SubCategoryId == subCategoryId.Value);
+            query = query.Where(p => p.sub_category_id == subCategoryId.Value);
         }
         if (brandId.HasValue)
         {
-            query = query.Where(p => p.BrandId == brandId.Value);
+            query = query.Where(p => p.brand_id == brandId.Value);
         }
 
         var totalCount = await query.CountAsync();

@@ -1,8 +1,5 @@
-// 1. USINGS ADICIONADOS
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-
-// Usings existentes
 using Microsoft.EntityFrameworkCore;
 using Ecommerce.Entity;
 
@@ -13,7 +10,6 @@ namespace Ecommerce.Data.Context
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : base(options)
         {
         }
-
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<SubCategory> SubCategories { get; set; }
@@ -23,76 +19,63 @@ namespace Ecommerce.Data.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
-            // Brand 
+
             modelBuilder.Entity<Brand>(entity =>
             {
                 entity.ToTable("brand");
-                entity.Property(b => b.id);
-                entity.Property(b => b.name).IsRequired().HasMaxLength(32);
-                entity.Property(b => b.brand_image_url).IsRequired().HasMaxLength(512);
+                entity.HasKey(b => b.id);
             });
-            // Provider 
+
             modelBuilder.Entity<Provider>(entity =>
             {
                 entity.ToTable("provider");
-                entity.Property(p => p.id);
-                entity.Property(p => p.name).IsRequired().HasMaxLength(32);
-                entity.Property(p => p.cnpj).IsRequired().HasMaxLength(16);
-                entity.Property(p => p.email).IsRequired().HasMaxLength(64);
-                entity.Property(p => p.phone_number).IsRequired().HasMaxLength(16);
-                entity.Property(p => p.address).IsRequired().HasMaxLength(128);
+                entity.HasKey(p => p.id);
             });
-            //SubCategory
-            modelBuilder.Entity<SubCategory>(entity =>
-            {
-                entity.ToTable("sub_category");
-                entity.Property(sc => sc.id);
-                entity.Property(sc => sc.name).IsRequired().HasMaxLength(32);
-                entity.Property(sc => sc.category_id).IsRequired();
-            //Category
+            
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.ToTable("category");
-                entity.HasKey(c => c.id); 
-                entity.Property(c => c.name).IsRequired().HasMaxLength(32); 
+                entity.HasKey(c => c.id);
             });
-                
-                
-            //------------------------------------------------------------------------------------------------------------------
 
-            
-            // Relação Product <-> Category
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Category)
-                .WithMany(c => c.Products)
-                .HasForeignKey(p => p.CategoryId);
-            
-            // Relação Product <-> Provider
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Provider)
-                .WithMany(pr => pr.Products)
-                .HasForeignKey(p => p.ProviderId);
-            
-                // Relação Product <-> SubCategory
-                modelBuilder.Entity<Product>()
-                    .HasOne(p => p.SubCategory)
-                    .WithMany(sc => sc.Products)
-                    .HasForeignKey(p => p.SubCategoryId);
-
-                // Relação SubCategory <-> Category
-                modelBuilder.Entity<SubCategory>()
-                    .HasOne(sc => sc.ParentCategory)
-                    .WithMany()
-                    .HasForeignKey(sc => sc.category_id);
+            modelBuilder.Entity<SubCategory>(entity =>
+            {
+                entity.ToTable("sub_category");
+                entity.HasKey(sc => sc.id);
                 
-                //Relação de brand <-> Products
-                modelBuilder.Entity<Product>()
-                    .HasOne(p => p.Brand)
-                    .WithMany(b => b.Products)
-                    .HasForeignKey(p => p.BrandId);
-
+                entity.HasOne(sc => sc.ParentCategory) 
+                      .WithMany() 
+                      .HasForeignKey(sc => sc.category_id) 
+                      .HasPrincipalKey(c => c.id); 
             });
-        }
-    }
-}
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.ToTable("product"); 
+                entity.HasKey(p => p.id); 
+                entity.HasOne(p => p.Category)         
+                      .WithMany(c => c.Products)    
+                      .HasForeignKey(p => p.category_id)
+                      .HasPrincipalKey(c => c.id);    
+
+                entity.HasOne(p => p.SubCategory)       
+                      .WithMany(sc => sc.Products)    
+                      .HasForeignKey(p => p.sub_category_id)
+                      .HasPrincipalKey(sc => sc.id);     
+
+                entity.HasOne(p => p.Brand)        
+                      .WithMany(b => b.Products)     
+                      .HasForeignKey(p => p.brand_id)    
+                      .HasPrincipalKey(b => b.id);     
+
+                entity.HasOne(p => p.Provider)          
+                      .WithMany(pr => pr.Products)    
+                      .HasForeignKey(p => p.provider_id) 
+                      .HasPrincipalKey(p => p.id);     
+            });
+            
+
+        } 
+    } 
+} 
+
