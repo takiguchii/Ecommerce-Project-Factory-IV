@@ -21,7 +21,7 @@ public class BrandRepository : IBrandRepository
 
     public Brand? GetById(int id)
     {
-        return _context.Brands.FirstOrDefault(b => b.Id == id);
+        return _context.Brands.FirstOrDefault(b => b.id == id);
     }
 
     public void Add(Brand brand)

@@ -1,7 +1,15 @@
-namespace Ecommerce.DTOs;
+using System.ComponentModel.DataAnnotations;
 
-public class CreateBrandDto
+namespace Ecommerce.DTOs
 {
-    public string Name { get; set; }
-    public string ImageUrl { get; set; }
+    public class CreateBrandDto
+    {
+        [Required(ErrorMessage = "O nome da marca é obrigatório.")]
+        [StringLength(32)] 
+        public string name { get; set; }
+
+        [Required(ErrorMessage = "A URL da imagem da marca é obrigatória.")]
+        [StringLength(512)] 
+        public string brand_image_url { get; set; }
+    }
 }

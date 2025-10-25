@@ -23,8 +23,8 @@ public class BrandService : IBrandService
     {
         var newBrand = new Brand
         {
-            Name = brandDto.Name,
-            ImageUrl = brandDto.ImageUrl
+            name = brandDto.name,
+            brand_image_url = brandDto.brand_image_url
         };
         _brandRepository.Add(newBrand);
         _brandRepository.SaveChanges();

@@ -172,10 +172,10 @@ public static class SeedData
                     }
                     else
                     {
-                        brand = context.Brands.FirstOrDefault(b => b.Name == dto.BrandName);
+                        brand = context.Brands.FirstOrDefault(b => b.name == dto.BrandName);
                         if (brand == null)
                         {
-                            brand = new Brand { Name = dto.BrandName, ImageUrl = NormalizeImageUrl(dto.BrandImage) };
+                            brand = new Brand { name = dto.BrandName, brand_image_url = NormalizeImageUrl(dto.BrandImage) };
                             context.Brands.Add(brand);
                         }
                         processedBrands.Add(dto.BrandName, brand);
