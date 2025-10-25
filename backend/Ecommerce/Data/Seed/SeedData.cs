@@ -154,11 +154,11 @@ public static class SeedData
                     }
                     else
                     {
-                        subCategory = context.SubCategories.FirstOrDefault(sc => sc.Name == cleanSubCategoryName);
+                        subCategory = context.SubCategories.FirstOrDefault(sc => sc.name == cleanSubCategoryName);
                         if (subCategory == null)
                         {
                             // Se a subcategoria não existir, criamos e associamos à categoria encontrada acima
-                            subCategory = new SubCategory { Name = cleanSubCategoryName, ParentCategory = category };
+                            subCategory = new SubCategory { name = cleanSubCategoryName, ParentCategory = category };
                             context.SubCategories.Add(subCategory);
                         }
                         processedSubCategories.Add(cleanSubCategoryName, subCategory);
