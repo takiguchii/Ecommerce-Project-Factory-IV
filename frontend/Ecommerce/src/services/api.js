@@ -1,15 +1,31 @@
 // src/services/api.js
 import axios from 'axios';
 
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 });
 
-// API methods 
+// Interceptor para adicionar o token JWT automaticamente
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken'); // Busca o token
+    if (token) {
+      // Se existir, adiciona ao cabeçalho Authorization
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config; // Continua a requisição
+  },
+  (error) => {
+    // Se houver erro na configuração da requisição
+    return Promise.reject(error);
+  }
+);
+
 export const apiGet = async (url) => {
   const response = await api.get(url);
   return response.data;
@@ -30,6 +46,7 @@ export const apiDelete = async (url) => {
   return response.data;
 };
 
+// Funções específicas (mantidas)
 function normalizeBrand(raw) {
   if (!raw) return null;
   return {
@@ -65,6 +82,23 @@ export async function getBrandCached(id) {
   const data = await getBrandById(key);
   brandCache.set(key, data);
   return data;
+}
+
+
+export function login(credentials) {
+  return api.post('/auth/login', credentials);
+}
+
+export function register(userInfo) {
+  return api.post('/auth/register', userInfo);
+}
+
+export function createBrand(brandData) {
+  return api.post('/brands', brandData);
+}
+
+export function deleteBrand(brandId) {
+  return api.delete(`/brands/${brandId}`);
 }
 
 export default api;
