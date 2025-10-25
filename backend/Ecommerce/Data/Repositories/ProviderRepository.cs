@@ -25,12 +25,12 @@ public class ProviderRepository : IProviderRepository
 
     public Provider? GetById(int id)
     {
-        return _dbContext.Providers.FirstOrDefault(p => p.Id == id);
+        return _dbContext.Providers.FirstOrDefault(p => p.id == id);
     }
 
     public Provider? GetByCnpj(string cnpj)
     {
-        return _dbContext.Providers.FirstOrDefault(p => p.Cnpj == cnpj);
+        return _dbContext.Providers.FirstOrDefault(p => p.cnpj == cnpj);
     }
 
     public void SaveChanges()

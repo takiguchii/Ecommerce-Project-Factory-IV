@@ -84,8 +84,8 @@ public static class SeedData
         {
             var techMartProvider = new Provider
             {
-                Name = "TechMart Distribuição", Cnpj = "12345678000199", Email = "contato@techmart.com",
-                PhoneNumber = "11999998888", Address = "Rua da Tecnologia, 123, São Paulo, SP"
+                name = "TechMart Distribuição", cnpj = "12345678000199", email = "contato@techmart.com",
+                phone_number = "11999998888", address = "Rua da Tecnologia, 123, São Paulo, SP"
             };
             context.Providers.Add(techMartProvider);
             var hardware = new Category { Name = "Hardware", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FHARDWARE_1700588665.png&w=256&q=75" };
