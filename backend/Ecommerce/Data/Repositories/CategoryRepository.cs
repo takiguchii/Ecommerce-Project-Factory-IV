@@ -25,7 +25,7 @@ public class CategoryRepository : ICategoryRepository
 
     public Category? GetById(int id)
     {
-        return _dbContext.Categories.FirstOrDefault(c => c.Id == id);
+        return _dbContext.Categories.FirstOrDefault(c => c.id == id);
     }
     
     public void Delete(Category category)

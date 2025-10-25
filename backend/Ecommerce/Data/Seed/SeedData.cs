@@ -88,14 +88,14 @@ public static class SeedData
                 phone_number = "11999998888", address = "Rua da Tecnologia, 123, São Paulo, SP"
             };
             context.Providers.Add(techMartProvider);
-            var hardware = new Category { Name = "Hardware", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FHARDWARE_1700588665.png&w=256&q=75" };
-            var perifericos = new Category { Name = "Periféricos", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FPERIFERICOS_1700588652.png&w=256&q=75" };
-            var computadores = new Category { Name = "Computadores", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCOMPUTADORES_1731081639.png&w=256&q=75" };
-            var videoGames = new Category { Name = "Video Games", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FGAMER_1700588706.png&w=256&q=75" };
-            var celulares = new Category { Name = "Celular & Smartphone", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCELULAR-SMARTPHONE_1731081407.png&w=256&q=75" };
-            var tv = new Category { Name = "TV", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FTV_1700588559.png&w=256&q=75" };
-            var audio = new Category { Name = "Áudio", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FAUDIO_1700588544.png&w=256&q=75" };
-            var casaInteligente = new Category { Name = "Casa Inteligente", ImageUrlCategory = "https://www.kabum.com.br/_next/image?url=https%3A%2F%2Fstatic.kabum.com.br%2Fconteudo%2Fcategorias%2FCASA-INTELIGENTE_1731081391.png&w=256&q=75" };
+            var hardware = new Category { name = "Hardware" };
+            var perifericos = new Category { name = "Periféricos" };
+            var computadores = new Category { name = "Computadores" };
+            var videoGames = new Category { name = "Video Games" };
+            var celulares = new Category { name = "Celular & Smartphone" };
+            var tv = new Category { name = "TV" };
+            var audio = new Category { name = "Áudio" };
+            var casaInteligente = new Category { name = "Casa Inteligente" };
             
             context.Categories.AddRange(hardware, perifericos, computadores, videoGames, celulares, tv, audio, casaInteligente);
             
@@ -136,11 +136,11 @@ public static class SeedData
                     }
                     else
                     {
-                        category = context.Categories.FirstOrDefault(c => c.Name == cleanCategoryName);
+                        category = context.Categories.FirstOrDefault(c => c.name == cleanCategoryName);
                         if (category == null)
                         {
                             // Se a categoria do JSON não existir, criamos uma nova (sem imagem, pois o JSON não fornece)
-                            category = new Category { Name = cleanCategoryName, ImageUrlCategory = "" };
+                            category = new Category { name = cleanCategoryName};
                             context.Categories.Add(category);
                         }
                         processedCategories.Add(cleanCategoryName, category);
