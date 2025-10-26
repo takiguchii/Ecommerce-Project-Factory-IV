@@ -39,6 +39,10 @@ public class ProductRepository : IProductRepository
             .Where(p => p.discount_price != null)
             .ToList();
     }
+    public void Update(Product product)
+    {
+        _dbContext.Entry(product).State = EntityState.Modified;
+    }
     public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm, int limit)
     {
         return await _dbContext.Products
