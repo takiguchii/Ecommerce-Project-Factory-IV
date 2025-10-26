@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Ecommerce.DTOs;
-
-public class CreateSubCategoryDto
+namespace Ecommerce.DTOs
 {
-    [Required]
-    [StringLength(128)]
-    public string Name { get; set; }
+    public class CreateSubCategoryDto
+    {
+        [Required(ErrorMessage = "O nome da subcategoria é obrigatório.")]
+        public string name { get; set; }
 
-    [Required]
-    public int ParentCategoryId { get; set; }
+        [Required(ErrorMessage = "O ID da categoria pai é obrigatório.")]
+        public int category_id { get; set; } 
+    }
 }

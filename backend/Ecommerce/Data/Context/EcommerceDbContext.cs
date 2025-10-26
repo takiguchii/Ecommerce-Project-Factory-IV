@@ -1,10 +1,7 @@
-// 1. USINGS ADICIONADOS
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-
-// Usings existentes
 using Microsoft.EntityFrameworkCore;
-using Ecommerce.Entity; 
+using Ecommerce.Entity;
 
 namespace Ecommerce.Data.Context
 {
@@ -13,45 +10,72 @@ namespace Ecommerce.Data.Context
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : base(options)
         {
         }
-        public DbSet<Product> Products { get; set; } 
+        public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<SubCategory> SubCategories { get; set; }
-        public DbSet<Provider> Providers { get; set; } 
+        public DbSet<Provider> Providers { get; set; }
         public DbSet<Brand> Brands { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
-            // Relação do produto com a categoria ( Um para muitos ) 
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Category)
-                .WithMany(c=> c.Products)
-                .HasForeignKey(p => p.CategoryId);
-            
-            // Relação do produto com a SubCategoria ( Um para muitos )
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.SubCategory)
-                .WithMany(sc => sc.Products)
-                .HasForeignKey(p => p.SubCategoryId);
-            
-            // Relação do produto com o fornecedor ( um para muitos )
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Provider)
-                .WithMany(pr => pr.Products)
-                .HasForeignKey(p => p.ProviderId);
-            
-            // Relação de Subcategoria para Categoria ( um para muitos )
-            modelBuilder.Entity<SubCategory>()
-                .HasOne(sc => sc.ParentCategory)
-                .WithMany()
-                .HasForeignKey(sc => sc.ParentCategoryId);
 
-            // Relação de Produto para Marca ( um para muitos )
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Brand)
-                .WithMany(b => b.Products)
-                .HasForeignKey(p => p.BrandId);
-        }
-    }
-}
+            modelBuilder.Entity<Brand>(entity =>
+            {
+                entity.ToTable("brand");
+                entity.HasKey(b => b.id);
+            });
+
+            modelBuilder.Entity<Provider>(entity =>
+            {
+                entity.ToTable("provider");
+                entity.HasKey(p => p.id);
+            });
+            
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.ToTable("category");
+                entity.HasKey(c => c.id);
+            });
+
+            modelBuilder.Entity<SubCategory>(entity =>
+            {
+                entity.ToTable("sub_category");
+                entity.HasKey(sc => sc.id);
+                
+                entity.HasOne(sc => sc.ParentCategory) 
+                      .WithMany() 
+                      .HasForeignKey(sc => sc.category_id) 
+                      .HasPrincipalKey(c => c.id); 
+            });
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.ToTable("product"); 
+                entity.HasKey(p => p.id); 
+                entity.HasOne(p => p.Category)         
+                      .WithMany(c => c.Products)    
+                      .HasForeignKey(p => p.category_id)
+                      .HasPrincipalKey(c => c.id);    
+
+                entity.HasOne(p => p.SubCategory)       
+                      .WithMany(sc => sc.Products)    
+                      .HasForeignKey(p => p.sub_category_id)
+                      .HasPrincipalKey(sc => sc.id);     
+
+                entity.HasOne(p => p.Brand)        
+                      .WithMany(b => b.Products)     
+                      .HasForeignKey(p => p.brand_id)    
+                      .HasPrincipalKey(b => b.id);     
+
+                entity.HasOne(p => p.Provider)          
+                      .WithMany(pr => pr.Products)    
+                      .HasForeignKey(p => p.provider_id) 
+                      .HasPrincipalKey(p => p.id);     
+            });
+            
+
+        } 
+    } 
+} 
+

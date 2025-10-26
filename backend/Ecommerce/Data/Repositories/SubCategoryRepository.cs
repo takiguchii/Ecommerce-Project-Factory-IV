@@ -25,7 +25,7 @@ public class SubCategoryRepository : ISubCategoryRepository
 
     public SubCategory? GetById(int id)
     {
-        return _dbContext.SubCategories.FirstOrDefault(sc => sc.Id == id);
+        return _dbContext.SubCategories.FirstOrDefault(sc => sc.id == id);
     }
 
     public void SaveChanges()

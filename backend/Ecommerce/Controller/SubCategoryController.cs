@@ -23,7 +23,7 @@ public class SubCategoryController : ControllerBase
 
         if (result is SubCategory subCategory)
         {
-            return CreatedAtAction(nameof(GetSubCategoryById), new { id = subCategory.Id }, subCategory);
+            return CreatedAtAction(nameof(GetSubCategoryById), new { id = subCategory.id }, subCategory);
         }
         
         return BadRequest(result);

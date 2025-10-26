@@ -16,7 +16,7 @@ public class CategoryService : ICategoryService
 
     public Category CreateCategory(CreateCategoryDto categoryDto)
     {
-        var newCategory = new Category { Name = categoryDto.Name };
+        var newCategory = new Category { name = categoryDto.name };
         _categoryRepository.Add(newCategory);
         _categoryRepository.SaveChanges();
         return newCategory;

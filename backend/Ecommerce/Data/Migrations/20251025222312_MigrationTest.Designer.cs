@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20251022113238_AdicionandoIdentity")]
-    partial class AdicionandoIdentity
+    [Migration("20251025222312_MigrationTest")]
+    partial class MigrationTest
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,195 +27,185 @@ namespace Ecommerce.Migrations
 
             modelBuilder.Entity("Ecommerce.Entity.Brand", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("brand_image_url")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                    b.HasKey("id");
 
-                    b.ToTable("Brands");
+                    b.ToTable("brand", (string)null);
                 });
 
             modelBuilder.Entity("Ecommerce.Entity.Category", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<string>("ImageUrlCategory")
+                    b.Property<string>("name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                    b.HasKey("id");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
+                    b.ToTable("category", (string)null);
                 });
 
             modelBuilder.Entity("Ecommerce.Entity.Product", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<string>("AdditionalImageUrl1")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("AdditionalImageUrl2")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("AdditionalImageUrl3")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("AdditionalImageUrl4")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("AverageStars")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<int>("BrandId")
+                    b.Property<int>("brand_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int>("category_id")
                         .HasColumnType("int");
 
-                    b.Property<string>("Code")
+                    b.Property<string>("code")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
 
-                    b.Property<string>("CoverImageUrl")
+                    b.Property<string>("description")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("TEXT");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<decimal>("discount_price")
+                        .HasColumnType("decimal(10, 2)");
 
-                    b.Property<decimal?>("DiscountPrice")
-                        .HasColumnType("decimal(65,30)");
+                    b.Property<string>("image_url0")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<string>("image_url1")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
-                    b.Property<decimal>("OriginalPrice")
-                        .HasColumnType("decimal(65,30)");
+                    b.Property<string>("image_url2")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
-                    b.Property<int>("ProviderId")
-                        .HasColumnType("int");
+                    b.Property<string>("image_url3")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
-                    b.Property<string>("RawDescription")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<string>("image_url4")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
-                    b.Property<string>("RawTechnicalInfo")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("ReviewCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubCategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TechnicalInfo")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BrandId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("ProviderId");
-
-                    b.HasIndex("SubCategoryId");
-
-                    b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("Ecommerce.Entity.Provider", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
-
-                    b.Property<string>("Cnpj")
-                        .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("varchar(14)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("varchar(64)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(11)
-                        .HasColumnType("varchar(11)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Providers");
-                });
-
-            modelBuilder.Entity("Ecommerce.Entity.SubCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
+                    b.Property<string>("name")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("varchar(128)");
 
-                    b.Property<int>("ParentCategoryId")
+                    b.Property<decimal>("original_price")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<int>("provider_id")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int>("rating")
+                        .HasColumnType("int");
 
-                    b.HasIndex("ParentCategoryId");
+                    b.Property<decimal>("stars")
+                        .HasColumnType("decimal(3, 2)");
 
-                    b.ToTable("SubCategories");
+                    b.Property<int?>("sub_category_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("technical_info")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("brand_id");
+
+                    b.HasIndex("category_id");
+
+                    b.HasIndex("provider_id");
+
+                    b.HasIndex("sub_category_id");
+
+                    b.ToTable("product", (string)null);
+                });
+
+            modelBuilder.Entity("Ecommerce.Entity.Provider", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("address")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
+
+                    b.Property<string>("cnpj")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<string>("phone_number")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("provider", (string)null);
+                });
+
+            modelBuilder.Entity("Ecommerce.Entity.SubCategory", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<int>("category_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("category_id");
+
+                    b.ToTable("sub_category", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -418,27 +408,25 @@ namespace Ecommerce.Migrations
                 {
                     b.HasOne("Ecommerce.Entity.Brand", "Brand")
                         .WithMany("Products")
-                        .HasForeignKey("BrandId")
+                        .HasForeignKey("brand_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Ecommerce.Entity.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("category_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Ecommerce.Entity.Provider", "Provider")
                         .WithMany("Products")
-                        .HasForeignKey("ProviderId")
+                        .HasForeignKey("provider_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Ecommerce.Entity.SubCategory", "SubCategory")
                         .WithMany("Products")
-                        .HasForeignKey("SubCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("sub_category_id");
 
                     b.Navigation("Brand");
 
@@ -453,7 +441,7 @@ namespace Ecommerce.Migrations
                 {
                     b.HasOne("Ecommerce.Entity.Category", "ParentCategory")
                         .WithMany()
-                        .HasForeignKey("ParentCategoryId")
+                        .HasForeignKey("category_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -20,7 +20,7 @@ public class SubCategoryService : ISubCategoryService
     {
         // Regra de negocio 
         // Verificar se a Categoria Pai informada realmente existe no banco de dados.
-        var parentCategory = _categoryRepository.GetById(subCategoryDto.ParentCategoryId);
+        var parentCategory = _categoryRepository.GetById(subCategoryDto.category_id);
         if (parentCategory == null)
         {
             // Se não existir, retornamos uma mensagem de erro em vez da entidade
@@ -29,8 +29,8 @@ public class SubCategoryService : ISubCategoryService
 
         var newSubCategory = new SubCategory
         {
-            Name = subCategoryDto.Name,
-            ParentCategoryId = subCategoryDto.ParentCategoryId
+            name = subCategoryDto.name,
+            category_id = subCategoryDto.category_id
         };
 
         _subCategoryRepository.Add(newSubCategory);
