@@ -57,6 +57,38 @@ public class ProductService : IProductService
         _productRepository.SaveChanges();
         return true; 
     }
+    public Product? UpdateProduct(int id, CreateProductDto productDto)
+    {
+        var existingProduct = _productRepository.GetById(id);
+
+        if (existingProduct == null)
+        {
+            return null;
+        }
+
+        existingProduct.code = productDto.code;
+        existingProduct.name = productDto.name;
+        existingProduct.original_price = productDto.original_price;
+        existingProduct.discount_price = productDto.discount_price;
+        existingProduct.description = productDto.description;
+        existingProduct.technical_info = productDto.technical_info;
+        
+        existingProduct.image_url0 = productDto.image_url0;
+        existingProduct.image_url1 = productDto.image_url1;
+        existingProduct.image_url2 = productDto.image_url2;
+        existingProduct.image_url3 = productDto.image_url3;
+        existingProduct.image_url4 = productDto.image_url4;
+        
+        existingProduct.category_id = productDto.category_id;
+        existingProduct.sub_category_id = productDto.sub_category_id;
+        existingProduct.brand_id = productDto.brand_id;
+        existingProduct.provider_id = productDto.provider_id;
+
+        _productRepository.Update(existingProduct);
+        _productRepository.SaveChanges();
+
+        return existingProduct;
+    }
     public List<Product> GetPromotions()
     {
 

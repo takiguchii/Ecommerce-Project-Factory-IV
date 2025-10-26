@@ -43,4 +43,20 @@ public class CategoryService : ICategoryService
         _categoryRepository.SaveChanges();
         return true;
     }
+    public Category? UpdateCategory(int id, CreateCategoryDto categoryDto)
+    {
+        var existingCategory = _categoryRepository.GetById(id);
+
+        if (existingCategory == null)
+        {
+            return null;
+        }
+
+        existingCategory.name = categoryDto.name;
+
+        _categoryRepository.Update(existingCategory);
+        _categoryRepository.SaveChanges();
+
+        return existingCategory;
+    }
 }

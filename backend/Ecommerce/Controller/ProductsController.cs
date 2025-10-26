@@ -90,6 +90,19 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
     
+    [HttpPut("{id}")]
+    public IActionResult UpdateProduct(int id, [FromBody] CreateProductDto productDto)
+    {
+        var updatedProduct = _productService.UpdateProduct(id, productDto);
+
+        if (updatedProduct == null)
+        {
+            return NotFound($"Produto com ID {id} não encontrado.");
+        }
+
+        return Ok(updatedProduct);
+    }
+    
     [HttpDelete("{id}")]
     public IActionResult DeleteProduct(int id)
     {

@@ -8,4 +8,6 @@ public interface ISubCategoryRepository
     List<SubCategory> GetAll();
     SubCategory? GetById(int id);
     void SaveChanges();
+    void Delete(SubCategory subCategory);
+    void Update(SubCategory subCategory);
 }

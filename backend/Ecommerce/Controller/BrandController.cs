@@ -31,6 +31,19 @@ namespace Ecommerce.Api.Controllers
 
             return CreatedAtAction(nameof(GetAllBrands), new { id = brand.id }, brand); 
         }
+        
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult UpdateBrand(int id, [FromBody] CreateBrandDto brandDto)
+        {
+            var updatedBrand = _brandService.UpdateBrand(id, brandDto);
+
+            if (updatedBrand == null)
+            {
+                return NotFound($"Marca com ID {id} não encontrada.");
+            }
+            return Ok(updatedBrand);
+        }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
