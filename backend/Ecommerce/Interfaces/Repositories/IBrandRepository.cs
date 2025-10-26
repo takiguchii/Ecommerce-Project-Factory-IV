@@ -9,4 +9,5 @@ public interface IBrandRepository
     void Add(Brand brand);
     void Delete(Brand brand);
     void SaveChanges();
+    void Update(Brand brand);
 }
