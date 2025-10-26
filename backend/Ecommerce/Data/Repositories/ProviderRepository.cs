@@ -32,7 +32,10 @@ public class ProviderRepository : IProviderRepository
     {
         return _dbContext.Providers.FirstOrDefault(p => p.cnpj == cnpj);
     }
-
+    public void Delete(Provider provider)
+    {
+        _dbContext.Providers.Remove(provider);
+    }
     public void SaveChanges()
     {
         _dbContext.SaveChanges();

@@ -16,7 +16,6 @@ public class ProviderService : IProviderService
 
     public object? CreateProvider(CreateProviderDto providerDto)
     {
-        // Regra de Negócio: Verificar se já existe um fornecedor com o mesmo CNPJ.
         var existingProvider = _providerRepository.GetByCnpj(providerDto.cnpj);
         if (existingProvider != null)
         {
@@ -45,5 +44,19 @@ public class ProviderService : IProviderService
     public Provider? GetProviderById(int id)
     {
         return _providerRepository.GetById(id);
+    }
+    public bool DeleteProvider(int id)
+    {
+        var provider = _providerRepository.GetById(id);
+
+        if (provider == null)
+        {
+            return false;
+        }
+
+        _providerRepository.Delete(provider);
+        _providerRepository.SaveChanges();
+
+        return true;
     }
 }

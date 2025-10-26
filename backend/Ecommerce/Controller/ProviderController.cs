@@ -46,4 +46,15 @@ public class ProviderController : ControllerBase
         }
         return Ok(provider);
     }
+    [HttpDelete("{id}")]
+    public IActionResult DeleteProvider(int id)
+    {
+        var success = _providerService.DeleteProvider(id);
+        if (!success)
+        {
+            return NotFound($"Fornecedor com ID {id} não encontrado.");
+        }
+            
+        return NoContent(); 
+    }
 }
