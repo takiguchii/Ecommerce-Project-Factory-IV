@@ -13,12 +13,10 @@ namespace Ecommerce.Dto;
         public string name { get; set; }
 
         [Required(ErrorMessage = "Preço original é obrigatório.")]
-        [Range(0.01, (double)decimal.MaxValue, ErrorMessage = "Preço original deve ser positivo.")]
-        public decimal original_price { get; set; }
+        public string original_price { get; set; }
 
         [Required(ErrorMessage = "Preço com desconto é obrigatório.")]
-        [Range(0.01, (double)decimal.MaxValue, ErrorMessage = "Preço com desconto deve ser positivo.")]
-        public decimal discount_price { get; set; } 
+        public string discount_price { get; set; } 
 
         [Required(ErrorMessage = "Descrição é obrigatória.")]
         public string description { get; set; }

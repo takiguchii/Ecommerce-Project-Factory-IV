@@ -6,6 +6,7 @@ public class Category
 {
     [Key]
     public int id { get; set; }
+    
     [Required]
     [StringLength(32)]
     public string name { get; set; }

@@ -84,8 +84,10 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("discount_price")
-                        .HasColumnType("decimal(10, 2)");
+                    b.Property<string>("discount_price")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
 
                     b.Property<string>("image_url0")
                         .HasMaxLength(512)
@@ -109,11 +111,13 @@ namespace Ecommerce.Migrations
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
-                    b.Property<decimal>("original_price")
-                        .HasColumnType("decimal(10, 2)");
+                    b.Property<string>("original_price")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
 
                     b.Property<int>("provider_id")
                         .HasColumnType("int");

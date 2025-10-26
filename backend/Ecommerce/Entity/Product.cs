@@ -14,16 +14,16 @@ namespace Ecommerce.Entity
         public string code { get; set; }
 
         [Required]
-        [StringLength(128)] 
+        [StringLength(256)] 
         public string name { get; set; }
         
         [Required]
-        [Column(TypeName = "decimal(10, 2)")] 
-        public decimal original_price { get; set; }
+        [StringLength(16)] 
+        public string original_price { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(10, 2)")]
-        public decimal discount_price { get; set; }
+        [StringLength(16)] 
+        public string discount_price { get; set; }
 
         [Required]
         [Column(TypeName = "TEXT")]

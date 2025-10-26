@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecommerce.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20251025194530_RefactorProductFinalCheck")]
-    partial class RefactorProductFinalCheck
+    [Migration("20251025233748_updatePriceProduct")]
+    partial class updatePriceProduct
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,8 +87,9 @@ namespace Ecommerce.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("discount_price")
-                        .HasColumnType("decimal(10, 2)");
+                    b.Property<string>("discount_price")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("image_url0")
                         .HasMaxLength(512)
@@ -115,8 +116,9 @@ namespace Ecommerce.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("varchar(128)");
 
-                    b.Property<decimal>("original_price")
-                        .HasColumnType("decimal(10, 2)");
+                    b.Property<string>("original_price")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("provider_id")
                         .HasColumnType("int");
