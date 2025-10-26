@@ -9,4 +9,6 @@ public interface ICategoryRepository
     Category? GetById(int id);
     void Delete(Category category);
     void SaveChanges();
+    //method put 
+    void Update(Category category);
 }

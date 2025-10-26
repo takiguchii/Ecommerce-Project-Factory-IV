@@ -92,7 +92,6 @@ public class ProductRepository : IProductRepository
     {
         var query = _dbContext.Products.AsQueryable();
 
-        // Filtro dinamico (O mesmo do seu método de paginação)
         if (categoryId.HasValue)
         {
             query = query.Where(p => p.category_id == categoryId.Value);
@@ -106,7 +105,6 @@ public class ProductRepository : IProductRepository
             query = query.Where(p => p.brand_id == brandId.Value);
         }
 
-        // Retorna a lista de produtos que correspondem aos filtros
         return await query.ToListAsync();
     }
 

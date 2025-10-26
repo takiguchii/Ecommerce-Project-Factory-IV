@@ -1,6 +1,8 @@
 using Ecommerce.Data.Context;
 using Ecommerce.Entity;
 using Ecommerce.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Ecommerce.Repositories;
 
@@ -32,9 +34,14 @@ public class CategoryRepository : ICategoryRepository
     {
         _dbContext.Categories.Remove(category);
     }
+    public void Update(Category category)
+    {
+        _dbContext.Entry(category).State = EntityState.Modified;
+    }
 
     public void SaveChanges()
     {
         _dbContext.SaveChanges();
     }
+    
 }
