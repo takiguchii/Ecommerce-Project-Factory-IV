@@ -138,4 +138,4 @@ async function handleRegister() {
 }
 </script>
 
-<style scoped>/* Seu CSS */</style>
+<style scoped></style>

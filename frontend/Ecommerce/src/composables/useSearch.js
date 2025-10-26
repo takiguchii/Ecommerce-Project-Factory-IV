@@ -19,7 +19,7 @@ export function useSearch() {
         ...p,
         coverImageUrl:
           p.coverImageUrl ||
-          p.imageUrl ||
+          p.image_url0 ||
           'https://placehold.co/400x400?text=Sem+Imagem'
       }))
     } catch (e) {

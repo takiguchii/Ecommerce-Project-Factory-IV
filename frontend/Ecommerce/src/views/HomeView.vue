@@ -22,14 +22,14 @@ const { brands, loading: brandsLoading, error: brandsError, fetchBrands } = useB
       <section
         class="rounded-2xl bg-neutral-900/60 border-[1.5px] md:border-4 border-neutral-700/70 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6 hover:border-orange-500/40 transition-all duration-300"
       >
-        <ProductSectionComponent 
+         <ProductSectionComponent 
           title="🔥 Hora de Dar Play!"
           :products="promotions"
           :loading="promotionsLoading"
           :error="promotionsError"
           @fetch-needed="fetchPromotions"
         />
-      </section>
+      </section> 
 
       <!-- Departamentos -->
       <section
@@ -44,14 +44,14 @@ const { brands, loading: brandsLoading, error: brandsError, fetchBrands } = useB
         id="marcas"
         class="rounded-2xl bg-neutral-900/50 border-[1.5px] md:border-4 border-neutral-700/70 shadow-lg ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6 hover:border-orange-500/40 transition-all duration-300"
       >
-        <BrandSectionComponent 
+       <BrandSectionComponent 
           title="Navegue por Marcas"
           :brands="brands"
           :loading="brandsLoading"
           :error="brandsError"
           @fetch-needed="fetchBrands"
         />
-      </section>
+      </section> 
 
       <!-- Lista de produtos -->
       <section
@@ -59,10 +59,10 @@ const { brands, loading: brandsLoading, error: brandsError, fetchBrands } = useB
       >
         <ProductSectionComponent 
           title="Nossos Produtos"
-          :products="products"
-          :loading="productsLoading"
-          :error="productsError"
-          @fetch-needed="fetchProducts"
+          :products="promotions"
+          :loading="promotionsLoading"
+          :error="promotionsError"
+          @fetch-needed="fetchPromotions"
         />
       </section>
     </main>
