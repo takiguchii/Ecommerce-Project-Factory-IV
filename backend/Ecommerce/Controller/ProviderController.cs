@@ -46,6 +46,18 @@ public class ProviderController : ControllerBase
         }
         return Ok(provider);
     }
+    [HttpPut("{id}")]
+    public IActionResult UpdateProvider(int id, [FromBody] CreateProviderDto providerDto)
+    {
+        var updatedProvider = _providerService.UpdateProvider(id, providerDto);
+
+        if (updatedProvider == null)
+        {
+            return NotFound($"Fornecedor com ID {id} não encontrado.");
+        }
+
+        return Ok(updatedProvider);
+    }
     [HttpDelete("{id}")]
     public IActionResult DeleteProvider(int id)
     {

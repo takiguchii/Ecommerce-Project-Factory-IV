@@ -1,6 +1,8 @@
 using Ecommerce.Data.Context;
 using Ecommerce.Entity;
 using Ecommerce.Interfaces.Repositories;
+using Ecommerce.DTOs;
+using Microsoft.EntityFrameworkCore; 
 
 namespace Ecommerce.Repositories;
 
@@ -39,5 +41,9 @@ public class ProviderRepository : IProviderRepository
     public void SaveChanges()
     {
         _dbContext.SaveChanges();
+    }
+    public void Update(Provider provider)
+    {
+        _dbContext.Entry(provider).State = EntityState.Modified;
     }
 }

@@ -9,4 +9,6 @@ public interface IProviderService
     List<Provider> GetAllProviders();
     Provider? GetProviderById(int id);
     bool DeleteProvider(int id);
+    Provider? UpdateProvider(int id, CreateProviderDto providerDto);
+
 }

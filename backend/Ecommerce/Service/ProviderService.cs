@@ -45,6 +45,26 @@ public class ProviderService : IProviderService
     {
         return _providerRepository.GetById(id);
     }
+    public Provider? UpdateProvider(int id, CreateProviderDto providerDto)
+    {
+        var existingProvider = _providerRepository.GetById(id);
+        if (existingProvider == null)
+        {
+            return null;
+        }
+
+        existingProvider.name = providerDto.name;
+        existingProvider.cnpj = providerDto.cnpj;
+        existingProvider.email = providerDto.email;
+        existingProvider.phone_number = providerDto.phone_number;
+        existingProvider.address = providerDto.address;
+    
+        _providerRepository.Update(existingProvider);
+        _providerRepository.SaveChanges();
+
+        // 5. Retorna a entidade atualizada
+        return existingProvider;
+    }
     public bool DeleteProvider(int id)
     {
         var provider = _providerRepository.GetById(id);
