@@ -9,6 +9,8 @@ namespace Ecommerce.Service;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
+    private static readonly Random _random = new Random();
+
 
     public ProductService(IProductRepository productRepository)
     {
@@ -57,22 +59,47 @@ public class ProductService : IProductService
     }
     public List<Product> GetPromotions()
     {
-        return _productRepository.GetPromotions();
+
+        var potentialPromotions = _productRepository.GetPromotions();
+        
+        var actualPromotions = potentialPromotions
+            .Where(p => p.original_price != null && p.discount_price != null)
+            .ToList();
+
+        var shuffledPromotions = actualPromotions.OrderBy(p => _random.Next());
+        
+        var selectedPromotions = shuffledPromotions.Take(12).ToList();
+
+        return selectedPromotions;
     }
     public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
     {
         return await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
     }
   
-        public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm)
-        {
-            const int suggestionLimit = 5; // Limitandoo a sugestão para 5 itens 
+    public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm)
+    {
+        const int suggestionLimit = 5; // Limitandoo a sugestão para 5 itens 
             
-            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) // Definindo o limite para aparecer a sugestão ( só aprece depois de 3 caracters )
-            {
-                return new List<ProductSearchSuggestionDto>(); 
-            }
-    
-            return await _productRepository.GetSearchSuggestionsAsync(searchTerm, suggestionLimit);
+        if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) // Definindo o limite para aparecer a sugestão ( só aprece depois de 3 caracters )
+        { 
+            return new List<ProductSearchSuggestionDto>(); 
         }
+    
+        return await _productRepository.GetSearchSuggestionsAsync(searchTerm, suggestionLimit);
     }
+    public async Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId)
+    {
+        const int productLimit = 12;
+
+        var filteredProducts = await _productRepository.GetFilteredProductsAsync(categoryId, subCategoryId, brandId);
+        
+        var shuffledProducts = filteredProducts.OrderBy(p => _random.Next());
+        
+        // pega os primeiros 12.
+        var selectedProducts = shuffledProducts.Take(productLimit).ToList();
+
+        return selectedProducts;
+    }
+}
+
