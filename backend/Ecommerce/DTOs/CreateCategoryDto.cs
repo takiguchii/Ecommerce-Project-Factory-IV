@@ -4,7 +4,6 @@ namespace Ecommerce.DTOs;
 
 public class CreateCategoryDto
 {
-    [Required]
-    [StringLength(128)]
-    public string Name { get; set; }
+    [Required(ErrorMessage = "O nome da categoria é obrigatório.")]
+    public string name { get; set; }
 }

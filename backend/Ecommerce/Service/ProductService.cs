@@ -19,14 +19,12 @@ public class ProductService : IProductService
     {
         var newProduct = new Product
         {
-            Name = productDto.Name,
-            CoverImageUrl = productDto.CoverImageUrl,
-            OriginalPrice = productDto.OriginalPrice,
-            DiscountPrice = productDto.DiscountPrice,
-            Description = productDto.Description,
-            TechnicalInfo = productDto.TechnicalInfo,
-            RawDescription = productDto.RawDescription,
-            RawTechnicalInfo = productDto.RawTechnicalInfo,
+            name = productDto.name,
+            image_url0 = productDto.image_url0,
+            original_price = productDto.original_price,
+            discount_price = productDto.discount_price,
+            description = productDto.description,
+            technical_info = productDto.technical_info,
 
         };
 

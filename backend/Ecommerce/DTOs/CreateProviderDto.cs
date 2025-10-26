@@ -1,26 +1,24 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Ecommerce.DTOs;
-
-public class CreateProviderDto
+namespace Ecommerce.DTOs
 {
-    [Required]
-    [StringLength(256)]
-    public string Name { get; set; }
+    public class CreateProviderDto
+    {
+        [Required(ErrorMessage = "O nome do fornecedor é obrigatório.")]
+        public string name { get; set; }
 
-    [Required]
-    [StringLength(14)]
-    public string Cnpj { get; set; }
+        [Required(ErrorMessage = "O CNPJ é obrigatório.")]
+        public string cnpj { get; set; }
 
-    [Required]
-    [StringLength(64)]
-    public string Email { get; set; }
+        [Required(ErrorMessage = "O e-mail é obrigatório.")]
+        [EmailAddress(ErrorMessage = "Formato de e-mail inválido.")]
+        public string email { get; set; }
 
-    [Required]
-    [StringLength(11)]
-    public string PhoneNumber { get; set; }
+        [Required(ErrorMessage = "O telefone é obrigatório.")]
+        [StringLength(16)] 
+        public string phone_number { get; set; }
 
-    [Required]
-    [StringLength(256)]
-    public string Address { get; set; }
+        [Required(ErrorMessage = "O endereço é obrigatório.")]
+        public string address { get; set; }
+    }
 }

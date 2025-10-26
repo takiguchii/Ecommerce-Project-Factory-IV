@@ -23,7 +23,7 @@ public class ProviderController : ControllerBase
         
         if (result is Provider provider)
         {
-            return CreatedAtAction(nameof(GetProviderById), new { id = provider.Id }, provider);
+            return CreatedAtAction(nameof(GetProviderById), new { id = provider.id }, provider);
         }
         
         return BadRequest(result);

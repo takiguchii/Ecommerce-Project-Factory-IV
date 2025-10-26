@@ -5,12 +5,11 @@ namespace Ecommerce.Entity;
 public class Category
 {
     [Key]
-    public int Id { get; set; }
-
-    [Required]
-    [StringLength(128)]
-    public string Name { get; set; }
+    public int id { get; set; }
     
-    public string ImageUrlCategory { get; set; }
+    [Required]
+    [StringLength(32)]
+    public string name { get; set; }
+    
     public ICollection<Product> Products { get; set; }
 }

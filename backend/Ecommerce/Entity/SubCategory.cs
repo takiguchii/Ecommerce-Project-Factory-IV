@@ -1,16 +1,21 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Ecommerce.Entity;
-
-public class SubCategory
+namespace Ecommerce.Entity
 {
-    [Key]
-    public int Id { get; set; }
-
-    [Required]
-    [StringLength(128)]
-    public string Name { get; set; }
-    public int ParentCategoryId { get; set; }
-    public Category ParentCategory { get; set; }
-    public ICollection<Product> Products { get; set; }
+    public class SubCategory
+    {
+        public int id { get; set; } 
+        
+        [Required]
+        [StringLength(32)]
+        public string name { get; set; } 
+        public int category_id { get; set; } 
+        
+        public virtual Category ParentCategory { get; set; }
+        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    }
 }
+
+
+

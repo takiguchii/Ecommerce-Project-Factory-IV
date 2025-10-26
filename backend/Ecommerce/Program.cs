@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Ecommerce.Data.Seed; 
+//using Ecommerce.Data.Seed; 
 using Ecommerce.Data.Context;
 using Ecommerce.Interfaces;
 using Ecommerce.Repositories;
@@ -143,7 +143,7 @@ using (var scope = app.Services.CreateScope())
                 logger.LogInformation("Usuário 'admin' criado e associado ao 'Admin'.");
             }
         }
-        SeedData.Initialize(context);
+        //SeedData.Initialize(context);
     }
     catch (Exception ex)
     {

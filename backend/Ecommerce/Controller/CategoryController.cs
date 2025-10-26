@@ -19,7 +19,7 @@ public class CategoryController : ControllerBase
     public IActionResult CreateCategory([FromBody] CreateCategoryDto categoryDto)
     {
         var category = _categoryService.CreateCategory(categoryDto);
-        return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
+        return CreatedAtAction(nameof(GetCategoryById), new { id = category.id }, category);
     }
 
     [HttpGet]

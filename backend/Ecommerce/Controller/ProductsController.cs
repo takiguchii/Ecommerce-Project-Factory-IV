@@ -22,7 +22,7 @@ public class ProductsController : ControllerBase
     {
         var product = _productService.CreateProduct(productDto);
         
-        return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
+        return CreatedAtAction(nameof(GetProductById), new { id = product.id }, product);
     }
 
     [HttpGet("{id}")]

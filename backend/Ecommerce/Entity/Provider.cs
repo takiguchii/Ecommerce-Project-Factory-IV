@@ -6,27 +6,27 @@ namespace Ecommerce.Entity;
 public class Provider
 {
     [Key]
-    public int Id { get; set; }
+    public int id { get; set; }
 
     [Required]
-    [StringLength(256)]
-    public string Name { get; set; }
+    [StringLength(32)]
+    public string name { get; set; }
 
     [Required]
-    [StringLength(14)]
-    public string Cnpj { get; set; }
+    [StringLength(16)]
+    public string cnpj { get; set; }
 
     [Required]
     [StringLength(64)]
-    public string Email { get; set; }
+    public string email { get; set; }
 
     [Required]
-    [StringLength(11)]
-    public string PhoneNumber { get; set; }
+    [StringLength(16)]
+    public string phone_number { get; set; }
 
     [Required]
-    [StringLength(256)]
-    public string Address { get; set; } 
+    [StringLength(128)]
+    public string address { get; set; } 
 
     public ICollection<Product> Products { get; set; }
 }
