@@ -17,6 +17,8 @@ public interface IProductService
     
     //Adicionando metodo da barra de pesquisa
     Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm);
-
+    
+    //method para filtrar produtos aleatorios da grid da homepage 
+    Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId);
 
 }

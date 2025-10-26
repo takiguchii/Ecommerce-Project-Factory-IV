@@ -88,5 +88,26 @@ public class ProductRepository : IProductRepository
             TotalCount = totalCount
         };
     }
+    public async Task<List<Product>> GetFilteredProductsAsync(int? categoryId, int? subCategoryId, int? brandId)
+    {
+        var query = _dbContext.Products.AsQueryable();
+
+        // Filtro dinamico (O mesmo do seu método de paginação)
+        if (categoryId.HasValue)
+        {
+            query = query.Where(p => p.category_id == categoryId.Value);
+        }
+        if (subCategoryId.HasValue)
+        {
+            query = query.Where(p => p.sub_category_id == subCategoryId.Value);
+        }
+        if (brandId.HasValue)
+        {
+            query = query.Where(p => p.brand_id == brandId.Value);
+        }
+
+        // Retorna a lista de produtos que correspondem aos filtros
+        return await query.ToListAsync();
+    }
 
 }

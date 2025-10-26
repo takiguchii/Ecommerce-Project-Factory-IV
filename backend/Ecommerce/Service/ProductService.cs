@@ -77,15 +77,29 @@ public class ProductService : IProductService
         return await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
     }
   
-        public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm)
-        {
-            const int suggestionLimit = 5; // Limitandoo a sugestão para 5 itens 
+    public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm)
+    {
+        const int suggestionLimit = 5; // Limitandoo a sugestão para 5 itens 
             
-            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) // Definindo o limite para aparecer a sugestão ( só aprece depois de 3 caracters )
-            {
-                return new List<ProductSearchSuggestionDto>(); 
-            }
-    
-            return await _productRepository.GetSearchSuggestionsAsync(searchTerm, suggestionLimit);
+        if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) // Definindo o limite para aparecer a sugestão ( só aprece depois de 3 caracters )
+        { 
+            return new List<ProductSearchSuggestionDto>(); 
         }
+    
+        return await _productRepository.GetSearchSuggestionsAsync(searchTerm, suggestionLimit);
     }
+    public async Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId)
+    {
+        const int productLimit = 12;
+
+        var filteredProducts = await _productRepository.GetFilteredProductsAsync(categoryId, subCategoryId, brandId);
+        
+        var shuffledProducts = filteredProducts.OrderBy(p => _random.Next());
+        
+        // pega os primeiros 12.
+        var selectedProducts = shuffledProducts.Take(productLimit).ToList();
+
+        return selectedProducts;
+    }
+}
+
