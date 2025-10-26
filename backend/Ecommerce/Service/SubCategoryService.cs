@@ -18,12 +18,11 @@ public class SubCategoryService : ISubCategoryService
 
     public object? CreateSubCategory(CreateSubCategoryDto subCategoryDto)
     {
-        // Regra de negocio 
         // Verificar se a Categoria Pai informada realmente existe no banco de dados.
         var parentCategory = _categoryRepository.GetById(subCategoryDto.category_id);
         if (parentCategory == null)
         {
-            // Se não existir, retornamos uma mensagem de erro em vez da entidade
+            // Se não existir, retorna uma mensagem de erro em vez da entidade
             return new { Message = "A categoria pai informada não existe." };
         }
 
@@ -46,5 +45,35 @@ public class SubCategoryService : ISubCategoryService
     public SubCategory? GetSubCategoryById(int id)
     {
         return _subCategoryRepository.GetById(id);
+    }
+    public bool DeleteSubCategory(int id)
+    {
+        var subCategory = _subCategoryRepository.GetById(id);
+
+        if (subCategory == null)
+        {
+            return false;
+        }
+
+        _subCategoryRepository.Delete(subCategory);
+        _subCategoryRepository.SaveChanges();
+        return true;
+    }
+    public SubCategory? UpdateSubCategory(int id, CreateSubCategoryDto subCategoryDto)
+    {
+        var existingSubCategory = _subCategoryRepository.GetById(id);
+
+        if (existingSubCategory == null)
+        {
+            return null;
+        }
+
+        existingSubCategory.name = subCategoryDto.name;
+        existingSubCategory.category_id = subCategoryDto.category_id; 
+
+        _subCategoryRepository.Update(existingSubCategory);
+        _subCategoryRepository.SaveChanges();
+
+        return existingSubCategory;
     }
 }
