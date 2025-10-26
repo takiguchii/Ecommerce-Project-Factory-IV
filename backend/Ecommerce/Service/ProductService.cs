@@ -9,6 +9,8 @@ namespace Ecommerce.Service;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
+    private static readonly Random _random = new Random();
+
 
     public ProductService(IProductRepository productRepository)
     {
@@ -57,7 +59,18 @@ public class ProductService : IProductService
     }
     public List<Product> GetPromotions()
     {
-        return _productRepository.GetPromotions();
+
+        var potentialPromotions = _productRepository.GetPromotions();
+        
+        var actualPromotions = potentialPromotions
+            .Where(p => p.original_price != null && p.discount_price != null)
+            .ToList();
+
+        var shuffledPromotions = actualPromotions.OrderBy(p => _random.Next());
+        
+        var selectedPromotions = shuffledPromotions.Take(12).ToList();
+
+        return selectedPromotions;
     }
     public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
     {
