@@ -8,13 +8,25 @@ const props = defineProps({
   products: { type: Array, default: null },
   loading: { type: Boolean, default: false },
   error: { type: String, default: null },
+
+  categoryId: { type: [String, Number], default: null },
+  subCategoryId: { type: [String, Number], default: null },
+  brandId: { type: [String, Number], default: null },
+  limit: { type: Number, default: 12 }, 
 });
+
 const emit = defineEmits(['fetch-needed']);
 
 const localProducts = useProducts();
-onMounted(() => {
+
+onMounted(async () => {
   if (props.products === null) {
-    localProducts.fetchProducts();
+    await localProducts.fetchProductsGridHomePage({
+      categoryId: props.categoryId,
+      subCategoryId: props.subCategoryId,
+      brandId: props.brandId,
+      limit: props.limit,
+    });
   } else {
     emit('fetch-needed');
   }
@@ -24,20 +36,10 @@ const displayProducts = computed(() => props.products || localProducts.products.
 const displayLoading = computed(() => props.loading || localProducts.loading.value);
 const displayError = computed(() => props.error || localProducts.error.value);
 
-// --- LÓGICA DO SCROLL (ADICIONADA DE VOLTA) ---
+// --- LÓGICA DO SCROLL ---
 const scrollContainer = ref(null);
-
-function scrollLeft() {
-  if (scrollContainer.value) {
-    scrollContainer.value.scrollBy({ left: -300, behavior: 'smooth' });
-  }
-}
-
-function scrollRight() {
-  if (scrollContainer.value) {
-    scrollContainer.value.scrollBy({ left: 300, behavior: 'smooth' });
-  }
-}
+function scrollLeft() { scrollContainer.value?.scrollBy({ left: -300, behavior: 'smooth' }); }
+function scrollRight() { scrollContainer.value?.scrollBy({ left: 300, behavior: 'smooth' }); }
 
 function handleAddToCart(product) {
   console.log('Adicionado ao carrinho:', product.name);
@@ -60,14 +62,14 @@ function handleAddToCart(product) {
         </div>
       </div>
 
-      <div v-if="displayError" class="..."></div>
-      
-      <div v-if="!displayLoading && displayProducts.length" 
+      <div v-if="displayError" class="text-red-400 mb-4">Erro ao carregar produtos.</div>
+
+      <div v-if="!displayLoading && displayProducts.length"
            ref="scrollContainer"
            class="flex gap-6 overflow-x-auto scrollbar-hide pb-4 -mb-4">
-        
+
         <div v-for="product in displayProducts" :key="product.id" class="w-[250px] flex-shrink-0">
-          <ProductCardComponent 
+          <ProductCardComponent
             :product="product"
             @add-to-cart="handleAddToCart"
           />
@@ -78,11 +80,6 @@ function handleAddToCart(product) {
 </template>
 
 <style scoped>
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 </style>

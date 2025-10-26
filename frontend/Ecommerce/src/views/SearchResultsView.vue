@@ -1,70 +1,195 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ProductCardComponent from '@/components/ProductCardComponent.vue'
 import { apiGet } from '@/services/api'
 
 const route = useRoute()
+const router = useRouter()
 
-const results = ref([])
+/* ----------------- Estado ----------------- */
+const results = ref([])           // itens (quando vier array) OU última página (quando vier paginado)
 const loading = ref(false)
 const error = ref(null)
 
-const pageNumber = ref(1)
-const pageSize = ref(16)
+const pageNumber = ref( Number(route.query.page ?? 1) )
+const pageSize   = ref( Number(route.query.size ?? 16) )
+
+const serverTotalCount = ref(null) // se backend informar, usamos
+const serverTotalPages = ref(null)
 
 const q = computed(() => String(route.query.q ?? '').trim())
 
-const totalCount = computed(() => results.value.length)
-const totalPages = computed(() => Math.max(1, Math.ceil(totalCount.value / pageSize.value)))
+/* ----------------- Helpers comuns ----------------- */
+const KABUM_HOST = 'https://www.kabum.com.br'
+
+function fixUrl(u) {
+  if (!u || typeof u !== 'string') return null
+  if (u.startsWith('http')) return u
+  if (u.startsWith('/')) return `${KABUM_HOST}${u}`
+  return u
+}
+
+function parsePrice(raw) {
+  if (raw === undefined || raw === null) return null
+  if (typeof raw === 'number') return raw
+  if (typeof raw === 'string') {
+    const norm = raw.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+    const n = parseFloat(norm)
+    return Number.isNaN(n) ? null : n
+  }
+  return null
+}
+function toBRL(n) {
+  return n === null ? '' : n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function normalizeProduct(p = {}) {
+  const imgs = [
+    p.coverImageUrl, p.imageUrl, p.image_url,
+    p.image_url0, p.image_url1, p.image_url2, p.image_url3, p.image_url4
+  ].map(fixUrl).filter(Boolean)
+  const coverImageUrl = imgs[0] || 'https://placehold.co/400x400?text=Sem+Imagem'
+
+  const original_price = parsePrice(p.original_price ?? p.originalPrice)
+  const discount_price = parsePrice(p.discount_price ?? p.discountPrice ?? p.price)
+
+  const stars  = Number(p.stars ?? p.averageStars ?? 0) || 0
+  const rating = Number(p.rating ?? p.reviewCount ?? 0) || 0
+
+  const id   = p.id ?? p.code ?? p.productId
+  const code = p.code ?? ''
+  const name = p.name ?? p.nome ?? ''
+
+  return {
+    ...p,
+    id, code, name,
+    coverImageUrl,
+    imageUrl: coverImageUrl,
+
+    original_price,
+    discount_price,
+    originalPrice: original_price,
+    discountPrice: discount_price,
+
+    originalPriceBRL: toBRL(original_price),
+    discountPriceBRL: toBRL(discount_price),
+
+    stars, rating,
+  }
+}
+
+/* ----------------- Derivados de UI ----------------- */
+// Quando vier paginação do backend, usamos os totais dele; senão, calculamos pelo array
+const totalCount = computed(() => {
+  if (serverTotalCount.value != null) return serverTotalCount.value
+  return results.value.length
+})
+const totalPages = computed(() => {
+  if (serverTotalPages.value != null) return serverTotalPages.value
+  return Math.max(1, Math.ceil(totalCount.value / pageSize.value))
+})
 
 const displayed = computed(() => {
+  // Backend paginado já devolve os itens da página; só retornamos.
+  if (serverTotalPages.value != null) return results.value
+  // Fallback: paginação no cliente
   const start = (pageNumber.value - 1) * pageSize.value
   return results.value.slice(start, start + pageSize.value)
 })
 
+function pushQuery() {
+  router.replace({
+    query: {
+      ...route.query,
+      q: q.value || undefined,
+      page: pageNumber.value !== 1 ? String(pageNumber.value) : undefined,
+      size: pageSize.value !== 16 ? String(pageSize.value) : undefined,
+    }
+  })
+}
+
 function goToPage(p) {
   if (p < 1 || p > totalPages.value || p === pageNumber.value) return
   pageNumber.value = p
+  pushQuery()
+  fetchSearch()
 }
 
+/* ----------------- Fetch (paginado + fallback) ----------------- */
 async function fetchSearch() {
   if (!q.value) {
     results.value = []
+    serverTotalCount.value = null
+    serverTotalPages.value = null
     return
   }
+
   loading.value = true
   error.value = null
+
   try {
-    const data = await apiGet(`/products/search-suggestions?query=${encodeURIComponent(q.value)}`)
-    results.value = (Array.isArray(data) ? data : []).map(p => ({
-      ...p,
-      coverImageUrl:
-        p.coverImageUrl ||
-        p.imageUrl ||
-        'https://placehold.co/400x400?text=Sem+Imagem'
-    }))
-  } catch (e) {
-    error.value = e?.message || 'Erro ao buscar produtos'
-    results.value = []
+    // 1) Tenta rota paginada do backend
+    const url = `/products/search?query=${encodeURIComponent(q.value)}&pageNumber=${pageNumber.value}&pageSize=${pageSize.value}`
+    const data = await apiGet(url)
+
+    // Suporte a formatos comuns: { items, totalCount, totalPages } ou { data, total, pages }
+    const items =
+      data?.items ??
+      data?.data ??
+      (Array.isArray(data) ? data : [])
+
+    const normalized = items.map(normalizeProduct)
+    results.value = normalized
+
+    const tCount = data?.totalCount ?? data?.total ?? null
+    const tPages = data?.totalPages ?? data?.pages ?? null
+
+    serverTotalCount.value = (typeof tCount === 'number') ? tCount : null
+    serverTotalPages.value = (typeof tPages === 'number') ? tPages : null
+
+    // Se veio array puro, considera fallback de paginação cliente
+    if (Array.isArray(data)) {
+      serverTotalCount.value = null
+      serverTotalPages.value = null
+    }
+  } catch (err1) {
+    try {
+      // 2) Fallback: rota de sugestões (array simples)
+      const arr = await apiGet(`/products/search-suggestions?query=${encodeURIComponent(q.value)}`)
+      const normalized = (Array.isArray(arr) ? arr : []).map(normalizeProduct)
+      results.value = normalized
+      serverTotalCount.value = null
+      serverTotalPages.value = null
+    } catch (err2) {
+      error.value = err2?.message || err1?.message || 'Erro ao buscar produtos'
+      results.value = []
+      serverTotalCount.value = null
+      serverTotalPages.value = null
+    }
   } finally {
     loading.value = false
   }
 }
 
 async function load() {
-  pageNumber.value = 1
+  pageNumber.value = Number(route.query.page ?? 1) || 1
+  pageSize.value   = Number(route.query.size ?? 16) || 16
   await fetchSearch()
   window.scrollTo({ top: 0, behavior: 'auto' })
 }
 
+/* ----------------- Lifecycle ----------------- */
 onMounted(load)
-watch(() => route.query.q, load)
+watch(() => [route.query.q, route.query.page, route.query.size], load)
 
 function changePageSize(val) {
   pageSize.value = Number(val)
   pageNumber.value = 1
+  pushQuery()
+  fetchSearch()
 }
+
 function handleAddToCart(prod) {
   console.log('Adicionar ao carrinho:', prod)
 }
