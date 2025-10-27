@@ -8,8 +8,8 @@ namespace Ecommerce.DTOs
         [StringLength(32)] 
         public string name { get; set; }
 
-        [Required(ErrorMessage = "A URL da imagem da marca é obrigatória.")]
+        //[Required(ErrorMessage = "A URL da imagem da marca é obrigatória.")]
         [StringLength(512)] 
-        public string brand_image_url { get; set; }
+        public string? brand_image_url { get; set; }
     }
 }

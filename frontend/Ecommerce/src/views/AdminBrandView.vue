@@ -86,11 +86,18 @@ const createBrandHandler = async () => {
   errorCreate.value = '';
   successCreate.value = false;
   try {
-    // Chama a função createBrand do seu api.js
-    await createBrand({
+    
+    // *** ESTA É A CORREÇÃO ***
+    // Criamos um 'payload' (pacote) com os nomes exatos que o DTO do backend espera.
+    // O backend espera 'brand_image_url', mas o formulário usa 'imageUrl'.
+    const payload = {
         name: newBrand.value.name,
-        imageUrl: newBrand.value.imageUrl || null // Envia null se vazio
-    });
+        brand_image_url: newBrand.value.imageUrl || null // Traduzindo o nome do campo
+    };
+
+    // Enviamos o 'payload' corrigido em vez do 'newBrand.value' direto
+    await createBrand(payload);
+
     successCreate.value = true;
     newBrand.value = { name: '', imageUrl: '' }; // Limpa form
     await fetchBrands(); // Recarrega lista

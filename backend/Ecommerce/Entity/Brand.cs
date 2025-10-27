@@ -10,7 +10,7 @@ namespace Ecommerce.Entity
 
         public string name { get; set; } 
 
-        public string brand_image_url { get; set; } 
+        public string? brand_image_url { get; set; } 
 
         public virtual ICollection<Product> Products { get; set; } = new List<Product>(); 
     }
