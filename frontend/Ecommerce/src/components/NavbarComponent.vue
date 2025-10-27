@@ -152,7 +152,7 @@
                     to="/admin/brands"
                     class="block px-4 py-2 text-sm text-gray-300 hover:bg-neutral-800/60 hover:text-orange-400 rounded-lg transition-colors"
                     role="menuitem" tabindex="-1" @click="isUserMenuOpen = false">
-                    Gerenciar Marcas
+                    Painel Administrador
                   </RouterLink>
                   <button @click="handleLogout" class="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-neutral-800/60 hover:text-red-300 rounded-lg transition-colors" role="menuitem" tabindex="-1">
                     Sair

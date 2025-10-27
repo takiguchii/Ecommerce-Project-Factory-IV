@@ -1,122 +1,235 @@
 <template>
-  <div class="admin-brands-container">
-    <h1>Gerenciar Marcas (Admin)</h1>
+  <div class="bg-gray-900 min-h-screen p-4 md:p-8 pt-20">
+    <div class="max-w-4xl mx-auto">
+      
+      <h1 class="text-3xl font-bold text-gray-100 mb-6">
+        {{ editingBrandId ? 'Editar Marca' : 'Gerenciador de Marcas' }}
+      </h1>
 
-    <form @submit.prevent="createBrandHandler" class="brand-form">
-      <h3>Nova Marca</h3>
-      <div>
-        <label for="brandName">Nome:</label>
-        <input type="text" id="brandName" v-model="newBrand.name" required>
+      <div class="bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mb-8">
+        <h3 class="text-2xl font-semibold text-gray-200 mb-6 border-b border-gray-700 pb-3">
+          {{ editingBrandId ? `Editando Marca (ID: ${editingBrandId})` : 'Adicionar Nova Marca' }}
+        </h3>
+        
+        <form @submit.prevent="saveBrandHandler" class="space-y-5">
+          <div>
+            <label for="brandName" class="block text-sm font-medium text-gray-400 mb-1">
+              Nome da Marca
+            </label>
+            <input
+              type="text"
+              id="brandName"
+              v-model="brandForm.name"
+              class="w-full px-4 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-md shadow-sm 
+                     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label for="brandImageUrl" class="block text-sm font-medium text-gray-400 mb-1">
+              URL da Imagem (Logo)
+            </label>
+            <input
+              type="text"
+              id="brandImageUrl"
+              v-model="brandForm.imageUrl"
+              class="w-full px-4 py-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-md shadow-sm 
+                     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-500"
+            />
+          </div>
+
+          <div class="flex items-center gap-4 pt-3">
+            <button
+              type="submit"
+              :disabled="loadingSubmit"
+              class="px-5 py-2 bg-orange-600 text-white font-medium rounded-md shadow-sm 
+                     hover:bg-orange-700 transition duration-200 
+                     disabled:bg-gray-500 disabled:cursor-not-allowed"
+            >
+              {{ loadingSubmit ? 'Salvando...' : (editingBrandId ? 'Atualizar Marca' : 'Criar Marca') }}
+            </button>
+            
+            <button
+              type="button"
+              v-if="editingBrandId"
+              @click="cancelEditHandler"
+              class="px-5 py-2 bg-gray-600 text-white font-medium rounded-md shadow-sm hover:bg-gray-500 transition duration-200"
+            >
+              Cancelar
+            </button>
+          </div>
+
+          <p v-if="errorSubmit" class="text-red-500 text-sm font-medium pt-2">{{ errorSubmit }}</p>
+          <p v-if="successSubmit" class="text-green-500 text-sm font-medium pt-2">{{ successMessage }}</p>
+        </form>
       </div>
-      <div>
-        <label for="brandImageUrl">URL da Imagem:</label>
-        <input type="text" id="brandImageUrl" v-model="newBrand.imageUrl">
+
+      <div class="bg-gray-800 shadow-xl rounded-lg overflow-hidden">
+        <h2 class="text-2xl font-semibold text-gray-200 p-6 border-b border-gray-700">
+          Marcas Existentes
+        </h2>
+
+        <div v-if="loadingList" class="text-center p-10 text-gray-400">
+          Carregando marcas...
+        </div>
+        <div v-else-if="errorList" class="text-center p-10 text-red-500">
+          {{ errorList }}
+        </div>
+        
+        <ul v-else-if="brands.length > 0" class="divide-y divide-gray-700">
+          <li
+            v-for="brand in brands"
+            :key="brand.id"
+            class="p-4 flex flex-wrap items-center justify-between gap-3 hover:bg-gray-700 transition duration-150"
+          >
+            <span class="text-lg text-gray-100">
+              {{ brand.name }}
+              <span class="text-sm text-gray-500 ml-2">(ID: {{ brand.id }})</span>
+            </span>
+            
+            <div class="flex-shrink-0 flex gap-2">
+              <button
+                @click="startEditHandler(brand)"
+                class="px-3 py-1 bg-yellow-500 text-white text-sm font-medium rounded-md shadow-sm hover:bg-yellow-600 transition duration-200"
+              >
+                Editar
+              </button>
+              <button
+                @click="deleteBrandHandler(brand.id)"
+                :disabled="loadingDelete[brand.id]"
+                class="px-3 py-1 bg-red-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-red-700 transition duration-200 disabled:bg-gray-500"
+              >
+                {{ loadingDelete[brand.id] ? '...' : 'Apagar' }}
+              </button>
+            </div>
+          </li>
+        </ul>
+        
+        <p v-else class="text-center p-10 text-gray-500">
+          Nenhuma marca encontrada.
+        </p>
       </div>
-      <button type="submit" :disabled="loadingCreate">
-        {{ loadingCreate ? 'Criando...' : 'Criar Marca' }}
+
+      <button 
+        @click="logout" 
+        class="mt-8 px-5 py-2 bg-gray-700 text-white font-medium rounded-md shadow-sm 
+               hover:bg-gray-600 transition duration-200"
+      >
+        Sair (Logout)
       </button>
-      <p v-if="errorCreate" class="error-message">{{ errorCreate }}</p>
-       <p v-if="successCreate" class="success-message">Marca criada com sucesso!</p>
-    </form>
 
-    <hr>
-
-    <h2>Marcas Existentes</h2>
-    <div v-if="loadingList">Carregando marcas...</div>
-    <div v-else-if="errorList">{{ errorList }}</div>
-    <ul v-else-if="brands.length > 0" class="brand-list">
-      <li v-for="brand in brands" :key="brand.id">
-        <span>{{ brand.name }} (ID: {{ brand.id }})</span>
-        <button @click="deleteBrandHandler(brand.id)" :disabled="loadingDelete[brand.id]">
-           {{ loadingDelete[brand.id] ? 'Apagando...' : 'Apagar' }}
-        </button>
-         <p v-if="errorDelete[brand.id]" class="error-message">{{ errorDelete[brand.id] }}</p>
-      </li>
-    </ul>
-    <p v-else>Nenhuma marca encontrada.</p>
-     <button @click="logout" class="logout-button">Sair (Logout)</button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-// Importa as funções específicas do seu api.js
-import { getBrands, createBrand, deleteBrand } from '@/services/api';
+import { getBrands, createBrand, deleteBrand, updateBrand } from '@/services/api';
 
 const router = useRouter();
 
-// Estado para Criar Marca
-const newBrand = ref({ name: '', imageUrl: '' });
-const loadingCreate = ref(false);
-const errorCreate = ref('');
-const successCreate = ref(false);
+const brandForm = ref({ name: '', imageUrl: '' });
+const editingBrandId = ref(null);
 
-// Estado para Listar Marcas
+const loadingSubmit = ref(false);
+const errorSubmit = ref('');
+const successSubmit = ref(false);
+const successMessage = ref('');
+
 const brands = ref([]);
 const loadingList = ref(false);
 const errorList = ref('');
 
-// Estado para Apagar Marca (objeto para rastrear por ID)
 const loadingDelete = reactive({});
 const errorDelete = reactive({});
 
-// Função para buscar marcas
 const fetchBrands = async () => {
   loadingList.value = true;
   errorList.value = '';
   try {
-    // Chama a função getBrands do seu api.js
     brands.value = await getBrands();
   } catch (err) {
     console.error("Erro ao buscar marcas:", err);
     errorList.value = 'Falha ao carregar marcas.';
-     // Se der erro 401/403, pode ser token expirado/inválido
      if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-         logout(); // Desloga o usuário se não autorizado
+         logout();
      }
   } finally {
     loadingList.value = false;
   }
 };
 
-// Função handler para criar marca
-const createBrandHandler = async () => {
-  loadingCreate.value = true;
-  errorCreate.value = '';
-  successCreate.value = false;
-  try {
+const resetForm = () => {
+    brandForm.value = { name: '', imageUrl: '' };
+    editingBrandId.value = null;
+    loadingSubmit.value = false;
+    errorSubmit.value = '';
+    successSubmit.value = false;
+    successMessage.value = '';
+};
+
+const startEditHandler = (brand) => {
+    editingBrandId.value = brand.id;
     
-    // *** ESTA É A CORREÇÃO ***
-    // Criamos um 'payload' (pacote) com os nomes exatos que o DTO do backend espera.
-    // O backend espera 'brand_image_url', mas o formulário usa 'imageUrl'.
+    brandForm.value.name = brand.name;
+    brandForm.value.imageUrl = brand.brand_image_url || ''; 
+
+    errorSubmit.value = '';
+    successSubmit.value = false;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const cancelEditHandler = () => {
+    resetForm();
+};
+
+const saveBrandHandler = async () => {
+  loadingSubmit.value = true;
+  errorSubmit.value = '';
+  successSubmit.value = false;
+  
+  try {
+
     const payload = {
-        name: newBrand.value.name,
-        brand_image_url: newBrand.value.imageUrl || null // Traduzindo o nome do campo
+        name: brandForm.value.name,
+        brand_image_url: brandForm.value.imageUrl || null
     };
 
-    // Enviamos o 'payload' corrigido em vez do 'newBrand.value' direto
-    await createBrand(payload);
+    if (editingBrandId.value) {
+      await updateBrand(editingBrandId.value, payload);
+      successMessage.value = 'Marca atualizada com sucesso!';
+    } else {
+      await createBrand(payload);
+      successMessage.value = 'Marca criada com sucesso!';
+    }
 
-    successCreate.value = true;
-    newBrand.value = { name: '', imageUrl: '' }; // Limpa form
-    await fetchBrands(); // Recarrega lista
-     setTimeout(() => successCreate.value = false, 3000); // Esconde msg sucesso
-  } catch (err) {
-    console.error("Erro ao criar marca:", err);
-    errorCreate.value = 'Falha ao criar marca.';
+    successSubmit.value = true;
+    resetForm(); 
+    await fetchBrands(); 
+     
+    setTimeout(() => { 
+        successSubmit.value = false;
+        successMessage.value = '';
+    }, 3000);
+
+  } catch (err)
+  {
+    console.error("Erro ao salvar marca:", err);
+    errorSubmit.value = 'Falha ao salvar marca.';
      if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-         errorCreate.value = 'Acesso negado. Você precisa ser Admin.';
-         // logout(); // Opcional: deslogar se tentar criar sem ser admin
+         errorSubmit.value = 'Acesso negado. Você precisa ser Admin.';
      } else if (err.response && err.response.data && err.response.data.errors) {
-         errorCreate.value = Object.values(err.response.data.errors).flat().join(' ');
+         // Esta linha vai mostrar o erro "O nome da marca é obrigatório." se o payload estiver errado
+         errorSubmit.value = Object.values(err.response.data.errors).flat().join(' ');
      }
   } finally {
-    loadingCreate.value = false;
+    loadingSubmit.value = false;
   }
 };
 
-// Função handler para apagar marca
 const deleteBrandHandler = async (id) => {
   if (!confirm(`Tem certeza que deseja apagar a marca com ID ${id}?`)) {
     return;
@@ -124,136 +237,31 @@ const deleteBrandHandler = async (id) => {
   loadingDelete[id] = true;
   errorDelete[id] = '';
   try {
-    // Chama a função deleteBrand do seu api.js
     await deleteBrand(id);
+    
+    if (editingBrandId.value === id) {
+        resetForm();
+    }
+    
     await fetchBrands(); // Recarrega a lista
   } catch (err) {
     console.error(`Erro ao apagar marca ${id}:`, err);
     errorDelete[id] = 'Falha ao apagar.';
     if (err.response && (err.response.status === 401 || err.response.status === 403)) {
          errorDelete[id] = 'Acesso negado.';
-         // logout(); // Opcional: deslogar se tentar apagar sem ser admin
      }
   } finally {
-    // Garante que o estado de loading seja removido, mesmo se houver erro
-    // Vue 3.3+ pode usar delete loadingDelete[id];
-    // Para compatibilidade:
     const tempLoading = { ...loadingDelete };
     delete tempLoading[id];
     Object.assign(loadingDelete, tempLoading);
-    //delete loadingDelete[id];
   }
 };
 
-// Função de Logout
 const logout = () => {
     localStorage.removeItem('authToken');
     router.push('/login');
 };
 
-// Carrega as marcas quando o componente é montado
 onMounted(fetchBrands);
 
 </script>
-
-<style scoped>
-.admin-brands-container {
-  max-width: 600px;
-  margin: 30px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9; /* Fundo claro para contraste */
-  color: #333; /* Texto escuro */
-}
-.brand-form {
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #ddd; /* Borda mais suave */
-  border-radius: 4px;
-  background-color: #fff; /* Fundo branco */
-}
-.brand-list {
-  list-style: none; /* Remove marcadores */
-  padding: 0;
-}
-.brand-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 5px; /* Mais preenchimento */
-  border-bottom: 1px solid #eee;
-}
-.brand-list li:last-child {
-  border-bottom: none; /* Remove borda do último item */
-}
-.brand-list li span {
-  flex-grow: 1; /* O nome ocupa o espaço disponível */
-  margin-right: 10px;
-}
-.brand-list li button {
-  padding: 4px 10px; /* Botão um pouco maior */
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s; /* Efeito suave */
-}
-.brand-list li button:hover {
-  background-color: #c82333; /* Cor mais escura no hover */
-}
-.brand-list li button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-.error-message {
-  color: #dc3545; /* Vermelho erro */
-  font-size: 0.9em;
-  margin-top: 5px;
-}
-.success-message {
-    color: #28a745; /* Verde sucesso */
-    margin-top: 5px;
-}
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold; /* Label em negrito */
-}
-input[type="text"] {
-  width: 95%;
-  padding: 10px; /* Input maior */
-  margin-bottom: 15px; /* Mais espaço */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button {
-  cursor: pointer;
-  padding: 10px 18px; /* Botão maior */
-  border-radius: 4px;
-  border: none;
-  background-color: #007bff; /* Azul primário */
-  color: white;
-  transition: background-color 0.2s;
-}
-button:hover {
-  background-color: #0056b3;
-}
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-hr {
-  margin: 30px 0; /* Mais espaço na linha */
-  border: 0;
-  border-top: 1px solid #eee;
-}
-.logout-button {
-    margin-top: 20px;
-    background-color: #6c757d; /* Cinza */
-}
-.logout-button:hover {
-    background-color: #5a6268;
-}
-</style>
