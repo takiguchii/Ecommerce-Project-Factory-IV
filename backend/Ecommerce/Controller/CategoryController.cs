@@ -39,6 +39,19 @@ public class CategoryController : ControllerBase
         }
         return Ok(category);
     }
+    
+    [HttpPut("{id}")]
+    public IActionResult UpdateCategory(int id, [FromBody] CreateCategoryDto categoryDto)
+    {
+        var updatedCategory = _categoryService.UpdateCategory(id, categoryDto);
+
+        if (updatedCategory == null)
+        {
+            return NotFound($"Categoria com ID {id} não encontrada.");
+        }
+
+        return Ok(updatedCategory);
+    }
 
     [HttpDelete("{id}")]
     public IActionResult DeleteCategory(int id)

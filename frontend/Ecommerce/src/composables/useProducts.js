@@ -6,52 +6,56 @@ export function useProducts() {
   const error = ref(null);
   const loading = ref(false);
 
-  // Todos os produtos
+  const fetchProductsGridHomePage = async ({
+    categoryId = null,
+    subCategoryId = null,
+    brandId = null,
+    limit = null, 
+  } = {}) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const params = new URLSearchParams();
+      if (categoryId != null) params.append('categoryId', String(categoryId));
+      if (subCategoryId != null) params.append('subCategoryId', String(subCategoryId));
+      if (brandId != null) params.append('brandId', String(brandId));
+      if (limit != null) params.append('limit', String(limit)); 
+
+      const qs = params.toString();
+      const data = await apiGet(`/products/productsGridHomePage${qs ? `?${qs}` : ''}`);
+
+      products.value = Array.isArray(data) ? data : [];
+      
+    } catch (err) {
+      console.error('Error fetching products grid:', err);
+      error.value = 'Erro ao carregar produtos.';
+      products.value = [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const fetchProducts = async () => {
     loading.value = true;
     error.value = null;
     try {
       products.value = await apiGet('/products');
-      console.log('Products loaded:', products.value);
     } catch (err) {
       console.error('Error fetching products:', err);
       error.value = 'Erro ao carregar produtos. Tente novamente mais tarde.';
+      products.value = [];
     } finally {
       loading.value = false;
     }
   };
 
-  // Produtos por categoria
-  const fetchProductsByCategory = async (categoryId) => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const allProducts = await apiGet('/products');
-      products.value = (Array.isArray(allProducts) ? allProducts : [])
-        .filter(p => String(p.categoryId) === String(categoryId));
-    } catch (err) {
-      console.error('Error fetching products by category:', err);
-      error.value = 'Erro ao carregar produtos da categoria.';
-    } finally {
-      loading.value = false;
-    }
+  const fetchProductsByCategory = async (category_id, limit = null) => {
+    return fetchProductsGridHomePage({ categoryId: category_id, limit });
   };
 
-  // Produtos por marca
-  const fetchProductsByBrand = async (brandId) => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const allProducts = await apiGet('/products');
-      products.value = (Array.isArray(allProducts) ? allProducts : [])
-        .filter(p => String(p.brandId) === String(brandId));
-      console.log(`Produtos filtrados por marca ${brandId}:`, products.value);
-    } catch (err) {
-      console.error('Error fetching products by brand:', err);
-      error.value = 'Erro ao carregar produtos da marca.';
-    } finally {
-      loading.value = false;
-    }
+  const fetchProductsByBrand = async (brand_id, limit = null) => {
+    return fetchProductsGridHomePage({ brandId: brand_id, limit });
   };
 
   return {
@@ -59,6 +63,7 @@ export function useProducts() {
     error,
     loading,
     fetchProducts,
+    fetchProductsGridHomePage,
     fetchProductsByCategory,
     fetchProductsByBrand,
   };

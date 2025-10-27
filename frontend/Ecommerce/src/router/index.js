@@ -6,7 +6,12 @@ import RegisterView from '../views/RegisterView.vue';
 import ProductRegisterView from '../views/ProductRegisterView.vue';
 import ProductDetailView from '../views/ProductDetailView.vue';
 import SearchResultsView from '../views/SearchResultsView.vue';
-import AdminBrandView from '../views/AdminBrandView.vue';
+import AdminLayout from '../views/AdminLayoutView.vue';
+import AdminBrandView from '../views/AdminBrandView.vue'; // 
+import AdminProductView from '../views/AdminProductView.vue';
+import AdminCategoryView from '../views/AdminCategoryView.vue';
+import AdminSubCategoryView from '../views/AdminSubCategoryView.vue';
+import AdminProviderView from '../views/AdminProviderView.vue';
 import { jwtDecode } from 'jwt-decode';
 
 const router = createRouter({
@@ -54,58 +59,69 @@ const router = createRouter({
       name: 'search',
       component: SearchResultsView
     },
-
-    // --- Rota dos adms  ---
     {
-      path: '/admin/brands',
-      name: 'admin-brands',
-      component: AdminBrandView,
-      meta: { requiresAdmin: true }
+      path: '/admin',
+      component: AdminLayout, 
+      children: [
+        {
+          path: '', 
+          redirect: '/admin/brands' 
+        },
+        {
+          path: 'brands', 
+          name: 'admin-brands',
+          component: AdminBrandView 
+        },
+        {
+          path: 'products', 
+          name: 'admin-products',
+          component: AdminProductView 
+        },
+        {
+          path: 'categories', 
+          name: 'admin-categories',
+          component: AdminCategoryView 
+        },
+        {
+          path: 'subcategories', 
+          name: 'admin-subcategories',
+          component: AdminSubCategoryView 
+        },
+        {
+          path: 'providers', 
+          name: 'admin-providers',
+          component: AdminProviderView 
+        }
+      ]
     }
-    // --- FIM DA NOVA ROTA ADMIN ---
   ],
 });
 
-// INÍCIO DA PROTEÇÃO DE ROTA (Navigation Guard)
-// Este código será executado ANTES de cada mudança de rota
+
 router.beforeEach((to, from, next) => {
-  // Verifica se a rota destino (to) tem o meta campo 'requiresAdmin'
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
-  // Pega o token do localStorage
   const token = localStorage.getItem('authToken');
 
-  // Se a rota PRECISA de Admin...
   if (requiresAdmin) {
-    // ...e não tem token
     if (!token) {
-      // redireciona para o login.
       next({ name: 'login' });
     } else {
-      // tem token
       try {
-        // decodifica o token
         const decodedToken = jwtDecode(token);
-        // ...pega o perfil (role)...
         const userRole = decodedToken.role || decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
 
-        // verifica se é 'Admin'.
         if (userRole === 'Admin') {
-          // Se for Admin, permite continuar para a rota /admin/brands.
           next();
         } else {
-          // Se NÃO for Admin, redireciona para a Home.
           next({ name: 'home' });
         }
       } catch (e) {
-        // Se o token for inválido/expirado (erro no decode)...
         console.error("Erro ao decodificar token:", e);
-        localStorage.removeItem('authToken'); // Limpa o token inválido
-        // ...redireciona para o login.
+        localStorage.removeItem('authToken');
         next({ name: 'login' });
       }
     }
   } else {
-    // Se a rota NÃO precisa de Admin, permite continuar.
     next();
   }
 });

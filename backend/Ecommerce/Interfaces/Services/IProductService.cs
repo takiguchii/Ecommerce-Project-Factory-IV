@@ -12,11 +12,14 @@ public interface IProductService
     Product? GetProductById(int id);
     bool DeleteProduct(int id);
     List<Product> GetPromotions();
+    Product? UpdateProduct(int id, CreateProductDto productDto);
     //Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize);
     Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId);
     
     //Adicionando metodo da barra de pesquisa
     Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm);
-
+    
+    //method para filtrar produtos aleatorios da grid da homepage 
+    Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId);
 
 }

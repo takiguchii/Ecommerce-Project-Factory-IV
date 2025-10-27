@@ -9,4 +9,5 @@ public interface ICategoryService
     List<Category> GetAllCategories();
     Category? GetCategoryById(int id);
     bool DeleteCategory(int id);
+    Category? UpdateCategory(int id, CreateCategoryDto categoryDto);
 }

@@ -104,11 +104,11 @@ const displayed = computed(() => {
     ...p,
     coverImageUrl:
       p.coverImageUrl ||
-      p.imageUrl ||
-      p.additionalImageUrl1 ||
-      p.additionalImageUrl2 ||
-      p.additionalImageUrl3 ||
-      p.additionalImageUrl4 ||
+      p.image_url0 ||
+      p.additionalImage_url1 ||
+      p.additionalImage_url2 ||
+      p.additionalImage_url3 ||
+      p.additionalImage_url4 ||
       'https://placehold.co/400x400?text=Sem+Imagem'
   }))
 })

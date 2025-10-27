@@ -42,4 +42,22 @@ public class BrandService : IBrandService
         _brandRepository.SaveChanges();
         return true;
     }
+    // put da marca ( em teste ) 
+    public Brand? UpdateBrand(int id, CreateBrandDto brandDto)
+    {
+        var existingBrand = _brandRepository.GetById(id);
+
+        if (existingBrand == null)
+        {
+            return null;
+        }
+
+        existingBrand.name = brandDto.name;
+        existingBrand.brand_image_url = brandDto.brand_image_url;
+
+        _brandRepository.Update(existingBrand);
+        _brandRepository.SaveChanges();
+
+        return existingBrand;
+    }
 }

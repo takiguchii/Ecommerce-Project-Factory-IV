@@ -46,4 +46,27 @@ public class SubCategoryController : ControllerBase
         }
         return Ok(subCategory);
     }
+    [HttpPut("{id}")]
+    public IActionResult UpdateSubCategory(int id, [FromBody] CreateSubCategoryDto subCategoryDto)
+    {
+        var updatedSubCategory = _subCategoryService.UpdateSubCategory(id, subCategoryDto);
+
+        if (updatedSubCategory == null)
+        {
+            return NotFound($"Subcategoria com ID {id} não encontrada.");
+        }
+
+        return Ok(updatedSubCategory);
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteSubCategory(int id)
+    {
+        var success = _subCategoryService.DeleteSubCategory(id);
+        if (!success)
+        {
+            return NotFound($"Subcategoria com ID {id} não encontrada.");
+        }
+        return NoContent();
+    }
 }

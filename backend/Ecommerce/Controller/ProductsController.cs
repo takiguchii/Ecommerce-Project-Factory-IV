@@ -74,6 +74,34 @@ public class ProductsController : ControllerBase
         var suggestions = await _productService.GetSearchSuggestionsAsync(query);
         return Ok(suggestions);
     }
+    [HttpGet("productsGridHomePage")]
+    public async Task<ActionResult<List<Product>>> GetRandomProducts(
+        [FromQuery] int? categoryId = null,
+        [FromQuery] int? subCategoryId = null,
+        [FromQuery] int? brandId = null)
+    {
+        var products = await _productService.GetRandomProductsAsync(categoryId, subCategoryId, brandId);
+        
+        if (products == null || !products.Any())
+        {
+            return NotFound("Nenhum produto encontrado para os filtros aplicados.");
+        }
+        
+        return Ok(products);
+    }
+    
+    [HttpPut("{id}")]
+    public IActionResult UpdateProduct(int id, [FromBody] CreateProductDto productDto)
+    {
+        var updatedProduct = _productService.UpdateProduct(id, productDto);
+
+        if (updatedProduct == null)
+        {
+            return NotFound($"Produto com ID {id} não encontrado.");
+        }
+
+        return Ok(updatedProduct);
+    }
     
     [HttpDelete("{id}")]
     public IActionResult DeleteProduct(int id)

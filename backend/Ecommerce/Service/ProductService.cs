@@ -9,6 +9,8 @@ namespace Ecommerce.Service;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
+    private static readonly Random _random = new Random();
+
 
     public ProductService(IProductRepository productRepository)
     {
@@ -55,24 +57,81 @@ public class ProductService : IProductService
         _productRepository.SaveChanges();
         return true; 
     }
+    public Product? UpdateProduct(int id, CreateProductDto productDto)
+    {
+        var existingProduct = _productRepository.GetById(id);
+
+        if (existingProduct == null)
+        {
+            return null;
+        }
+
+        existingProduct.code = productDto.code;
+        existingProduct.name = productDto.name;
+        existingProduct.original_price = productDto.original_price;
+        existingProduct.discount_price = productDto.discount_price;
+        existingProduct.description = productDto.description;
+        existingProduct.technical_info = productDto.technical_info;
+        
+        existingProduct.image_url0 = productDto.image_url0;
+        existingProduct.image_url1 = productDto.image_url1;
+        existingProduct.image_url2 = productDto.image_url2;
+        existingProduct.image_url3 = productDto.image_url3;
+        existingProduct.image_url4 = productDto.image_url4;
+        
+        existingProduct.category_id = productDto.category_id;
+        existingProduct.sub_category_id = productDto.sub_category_id;
+        existingProduct.brand_id = productDto.brand_id;
+        existingProduct.provider_id = productDto.provider_id;
+
+        _productRepository.Update(existingProduct);
+        _productRepository.SaveChanges();
+
+        return existingProduct;
+    }
     public List<Product> GetPromotions()
     {
-        return _productRepository.GetPromotions();
+
+        var potentialPromotions = _productRepository.GetPromotions();
+        
+        var actualPromotions = potentialPromotions
+            .Where(p => p.original_price != null && p.discount_price != null)
+            .ToList();
+
+        var shuffledPromotions = actualPromotions.OrderBy(p => _random.Next());
+        
+        var selectedPromotions = shuffledPromotions.Take(12).ToList();
+
+        return selectedPromotions;
     }
     public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
     {
         return await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
     }
   
-        public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm)
-        {
-            const int suggestionLimit = 5; // Limitandoo a sugestão para 5 itens 
+    public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm)
+    {
+        const int suggestionLimit = 5; // Limitandoo a sugestão para 5 itens 
             
-            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) // Definindo o limite para aparecer a sugestão ( só aprece depois de 3 caracters )
-            {
-                return new List<ProductSearchSuggestionDto>(); 
-            }
-    
-            return await _productRepository.GetSearchSuggestionsAsync(searchTerm, suggestionLimit);
+        if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) // Definindo o limite para aparecer a sugestão ( só aprece depois de 3 caracters )
+        { 
+            return new List<ProductSearchSuggestionDto>(); 
         }
+    
+        return await _productRepository.GetSearchSuggestionsAsync(searchTerm, suggestionLimit);
     }
+    public async Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId)
+    {
+        const int productLimit = 12;
+
+        var filteredProducts = await _productRepository.GetFilteredProductsAsync(categoryId, subCategoryId, brandId);
+        
+        var shuffledProducts = filteredProducts.OrderBy(p => _random.Next());
+        
+        // pega os primeiros 12.
+        var selectedProducts = shuffledProducts.Take(productLimit).ToList();
+
+        return selectedProducts;
+    }
+}
+

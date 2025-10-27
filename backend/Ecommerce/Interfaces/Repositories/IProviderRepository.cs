@@ -9,4 +9,6 @@ public interface IProviderRepository
     Provider? GetById(int id);
     Provider? GetByCnpj(string cnpj); 
     void SaveChanges();
+    void Delete(Provider provider);
+    void Update(Provider provider);
 }
