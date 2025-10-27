@@ -1,4 +1,3 @@
-// src/services/api.js
 import axios from 'axios';
 
 
@@ -10,18 +9,15 @@ const api = axios.create({
   }
 });
 
-// Interceptor para adicionar o token JWT automaticamente
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken'); // Busca o token
+    const token = localStorage.getItem('authToken');
     if (token) {
-      // Se existir, adiciona ao cabeçalho Authorization
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-    return config; // Continua a requisição
+    return config; 
   },
   (error) => {
-    // Se houver erro na configuração da requisição
     return Promise.reject(error);
   }
 );
@@ -99,6 +95,10 @@ export function createBrand(brandData) {
 
 export function deleteBrand(brandId) {
   return api.delete(`/brands/${brandId}`);
+}
+
+export function updateBrand(brandId, brandData) {
+  return api.put(`/brands/${brandId}`, brandData);
 }
 
 export default api;

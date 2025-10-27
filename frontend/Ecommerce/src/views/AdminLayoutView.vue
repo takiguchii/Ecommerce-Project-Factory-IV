@@ -1,15 +1,15 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 
-const navLinkClass = "block py-1.5 px-2 rounded-md no-underline text-gray-700 font-semibold hover:bg-gray-200 hover:text-gray-900 aria-[current=page]:text-blue-600 aria-[current=page]:bg-blue-50";
+const navLinkClass = "block py-2 px-3 rounded-md no-underline text-gray-300 font-medium hover:bg-gray-700 hover:text-white transition-colors duration-150 aria-[current=page]:text-white aria-[current=page]:bg-orange-600";
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gray-50">
+  <div class="flex min-h-screen bg-gray-900">
     
-    <aside class="w-56 flex-shrink-0 bg-white p-4 border-r border-gray-200">
+    <aside class="w-56 flex-shrink-0 bg-gray-800 p-4 pt-20 border-r border-gray-700">
       
-      <h2 class="text-xl font-bold mb-5 px-2 text-gray-900">
+      <h2 class="text-xl font-bold mb-5 px-2 text-gray-100">
         Painel Admin
       </h2>
 
@@ -44,12 +44,9 @@ const navLinkClass = "block py-1.5 px-2 rounded-md no-underline text-gray-700 fo
       </nav>
     </aside>
     
-    <main class="flex-1 p-6">
+    <main class="flex-1">
       <router-view />
     </main>
     
   </div>
 </template>
-
-<style scoped>
-</style>
