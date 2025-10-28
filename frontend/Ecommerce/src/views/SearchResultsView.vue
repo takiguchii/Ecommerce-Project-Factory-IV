@@ -1,4 +1,6 @@
-<script setup>
+<template></template>
+
+<!-- <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ProductCardComponent from '@/components/ProductCardComponent.vue'
@@ -8,27 +10,21 @@ const route = useRoute()
 const router = useRouter()
 
 /* ----------------- Estado ----------------- */
-const results = ref([])           // itens (quando vier array) OU última página (quando vier paginado)
+const results = ref([])
 const loading = ref(false)
 const error = ref(null)
 
 const pageNumber = ref( Number(route.query.page ?? 1) )
 const pageSize   = ref( Number(route.query.size ?? 16) )
 
-const serverTotalCount = ref(null) // se backend informar, usamos
+const serverTotalCount = ref(null)
 const serverTotalPages = ref(null)
 
 const q = computed(() => String(route.query.q ?? '').trim())
 
-/* ----------------- Helpers comuns ----------------- */
+/* ----------------- Helpers ----------------- */
 const KABUM_HOST = 'https://www.kabum.com.br'
-
-function fixUrl(u) {
-  if (!u || typeof u !== 'string') return null
-  if (u.startsWith('http')) return u
-  if (u.startsWith('/')) return `${KABUM_HOST}${u}`
-  return u
-}
+const fixUrl = (u) => (!u || typeof u !== 'string') ? null : u.startsWith('http') ? u : (u.startsWith('/') ? `${KABUM_HOST}${u}` : u)
 
 function parsePrice(raw) {
   if (raw === undefined || raw === null) return null
@@ -40,9 +36,7 @@ function parsePrice(raw) {
   }
   return null
 }
-function toBRL(n) {
-  return n === null ? '' : n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+const toBRL = (n) => (n === null ? '' : n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }))
 
 function normalizeProduct(p = {}) {
   const imgs = [
@@ -66,34 +60,22 @@ function normalizeProduct(p = {}) {
     id, code, name,
     coverImageUrl,
     imageUrl: coverImageUrl,
-
     original_price,
     discount_price,
     originalPrice: original_price,
     discountPrice: discount_price,
-
     originalPriceBRL: toBRL(original_price),
     discountPriceBRL: toBRL(discount_price),
-
     stars, rating,
   }
 }
 
-/* ----------------- Derivados de UI ----------------- */
-// Quando vier paginação do backend, usamos os totais dele; senão, calculamos pelo array
-const totalCount = computed(() => {
-  if (serverTotalCount.value != null) return serverTotalCount.value
-  return results.value.length
-})
-const totalPages = computed(() => {
-  if (serverTotalPages.value != null) return serverTotalPages.value
-  return Math.max(1, Math.ceil(totalCount.value / pageSize.value))
-})
+/* ----------------- Derivados ----------------- */
+const totalCount = computed(() => serverTotalCount.value ?? results.value.length)
+const totalPages = computed(() => serverTotalPages.value ?? Math.max(1, Math.ceil(totalCount.value / pageSize.value)))
 
 const displayed = computed(() => {
-  // Backend paginado já devolve os itens da página; só retornamos.
   if (serverTotalPages.value != null) return results.value
-  // Fallback: paginação no cliente
   const start = (pageNumber.value - 1) * pageSize.value
   return results.value.slice(start, start + pageSize.value)
 })
@@ -116,7 +98,7 @@ function goToPage(p) {
   fetchSearch()
 }
 
-/* ----------------- Fetch (paginado + fallback) ----------------- */
+/* ----------------- Fetch ----------------- */
 async function fetchSearch() {
   if (!q.value) {
     results.value = []
@@ -129,36 +111,25 @@ async function fetchSearch() {
   error.value = null
 
   try {
-    // 1) Tenta rota paginada do backend
     const url = `/products/search?query=${encodeURIComponent(q.value)}&pageNumber=${pageNumber.value}&pageSize=${pageSize.value}`
     const data = await apiGet(url)
 
-    // Suporte a formatos comuns: { items, totalCount, totalPages } ou { data, total, pages }
-    const items =
-      data?.items ??
-      data?.data ??
-      (Array.isArray(data) ? data : [])
-
-    const normalized = items.map(normalizeProduct)
-    results.value = normalized
+    const items = data?.items ?? data?.data ?? (Array.isArray(data) ? data : [])
+    results.value = items.map(normalizeProduct)
 
     const tCount = data?.totalCount ?? data?.total ?? null
     const tPages = data?.totalPages ?? data?.pages ?? null
-
     serverTotalCount.value = (typeof tCount === 'number') ? tCount : null
     serverTotalPages.value = (typeof tPages === 'number') ? tPages : null
 
-    // Se veio array puro, considera fallback de paginação cliente
     if (Array.isArray(data)) {
       serverTotalCount.value = null
       serverTotalPages.value = null
     }
   } catch (err1) {
     try {
-      // 2) Fallback: rota de sugestões (array simples)
       const arr = await apiGet(`/products/search-suggestions?query=${encodeURIComponent(q.value)}`)
-      const normalized = (Array.isArray(arr) ? arr : []).map(normalizeProduct)
-      results.value = normalized
+      results.value = (Array.isArray(arr) ? arr : []).map(normalizeProduct)
       serverTotalCount.value = null
       serverTotalPages.value = null
     } catch (err2) {
@@ -189,6 +160,23 @@ function changePageSize(val) {
   pushQuery()
   fetchSearch()
 }
+
+/* --- Paginação dinâmica igual às outras telas --- */
+const visiblePages = computed(() => {
+  const delta = 2 // mostra 2 antes e 2 depois
+  const pages = []
+  const start = Math.max(1, pageNumber.value - delta)
+  const end = Math.min(totalPages.value, pageNumber.value + delta)
+  for (let i = start; i <= end; i++) pages.push(i)
+
+  if (start > 1) pages.unshift('...')
+  if (end < totalPages.value) pages.push('...')
+  if (!pages.includes(1)) pages.unshift(1)
+  if (!pages.includes(totalPages.value)) pages.push(totalPages.value)
+
+  // remove duplicados acidentais
+  return pages.filter((v, i, a) => a.indexOf(v) === i)
+})
 
 function handleAddToCart(prod) {
   console.log('Adicionar ao carrinho:', prod)
@@ -238,6 +226,7 @@ function handleAddToCart(prod) {
 
         <div v-else class="text-neutral-300">Nenhum produto encontrado para "{{ q }}".</div>
 
+        <!-- Paginação (padrão das outras telas) 
         <div v-if="totalPages > 1" class="mt-8 flex flex-wrap items-center justify-center gap-2">
           <button
             class="px-3 py-2 rounded bg-neutral-900 border border-neutral-700 text-sm disabled:opacity-50"
@@ -245,13 +234,15 @@ function handleAddToCart(prod) {
             @click="goToPage(pageNumber - 1)"
           >Anterior</button>
 
-          <button
-            v-for="p in Math.min(totalPages, 7)"
-            :key="`p-${p}`"
-            class="px-3 py-2 rounded border text-sm"
-            :class="p === pageNumber ? 'bg-orange-500 border-orange-500 text-black' : 'bg-neutral-900 border-neutral-700'"
-            @click="goToPage(p)"
-          >{{ p }}</button>
+          <template v-for="(p, idx) in visiblePages" :key="idx">
+            <button
+              v-if="p !== '...'"
+              class="px-3 py-2 rounded border text-sm"
+              :class="p === pageNumber ? 'bg-orange-500 border-orange-500 text-black' : 'bg-neutral-900 border-neutral-700'"
+              @click="goToPage(p)"
+            >{{ p }}</button>
+            <span v-else class="px-2 text-neutral-400">…</span>
+          </template>
 
           <button
             class="px-3 py-2 rounded bg-neutral-900 border border-neutral-700 text-sm disabled:opacity-50"
@@ -262,4 +253,4 @@ function handleAddToCart(prod) {
       </div>
     </div>
   </div>
-</template>
+</template> -->
