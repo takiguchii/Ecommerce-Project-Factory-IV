@@ -15,11 +15,24 @@ namespace Ecommerce.Data.Context
         public DbSet<SubCategory> SubCategories { get; set; }
         public DbSet<Provider> Providers { get; set; }
         public DbSet<Brand> Brands { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("user_profile"); 
+                entity.HasKey(u => u.Id);
+                
+                entity.HasOne(u => u.AppUser)
+                    .WithOne() 
+                    .HasForeignKey<User>(u => u.AppUserId)
+                    .IsRequired();
+                
+                entity.HasIndex(u => u.AppUserId).IsUnique();
+            });
             modelBuilder.Entity<Brand>(entity =>
             {
                 entity.ToTable("brand");
