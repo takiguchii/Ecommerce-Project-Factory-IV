@@ -11,7 +11,6 @@ export function useProfile() {
     isLoading.value = true;
     error.value = null;
     try {
-      // CORREÇÃO AQUI
       const response = await api.get('/user/profile'); // Removido o /api
       
       profile.value = response.data;
@@ -28,7 +27,6 @@ export function useProfile() {
     isLoading.value = true;
     error.value = null;
     try {
-      // E CORREÇÃO AQUI
       const response = await api.put('/user/profile', profile.value); // Removido o /api
       
       profile.value = response.data;
