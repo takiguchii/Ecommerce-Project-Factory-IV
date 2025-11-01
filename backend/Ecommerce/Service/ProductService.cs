@@ -1,8 +1,8 @@
 using Ecommerce.Dto;
 using Ecommerce.Entity;
-using Ecommerce.Interfaces;
 using Ecommerce.Interfaces.Repositories; 
 using Ecommerce.DTOs;
+using Ecommerce.Interfaces.Services;
 
 namespace Ecommerce.Service;
 
@@ -10,32 +10,69 @@ public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
     private static readonly Random _random = new Random();
-
-
-    public ProductService(IProductRepository productRepository)
+    
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly ISubCategoryRepository _subCategoryRepository;
+    private readonly IBrandRepository _brandRepository;
+    private readonly IProviderRepository _providerRepository;
+    
+    public ProductService(IProductRepository productRepository, 
+                          ICategoryRepository categoryRepository, 
+                          ISubCategoryRepository subCategoryRepository, 
+                          IBrandRepository brandRepository, 
+                          IProviderRepository providerRepository)
     {
         _productRepository = productRepository;
+        _categoryRepository = categoryRepository;
+        _subCategoryRepository = subCategoryRepository;
+        _brandRepository = brandRepository;
+        _providerRepository = providerRepository;
     }
-
-    public Product CreateProduct(CreateProductDto productDto)
+    
+    public Product? CreateProduct(CreateProductDto productDto)
     {
+
+        var category = _categoryRepository.GetById(productDto.category_id);
+        if (category == null) return null;
+
+        var brand = _brandRepository.GetById(productDto.brand_id);
+        if (brand == null) return null; 
+
+        var provider = _providerRepository.GetById(productDto.provider_id);
+        if (provider == null) return null; 
+
+        if (productDto.sub_category_id != null && productDto.sub_category_id.Value != 0)
+        {
+            var subCategory = _subCategoryRepository.GetById(productDto.sub_category_id.Value);
+            if (subCategory == null) return null; 
+        }
+
         var newProduct = new Product
         {
             name = productDto.name,
+            code = productDto.code, 
             image_url0 = productDto.image_url0,
+            image_url1 = productDto.image_url1, 
+            image_url2 = productDto.image_url2, 
+            image_url3 = productDto.image_url3, 
+            image_url4 = productDto.image_url4, 
             original_price = productDto.original_price,
             discount_price = productDto.discount_price,
             description = productDto.description,
             technical_info = productDto.technical_info,
-
+            // IDs
+            category_id = productDto.category_id,
+            sub_category_id = productDto.sub_category_id,
+            brand_id = productDto.brand_id,
+            provider_id = productDto.provider_id,
         };
 
         _productRepository.Add(newProduct);
-        _productRepository.SaveChanges();
+        _productRepository.SaveChanges(); 
 
         return newProduct;
     }
-
+    
     public List<Product> GetAllProducts()
     {
         return _productRepository.GetAll();
@@ -57,6 +94,7 @@ public class ProductService : IProductService
         _productRepository.SaveChanges();
         return true; 
     }
+    
     public Product? UpdateProduct(int id, CreateProductDto productDto)
     {
         var existingProduct = _productRepository.GetById(id);
@@ -64,6 +102,21 @@ public class ProductService : IProductService
         if (existingProduct == null)
         {
             return null;
+        }
+
+        var category = _categoryRepository.GetById(productDto.category_id);
+        if (category == null) return null; 
+
+        var brand = _brandRepository.GetById(productDto.brand_id);
+        if (brand == null) return null; 
+
+        var provider = _providerRepository.GetById(productDto.provider_id);
+        if (provider == null) return null; 
+
+        if (productDto.sub_category_id != null && productDto.sub_category_id.Value != 0)
+        {
+            var subCategory = _subCategoryRepository.GetById(productDto.sub_category_id.Value);
+            if (subCategory == null) return null; 
         }
 
         existingProduct.code = productDto.code;
@@ -89,9 +142,9 @@ public class ProductService : IProductService
 
         return existingProduct;
     }
+    
     public List<Product> GetPromotions()
     {
-
         var potentialPromotions = _productRepository.GetPromotions();
         
         var actualPromotions = potentialPromotions
@@ -104,6 +157,8 @@ public class ProductService : IProductService
 
         return selectedPromotions;
     }
+    
+    //paginação
     public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
     {
         return await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
@@ -134,4 +189,3 @@ public class ProductService : IProductService
         return selectedProducts;
     }
 }
-

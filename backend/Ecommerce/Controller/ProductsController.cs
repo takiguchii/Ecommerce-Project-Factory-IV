@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Ecommerce.Dto;
 using Ecommerce.Entity;
-using Ecommerce.Interfaces;
+using Ecommerce.Interfaces; 
 using Ecommerce.DTOs; 
+using System.Linq; 
+using System.Threading.Tasks;
+using Ecommerce.Interfaces.Services; 
 
-namespace Ecommerce.Api.Controllers;
+namespace Ecommerce.Api.Controllers; 
 
 [ApiController]
 [Route("api/products")]
@@ -22,6 +25,11 @@ public class ProductsController : ControllerBase
     {
         var product = _productService.CreateProduct(productDto);
         
+        if (product == null)
+        {
+            return BadRequest(new { message = "Não foi possível criar o produto. Um dos IDs (Categoria, SubCategoria, Marca ou Fornecedor) é inválido." });
+        }
+
         return CreatedAtAction(nameof(GetProductById), new { id = product.id }, product);
     }
 
@@ -44,6 +52,7 @@ public class ProductsController : ControllerBase
         var products = _productService.GetAllProducts();
         return Ok(products);
     }
+    
     [HttpGet("promotions")] 
     public IActionResult GetPromotions()
     {
@@ -59,21 +68,23 @@ public class ProductsController : ControllerBase
         [FromQuery] int? subCategoryId = null,
         [FromQuery] int? brandId = null)
     {
-        var products = await _productService.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
+        var result = await _productService.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
         
-        if (products == null || !products.Items.Any())
+        if (result.TotalCount == 0)
         {
             return NotFound("Nenhum produto encontrado para os filtros aplicados.");
         }
         
-        return Ok(products);
+        return Ok(result);
     }
+    
     [HttpGet("search-suggestions")]
     public async Task<IActionResult> GetSearchSuggestions([FromQuery] string query)
     {
         var suggestions = await _productService.GetSearchSuggestionsAsync(query);
         return Ok(suggestions);
     }
+    
     [HttpGet("productsGridHomePage")]
     public async Task<ActionResult<List<Product>>> GetRandomProducts(
         [FromQuery] int? categoryId = null,
@@ -97,7 +108,7 @@ public class ProductsController : ControllerBase
 
         if (updatedProduct == null)
         {
-            return NotFound($"Produto com ID {id} não encontrado.");
+            return NotFound($"Produto com ID {id} não encontrado ou um dos IDs de Categoria/Marca é inválido.");
         }
 
         return Ok(updatedProduct);
@@ -113,5 +124,4 @@ public class ProductsController : ControllerBase
         }
         return NoContent(); 
     }
-
 }

@@ -30,13 +30,12 @@ builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
 builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<EcommerceDbContext>()
     .AddDefaultTokenProviders();
-
 // Autenticação Jwt
 builder.Services.AddAuthentication(options =>
 {
@@ -58,7 +57,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllers();
+//Corrigindo verificação do json do swagger para evitar aquele erro lá do 500 do post 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
@@ -150,6 +154,7 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "Ocorreu um erro durante a inicialização (seed).");
     }
 }
+
 
 if (app.Environment.IsDevelopment())
 {
