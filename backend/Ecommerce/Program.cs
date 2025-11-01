@@ -57,7 +57,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Adicionar erro de json 
+//Corrigindo verificação do json do swagger para evitar aquele erro lá do 500 do post 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
