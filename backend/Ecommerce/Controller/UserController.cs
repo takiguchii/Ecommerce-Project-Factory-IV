@@ -9,7 +9,7 @@ namespace Ecommerce.Api.Controllers
 {
     [ApiController]
     [Route("api/user")]
-    [Authorize] // Este controller SÓ funciona para usuários logados
+    [Authorize] 
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -18,11 +18,8 @@ namespace Ecommerce.Api.Controllers
         {
             _userService = userService;
         }
-
-        // Pega o ID (GUID) do usuário que está no Token JWT
         private string GetCurrentAppUserId()
         {
-            // O NameIdentifier é o 'user.Id' que vamos adicionar ao token
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
         
