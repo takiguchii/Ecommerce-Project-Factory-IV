@@ -146,7 +146,9 @@
                 class="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-neutral-700/40 bg-neutral-900/95 shadow-xl ring-1 ring-black/5 z-[70] backdrop-blur focus:outline-none"
                 role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                 <div class="py-1" role="none">
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-neutral-800/60 hover:text-orange-400 rounded-lg transition-colors" role="menuitem" tabindex="-1">Meu Perfil</a>
+                  <router-link to="/profile">
+                  <a href="" class="block px-4 py-2 text-sm text-gray-300 hover:bg-neutral-800/60 hover:text-orange-400 rounded-lg transition-colors" role="menuitem" tabindex="-1">Meu Perfil</a>
+                  </router-link>
                   <RouterLink
                     v-if="user?.role === 'Admin'"
                     to="/admin/brands"
@@ -188,6 +190,7 @@ const userMenuDropdown = ref(null)
 const toggleUserMenu = () => { isUserMenuOpen.value = !isUserMenuOpen.value }
 const handleLogout = () => { isUserMenuOpen.value = false; logout() }
 
+
 /* --- departamentos --- */
 const isDepartmentsOpen = ref(false)
 const hoveredCategoryId = ref(null)
@@ -204,7 +207,9 @@ const hideSubcategories = () => {
 }
 
 /* --- categorias --- */
-const { categories, fetchCategories, subcategories, fetchSubCategories } = useCategories()
+// [INÍCIO DA CORREÇÃO] - Pausando o que não existe no useCategories.js
+const { categories, fetchCategories, /* subcategories, fetchSubCategories */ } = useCategories()
+// [FIM DA CORREÇÃO]
 
 /* --- busca/sugestões --- */
 const searchRoot = ref(null)
@@ -238,13 +243,11 @@ async function fetchSuggestions() {
   loadingSuggestions.value = true
   highlighted.value = -1
   try {
-    // endpoint corrigido (seguindo o projeto): /products/search-suggestions?query=
     const res = await apiGet(`/products/search-suggestions?query=${encodeURIComponent(term)}`)
     const arr = Array.isArray(res) ? res : []
     suggestions.value = arr.map(normalizeItem).slice(0, 10)
     showSuggestions.value = true
   } catch (e) {
-    // fallback opcional: tenta rota antiga /products/suggestions?q=
     try {
       const res2 = await apiGet(`/products/suggestions?q=${encodeURIComponent(term)}`)
       const arr2 = Array.isArray(res2) ? res2 : []
@@ -336,7 +339,9 @@ function onDocPointerDown(e) {
 const isMobileMenuOpen = ref(false)
 onMounted(async () => {
   await fetchCategories()
-  await fetchSubCategories()
+  // [INÍCIO DA CORREÇÃO] - Pausando a chamada da função que não existe
+  // await fetchSubCategories() 
+  // [FIM DA CORREÇÃO]
   document.addEventListener('pointerdown', onDocPointerDown, { capture: true })
 })
 onBeforeUnmount(() => {
