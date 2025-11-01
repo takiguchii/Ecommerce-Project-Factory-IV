@@ -57,7 +57,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllers();
+// Adicionar erro de json 
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
@@ -149,6 +150,7 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "Ocorreu um erro durante a inicialização (seed).");
     }
 }
+
 
 if (app.Environment.IsDevelopment())
 {
