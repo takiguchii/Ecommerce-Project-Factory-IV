@@ -11,7 +11,7 @@ export function useProfile() {
     isLoading.value = true;
     error.value = null;
     try {
-      const response = await api.get('/user/profile'); // Removido o /api
+      const response = await api.get('/user/profile'); 
       
       profile.value = response.data;
       
