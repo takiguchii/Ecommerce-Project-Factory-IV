@@ -7,7 +7,7 @@
         <p class="text-sm text-neutral-100 mt-2">Complete seus dados para agilizar suas futuras compras.</p>
       </header>
 
-      <!-- Alerts -->
+      <!-- Alerts  -->
       <div v-if="isLoading"
         class="mb-4 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-200 px-4 py-3 shadow" role="alert">
         <span class="font-medium">Carregando dados…</span>
