@@ -3,10 +3,23 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCategories } from '@/composables/useCategories'
 import { useProducts } from '@/composables/useProducts'
+import hardwareImage from '@/assets/images/hardwareimage.webp'
+import perfericos from '@/assets/images/perfericos.webp'
+import celulares from '@/assets/images/image.webp'
+import computadores from '@/assets/images/computadores.webp'
+import casaInteligente from '@/assets/images/casaInteligente.webp'
 
 const { categories, loading, error, fetchCategories } = useCategories()
 const { fetchProductsGridHomePage } = useProducts()
-
+const images = {
+  id: {
+    1: hardwareImage,
+    2: computadores,
+    3: casaInteligente,
+    4: celulares,
+    5: perfericos,
+  },
+}
 const router = useRouter()
 
 onMounted(() => {
@@ -26,34 +39,47 @@ async function goToCategory(category_id) {
         Navegue por Departamentos
       </h2>
 
+      <!-- Estados -->
       <div v-if="loading" class="text-center text-orange-200">Carregando...</div>
-      <div v-if="error" class="text-center text-red-400">Erro ao carregar departamentos.</div>
+      <div v-else-if="error" class="text-center text-red-400">
+        Erro ao carregar departamentos.
+      </div>
 
+      <!-- Grid Centralizado -->
       <div
-        v-if="!loading && categories.length"
-        class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4"
+        v-else-if="categories.length"
+        class="mx-auto max-w-[1100px]"
       >
         <div
-          v-for="category in categories"
-          :key="category.id"
-          @click="goToCategory(category.id)"
-          class="cursor-pointer group flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-neutral-800 transition-colors"
+          class="grid [grid-template-columns:repeat(auto-fit,minmax(140px,1fr))] gap-6 place-items-center"
         >
           <div
-            class="w-24 h-24 rounded-full bg-neutral-800 group-hover:bg-neutral-700 border-2 border-transparent group-hover:border-orange-500 transition-all duration-300 flex items-center justify-center overflow-hidden"
+            v-for="category in categories"
+            :key="category.id"
+            @click="goToCategory(category.id)"
+            class="cursor-pointer group flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-neutral-800 transition-colors"
           >
-            <img
-              :src="'https://ui-avatars.com/api/?name=' + encodeURIComponent(category.name)"
-              :alt="category.name"
-              class="w-24 h-24 object-contain"
-            />
-          </div>
+            <div
+              class="w-24 h-24 rounded-full bg-neutral-800 group-hover:bg-neutral-700 border-2 border-transparent group-hover:border-orange-500 transition-all duration-300 flex items-center justify-center overflow-hidden"
+            >
+              <img
+                :src="images.id[category.id]"
+                :alt="category.name"
+                class="w-24 h-24 object-contain"
+              />
+            </div>
 
-          <span
-            class="text-sm font-medium text-gray-300 group-hover:text-orange-400 transition-colors"
-            >{{ category.name }}</span
-          >
+            <span
+              class="text-sm font-medium text-gray-300 group-hover:text-orange-400 transition-colors text-center"
+            >
+              {{ category.name }}
+            </span>
+          </div>
         </div>
+      </div>
+
+      <div v-else class="text-center text-neutral-400">
+        Nenhum departamento encontrado.
       </div>
     </div>
   </section>

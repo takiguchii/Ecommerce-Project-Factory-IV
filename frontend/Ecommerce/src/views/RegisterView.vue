@@ -30,13 +30,42 @@
 
           <div class="space-y-1.5">
             <label class="block text-sm text-neutral-300">Senha</label>
-            <div class="relative">
-              <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                <svg class="w-5 h-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="11" width="16" height="9" rx="2" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 11V8a4 4 0 118 0v3"/></svg>
+            <div class="relative flex items-center">
+              <span class="absolute left-3 flex items-center justify-center h-full pointer-events-none">
+                <svg
+                  class="w-5 h-5 text-neutral-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <rect
+                    x="4"
+                    y="11"
+                    width="16"
+                    height="9"
+                    rx="2"
+                    stroke-width="1.8"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.8"
+                    d="M8 11V8a4 4 0 118 0v3"
+                  />
+                </svg>
               </span>
-              <input v-model="form.password" type="password" placeholder="********" required class="w-full rounded-xl bg-neutral-800/80 border border-neutral-700 pl-10 pr-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"/>
-              <p class="text-xs text-neutral-400 mt-1 pl-1">Mínimo 6 caracteres, maiúscula, minúscula, número e símbolo (ex: !@#$).</p>
+
+              <input
+                v-model="form.password"
+                type="password"
+                placeholder="********"
+                required
+                class="w-full rounded-xl bg-neutral-800/80 border border-neutral-700 pl-10 pr-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+              />
             </div>
+            <p class="text-xs text-neutral-400 mt-1 pl-1">
+              Mínimo 6 caracteres, maiúscula, minúscula, número e símbolo (ex: !@#$).
+            </p>
           </div>
 
           <div class="space-y-1.5">

@@ -3,11 +3,17 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import promoImage1 from '@/assets/images/promo1.webp';
 import promoImage2 from '@/assets/images/promo2.webp';
 import promoImage3 from '@/assets/images/promo3.webp';
+import banner4 from '@/assets/images/banner4.webp';
+import banner5 from '@/assets/images/banner5.webp';
+import banner6 from '@/assets/images/banner6.webp';
 
 const promotions = ref([
-  { id: 1, src: promoImage1, alt: 'Promoção de Hardware' },
-  { id: 2, src: promoImage2, alt: 'Ofertas em Periféricos' },
-  { id: 3, src: promoImage3, alt: 'Descontos em Notebooks' },
+  //{ id: 1, src: promoImage1, alt: 'Promoção de Hardware' },
+  //{ id: 2, src: promoImage2, alt: 'Ofertas em Periféricos' },
+  //{ id: 3, src: promoImage3, alt: 'Descontos em Notebooks' },
+  { id: 4, src: banner4, alt: 'banner4' },
+  { id: 5, src: banner5, alt: 'banner5' },
+  { id: 6, src: banner6, alt: 'banner6' },
 ]);
 
 const activeIndex = ref(0);

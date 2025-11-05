@@ -10,7 +10,6 @@ const route = useRoute()
 const { fetchBrandById } = useBrands()
 const { products, loading: loadingLegacy, error: errorLegacy, fetchProductsByBrand } = useProducts()
 
-// Estado
 const brandName = ref('Marca')
 const brandLogo = ref(null)
 
@@ -18,13 +17,11 @@ const loading = ref(false)
 const error = ref(null)
 const pagedItems = ref([])
 
-// Paginação
 const pageNumber = ref(1)
 const pageSize = ref(16)
 const totalPages = ref(1)
 const totalCount = ref(0)
 
-// Nome/Logo da marca
 async function loadBrand() {
   try {
     const b = await fetchBrandById(route.params.id)
@@ -36,7 +33,6 @@ async function loadBrand() {
   }
 }
 
-// Chamada preferencial: /products/filter?brandId=...
 async function fetchFromFilter() {
   loading.value = true
   error.value = null
@@ -49,17 +45,13 @@ async function fetchFromFilter() {
 
   try {
     const data = await apiGet(`/products/filter?${qs}`)
-
     const list = Array.isArray(data) ? data : (data?.items ?? [])
     pagedItems.value = list
-
     totalPages.value = Number(
       data?.totalPages ??
       Math.max(1, Math.ceil((data?.totalCount ?? list.length) / pageSize.value))
     )
     totalCount.value = Number(data?.totalCount ?? list.length)
-
-    // se vier vazio, cai pro fallback para não quebrar
     if (!list.length) await fetchLegacy()
   } catch (e) {
     await fetchLegacy()
@@ -69,24 +61,19 @@ async function fetchFromFilter() {
   }
 }
 
-// Fallback: busca todos e filtra no cliente (useProducts)
 async function fetchLegacy() {
   try {
     await fetchProductsByBrand(route.params.id)
     totalCount.value = products.value.length
     totalPages.value = Math.max(1, Math.ceil(products.value.length / pageSize.value))
-  } catch (_) {
-    // mantém erro do legacy se houver
-  }
+  } catch (_) {}
 }
 
-// Carregar tudo
 async function loadAll() {
   pageNumber.value = 1
   await Promise.all([loadBrand(), fetchFromFilter()])
 }
 
-// Lifecycle
 onMounted(loadAll)
 watch(() => route.params.id, async () => {
   await loadAll()
@@ -97,7 +84,6 @@ watch([pageNumber, pageSize], async () => {
   window.scrollTo({ top: 0, behavior: 'auto' })
 })
 
-// Lista exibida (normaliza coverImageUrl)
 const displayed = computed(() => {
   const list = pagedItems.value?.length ? pagedItems.value : (() => {
     const start = (pageNumber.value - 1) * pageSize.value
@@ -124,13 +110,31 @@ function goToPage(p) {
 
 const showingRange = computed(() => {
   const start = (pageNumber.value - 1) * pageSize.value + 1
-  const end = Math.min(pageNumber.value * pageSize.value, totalCount.value || (pageNumber.value * pageSize.value))
+  const end = Math.min(pageNumber.value * pageSize.value, totalCount.value)
   return { start, end }
 })
 
 function handleAddToCart(prod) {
   console.log('Adicionar ao carrinho:', prod)
 }
+
+/* --- Paginação dinâmica (como na CategoryView) --- */
+const visiblePages = computed(() => {
+  const delta = 2 // mostra 2 páginas antes e 2 depois da atual
+  const pages = []
+  const start = Math.max(1, pageNumber.value - delta)
+  const end = Math.min(totalPages.value, pageNumber.value + delta)
+
+  for (let i = start; i <= end; i++) pages.push(i)
+
+  // Adiciona reticências se necessário
+  if (start > 1) pages.unshift('...')
+  if (end < totalPages.value) pages.push('...')
+  if (!pages.includes(1)) pages.unshift(1)
+  if (!pages.includes(totalPages.value)) pages.push(totalPages.value)
+
+  return pages.filter((v, i, a) => a.indexOf(v) === i)
+})
 </script>
 
 <template>
@@ -197,15 +201,18 @@ function handleAddToCart(prod) {
           >
             Anterior
           </button>
-          <button
-            v-for="p in Math.min(totalPages, 7)"
-            :key="`p-${p}`"
-            class="px-3 py-2 rounded border text-sm"
-            :class="p === pageNumber ? 'bg-orange-500 border-orange-500 text-black' : 'bg-neutral-900 border-neutral-700'"
-            @click="goToPage(p)"
-          >
-            {{ p }}
-          </button>
+
+          <template v-for="(p, idx) in visiblePages" :key="idx">
+            <button
+              v-if="p !== '...'"
+              class="px-3 py-2 rounded border text-sm"
+              :class="p === pageNumber ? 'bg-orange-500 border-orange-500 text-black' : 'bg-neutral-900 border-neutral-700'"
+              @click="goToPage(p)"
+            >
+              {{ p }}
+            </button>
+            <span v-else class="px-2 text-neutral-400">…</span>
+          </template>
 
           <button
             class="px-3 py-2 rounded bg-neutral-900 border border-neutral-700 text-sm disabled:opacity-50"

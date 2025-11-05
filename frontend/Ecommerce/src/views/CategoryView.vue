@@ -10,19 +10,16 @@ const route = useRoute()
 const { fetchCategoryById } = useCategories()
 const { products, loading: loadingLegacy, error: errorLegacy, fetchProductsByCategory } = useProducts()
 
-// Estado
 const categoryName = ref('Categoria')
 const loading = ref(false)
 const error = ref(null)
 const pagedItems = ref([])
 
-// Paginação (API /products/filter começa com 1)
 const pageNumber = ref(1)
 const pageSize = ref(16)
 const totalPages = ref(1)
 const totalCount = ref(0)
 
-// Nome da categoria
 async function loadCategoryName() {
   try {
     const c = await fetchCategoryById(route.params.id)
@@ -32,7 +29,6 @@ async function loadCategoryName() {
   }
 }
 
-// Chamada preferencial: /products/filter
 async function fetchFromFilter() {
   loading.value = true
   error.value = null
@@ -45,20 +41,16 @@ async function fetchFromFilter() {
 
   try {
     const data = await apiGet(`/products/filter?${qs}`)
-
     const list = Array.isArray(data) ? data : (data?.items ?? [])
     pagedItems.value = list
-
     totalPages.value = Number(
       data?.totalPages ??
       Math.max(1, Math.ceil((data?.totalCount ?? list.length) / pageSize.value))
     )
     totalCount.value = Number(data?.totalCount ?? list.length)
 
-    // se vier vazio, usa fallback
     if (!list.length) await fetchLegacy()
   } catch (e) {
-    // se der 404 ou erro, cai pro fallback para não quebrar
     await fetchLegacy()
     error.value = e?.message || null
   } finally {
@@ -66,24 +58,19 @@ async function fetchFromFilter() {
   }
 }
 
-// Fallback: sua lógica antiga
 async function fetchLegacy() {
   try {
     await fetchProductsByCategory(route.params.id)
     totalCount.value = products.value.length
     totalPages.value = Math.max(1, Math.ceil(products.value.length / pageSize.value))
-  } catch (_) {
-    // mantém erro do legacy se houver
-  }
+  } catch (_) {}
 }
 
-// Carregar tudo
 async function loadAll() {
   pageNumber.value = 1
   await Promise.all([loadCategoryName(), fetchFromFilter()])
 }
 
-// Lifecycle
 onMounted(loadAll)
 watch(() => route.params.id, async () => {
   await loadAll()
@@ -99,7 +86,6 @@ const displayed = computed(() => {
     const start = (pageNumber.value - 1) * pageSize.value
     return products.value.slice(start, start + pageSize.value)
   })()
-
   return list.map(p => ({
     ...p,
     coverImageUrl:
@@ -120,13 +106,33 @@ function goToPage(p) {
 
 const showingRange = computed(() => {
   const start = (pageNumber.value - 1) * pageSize.value + 1
-  const end = Math.min(pageNumber.value * pageSize.value, totalCount.value || (pageNumber.value * pageSize.value))
+  const end = Math.min(pageNumber.value * pageSize.value, totalCount.value)
   return { start, end }
 })
 
 function handleAddToCart(prod) {
   console.log('Adicionar ao carrinho:', prod)
 }
+
+/* --- Paginação dinâmica --- */
+const visiblePages = computed(() => {
+  const delta = 2 // número de páginas para mostrar antes/depois
+  const pages = []
+  const start = Math.max(1, pageNumber.value - delta)
+  const end = Math.min(totalPages.value, pageNumber.value + delta)
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  // Adiciona reticências se necessário
+  if (start > 1) pages.unshift('...')
+  if (end < totalPages.value) pages.push('...')
+  if (!pages.includes(1)) pages.unshift(1)
+  if (!pages.includes(totalPages.value)) pages.push(totalPages.value)
+
+  return pages.filter((v, i, a) => a.indexOf(v) === i)
+})
 </script>
 
 <template>
@@ -134,7 +140,6 @@ function handleAddToCart(prod) {
     <div class="max-w-7xl mx-auto px-4">
       <h2 class="text-3xl font-bold text-orange-400 mb-6">{{ categoryName }}</h2>
 
-      <!-- Top bar -->
       <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div class="text-sm text-orange-200">
           <template v-if="totalCount">
@@ -156,13 +161,11 @@ function handleAddToCart(prod) {
         </div>
       </div>
 
-      <!-- Estados -->
       <div v-if="loading || loadingLegacy" class="text-orange-200">Carregando...</div>
       <div v-else-if="(error || errorLegacy) && !displayed.length" class="text-red-400">
         {{ error || errorLegacy }}
       </div>
 
-      <!-- Grid -->
       <div v-else>
         <div v-if="displayed && displayed.length" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <ProductCardComponent
@@ -185,15 +188,17 @@ function handleAddToCart(prod) {
             Anterior
           </button>
 
-          <button
-            v-for="p in Math.min(totalPages, 7)"
-            :key="`p-${p}`"
-            class="px-3 py-2 rounded border text-sm"
-            :class="p === pageNumber ? 'bg-orange-500 border-orange-500 text-black' : 'bg-neutral-900 border-neutral-700'"
-            @click="goToPage(p)"
-          >
-            {{ p }}
-          </button>
+          <template v-for="(p, idx) in visiblePages" :key="idx">
+            <button
+              v-if="p !== '...'"
+              class="px-3 py-2 rounded border text-sm"
+              :class="p === pageNumber ? 'bg-orange-500 border-orange-500 text-black' : 'bg-neutral-900 border-neutral-700'"
+              @click="goToPage(p)"
+            >
+              {{ p }}
+            </button>
+            <span v-else class="px-2 text-neutral-400">…</span>
+          </template>
 
           <button
             class="px-3 py-2 rounded bg-neutral-900 border border-neutral-700 text-sm disabled:opacity-50"

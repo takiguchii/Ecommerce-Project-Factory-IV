@@ -12,6 +12,7 @@ import AdminProductView from '../views/AdminProductView.vue';
 import AdminCategoryView from '../views/AdminCategoryView.vue';
 import AdminSubCategoryView from '../views/AdminSubCategoryView.vue';
 import AdminProviderView from '../views/AdminProviderView.vue';
+import ProfileView from '../views/ProfileView.vue';
 import { jwtDecode } from 'jwt-decode';
 
 const router = createRouter({
@@ -58,6 +59,12 @@ const router = createRouter({
     { path: '/search',
       name: 'search',
       component: SearchResultsView
+    },
+    {
+      path: '/profile',
+      name: 'Profile',
+      component: ProfileView,
+      meta: { requiresAuth: true } 
     },
     {
       path: '/admin',

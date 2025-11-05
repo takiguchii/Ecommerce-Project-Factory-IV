@@ -2,24 +2,18 @@ using Ecommerce.Dto;
 using Ecommerce.Entity;
 using Ecommerce.DTOs;
 
-
-namespace Ecommerce.Interfaces;
-
-public interface IProductService
+namespace Ecommerce.Interfaces.Services 
 {
-    Product CreateProduct(CreateProductDto productDto);
-    List<Product> GetAllProducts();
-    Product? GetProductById(int id);
-    bool DeleteProduct(int id);
-    List<Product> GetPromotions();
-    Product? UpdateProduct(int id, CreateProductDto productDto);
-    //Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize);
-    Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId);
-    
-    //Adicionando metodo da barra de pesquisa
-    Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm);
-    
-    //method para filtrar produtos aleatorios da grid da homepage 
-    Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId);
-
+    public interface IProductService
+    {
+        Product? CreateProduct(CreateProductDto productDto);
+        List<Product> GetAllProducts();
+        Product? GetProductById(int id);
+        bool DeleteProduct(int id);
+        Product? UpdateProduct(int id, CreateProductDto productDto);
+        List<Product> GetPromotions();
+        Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId);
+        Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm);
+        Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId);
+    }
 }

@@ -20,7 +20,6 @@ const goToDetail = () => {
 }
 
 const mainUrl = "https://www.kabum.com.br/"
-// --- Aliases (nomes exatamente como a API) ---
 const name = computed(() => props.product?.name ?? '')
 const imgSrc = computed(
   () =>
@@ -38,7 +37,6 @@ const discountPrice = computed(
   () => props.product?.discount_price ?? props.product?.discountPrice ?? null
 )
 
-// Debug opcional
 watchEffect(() => {
 
 })

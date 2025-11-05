@@ -6,7 +6,6 @@ export function useBrands() {
   const loading = ref(false)
   const error = ref(null)
 
-  // Converte URLs relativas do Next para absolutas
   function fixImageUrl(u) {
     if (!u) return null
     if (/^https?:\/\//.test(u)) return u
@@ -19,7 +18,6 @@ export function useBrands() {
     return {
       id: raw.id,
       name: raw.name ?? '',
-      // API: brand_image_url; padronizamos para imageUrl no front
       imageUrl: fixImageUrl(
         raw.brand_image_url ?? raw.brandImageUrl ?? raw.imageUrl ?? null
       ),
