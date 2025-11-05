@@ -1,94 +1,299 @@
 <template>
-  <div class="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Meu Perfil</h2>
-    <p class="text-sm text-gray-600 mb-6">
-      Complete seus dados para agilizar suas futuras compras.
-    </p>
+  <div class="min-h-screen bg-neutral-950 text-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10">
+      <!-- Header -->
+      <header class="mb-8">
+        <h2 class="text-3xl font-semibold tracking-tight text-orange-400">Meu Perfil</h2>
+        <p class="text-sm text-neutral-100 mt-2">Complete seus dados para agilizar suas futuras compras.</p>
+      </header>
 
-    <div v-if="isLoading" class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4" role="alert">
-      Carregando dados...
-    </div>
-    <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-      {{ error }}
-    </div>
-
-    <transition name="fade-in-out">
-      <div v-if="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-        {{ successMessage }}
+      <!-- Alerts  -->
+      <div v-if="isLoading"
+        class="mb-4 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-200 px-4 py-3 shadow" role="alert">
+        <span class="font-medium">Carregando dados…</span>
       </div>
-    </transition>
-    <form v-if="profile" @submit.prevent="handleSubmit" class="flex flex-col gap-6">
-      
-      <fieldset class="border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <legend class="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-700 w-full">Dados da Conta</legend>
-        <div class="p-4 sm:p-6 space-y-4">
-          <div>
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username:</label>
-            <input type="text" id="username" :value="profile.username" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm disabled:bg-gray-100 disabled:text-gray-500" disabled />
-          </div>
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-            <input type="email" id="email" :value="profile.email" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm disabled:bg-gray-100 disabled:text-gray-500" disabled />
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset class="border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <legend class="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-700 w-full">Dados Pessoais</legend>
-        <div class="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="sm:col-span-2">
-            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo:</label>
-            <input type="text" id="fullName" v-model="profile.fullName" placeholder="Digite seu nome completo" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-          <div>
-            <label for="document" class="block text-sm font-medium text-gray-700 mb-1">CPF/CNPJ:</label>
-            <input type="text" id="document" v-model="profile.documentCpfCnpj" placeholder="Digite seu CPF ou CNPJ" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-          <div>
-            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Telefone:</label>
-            <input type="tel" id="phone" v-model="profile.phone" placeholder="(XX) XXXXX-XXXX" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset class="border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <legend class="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-700 w-full">Endereço de Entrega</legend>
-        <div class="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-6 gap-4">
-          <div class="sm:col-span-2">
-            <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">CEP:</label>
-            <input type="text" id="postalCode" v-model="profile.postalCode" placeholder="XXXXX-XXX" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-          <div class="sm:col-span-4">
-             <label for="addressLine" class="block text-sm font-medium text-gray-700 mb-1">Endereço (Rua e Nº):</label>
-            <input type="text" id="addressLine" v-model="profile.addressLine" placeholder="Ex: Rua Brasil, 123" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-          <div class="sm:col-span-3">
-            <label for="complement" class="block text-sm font-medium text-gray-700 mb-1">Complemento:</label>
-            <input type="text" id="complement" v-model="profile.addressComplement" placeholder="Ex: Apto 101, Bloco B" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-          <div class="sm:col-span-3">
-            <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-1">Bairro:</label>
-            <input type="text" id="neighborhood" v-model="profile.neighborhood" placeholder="Digite seu bairro" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-          <div class="sm:col-span-4">
-            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Cidade:</label>
-            <input type="text" id="city" v-model="profile.city" placeholder="Digite sua cidade" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-          <div class="sm:col-span-2">
-            <label for="state" class="block text-sm font-medium text-gray-700 mb-1">Estado (UF):</label>
-            <input type="text" id="state" v-model="profile.state" placeholder="Ex: SP" maxlength="2" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-          </div>
-        </div>
-      </fieldset>
-      <div class="flex justify-end">
-        <button type="submit" 
-                class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed" 
-                :disabled="isLoading">
-          {{ isLoading ? 'Salvando...' : 'Salvar Alterações' }}
-        </button>
+      <div v-if="error" class="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 px-4 py-3 shadow"
+        role="alert">
+        {{ error }}
       </div>
+      <transition name="fade-in-out">
+        <div v-if="successMessage"
+          class="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 text-green-200 px-4 py-3 shadow"
+          role="alert">
+          {{ successMessage }}
+        </div>
+      </transition>
 
-    </form>
+      <!-- Form -->
+      <form v-if="profile" @submit.prevent="handleSubmit" class="flex flex-col gap-8">
+        <!-- Tabs -->
+        <nav class="rounded-2xl bg-neutral-900/50 border border-neutral-800 p-1.5 shadow-lg">
+          <ul class="grid grid-cols-3 gap-1">
+            <li>
+              <button type="button" :class="tabBtnClass('conta')" @click="activeTab = 'conta'" aria-controls="tab-conta"
+                :aria-selected="activeTab === 'conta'" role="tab">
+                Dados da Conta
+              </button>
+            </li>
+            <li>
+              <button type="button" :class="tabBtnClass('pessoais')" @click="activeTab = 'pessoais'"
+                aria-controls="tab-pessoais" :aria-selected="activeTab === 'pessoais'" role="tab">
+                Dados Pessoais
+              </button>
+            </li>
+            <li>
+              <button type="button" :class="tabBtnClass('endereco')" @click="activeTab = 'endereco'"
+                aria-controls="tab-endereco" :aria-selected="activeTab === 'endereco'" role="tab">
+                Endereço de Entrega
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        <!-- Panels -->
+        <section id="tab-conta" role="tabpanel" v-show="activeTab === 'conta'"
+          class="relative overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-b from-neutral-900/70 to-neutral-950/60 backdrop-blur-md shadow-xl p-8 transition-all duration-300">
+          <!-- título com ícone -->
+          <div class="mb-6 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M5.121 17.804A13.937 13.937 0 0112 15c2.489 0 4.823.607 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zM19.5 21a9.5 9.5 0 10-15 0" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-white tracking-tight">Informações da Conta</h3>
+          </div>
+
+          <!-- campos -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <!-- Username -->
+            <div class="field group">
+              <label for="username" class="form-label text-neutral-300">Username</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5.121 17.804A13.937 13.937 0 0112 15c2.489 0 4.823.607 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zM19.5 21a9.5 9.5 0 10-15 0" />
+                </svg>
+                <input type="text" id="username" :value="profile.username"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500 cursor-not-allowed"
+                  disabled />
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="field group">
+              <label for="email" class="form-label text-neutral-300">Email</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2.94 6.94A2 2 0 014.414 6h11.172a2 2 0 011.475.94L10 11 2.94 6.94z" />
+                  <path d="M18 8.118l-8 4.882-8-4.882V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                <input type="email" id="email" :value="profile.email"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500 cursor-not-allowed"
+                  disabled />
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="tab-pessoais" role="tabpanel" v-show="activeTab === 'pessoais'"
+          class="relative overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-b from-neutral-900/70 to-neutral-950/60 backdrop-blur-md shadow-xl p-8 transition-all duration-300">
+          <!-- título com ícone -->
+          <div class="mb-6 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+              <!-- id-card -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2 7a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7z" />
+                <path class="opacity-70" d="M7 10.5h6a1 1 0 000-2H7a1 1 0 000 2zM7 14h4a1 1 0 100-2H7a1 1 0 100 2z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-white tracking-tight">Dados Pessoais</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <!-- Nome -->
+            <div class="sm:col-span-2 field group">
+              <label for="fullName" class="form-label text-neutral-300">Nome Completo</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <!-- user -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5.121 17.804A13.937 13.937 0 0112 15c2.489 0 4.823.607 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zM19.5 21a9.5 9.5 0 10-15 0" />
+                </svg>
+                <input type="text" id="fullName" v-model="profile.fullName" placeholder="Digite seu nome completo"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500" />
+              </div>
+            </div>
+
+            <!-- CPF/CNPJ -->
+            <div class="field group">
+              <label for="document" class="form-label text-neutral-300">CPF/CNPJ</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <!-- id-badge -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 2a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2V4a2 2 0 00-2-2H6z" />
+                </svg>
+                <input type="text" id="document" v-model="profile.documentCpfCnpj" placeholder="Digite seu CPF ou CNPJ"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500" />
+              </div>
+            </div>
+
+            <!-- Telefone -->
+            <div class="field group">
+              <label for="phone" class="form-label text-neutral-300">Telefone</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <!-- phone -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 3a1 1 0 011-1h3l2 4-2 1a11 11 0 006 6l1-2 4 2v3a1 1 0 01-1 1h-1C8.82 17 3 11.18 3 4V3z" />
+                </svg>
+                <input type="tel" id="phone" v-model="profile.phone" placeholder="(XX) XXXXX-XXXX"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="tab-endereco" role="tabpanel" v-show="activeTab === 'endereco'"
+          class="relative overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-b from-neutral-900/70 to-neutral-950/60 backdrop-blur-md shadow-xl p-8 transition-all duration-300">
+          <!-- título com ícone -->
+          <div class="mb-6 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+              <!-- map-pin -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-white tracking-tight">Endereço de Entrega</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-8">
+            <!-- CEP -->
+            <div class="sm:col-span-3 field group">
+              <label for="postalCode" class="form-label text-neutral-300">CEP</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <!-- hash -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M9 3h2l-1 6h4l1-6h2l-1 6h4v2h-4l-1 6h4v2h-4l-1 6h-2l1-6H9l-1 6H6l1-6H3v-2h4l1-6H4V9h4l1-6zM10 15h4l1-6h-4l-1 6z" />
+                </svg>
+                <input type="text" id="postalCode" v-model="profile.postalCode" placeholder="XXXXX-XXX"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500" />
+              </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="sm:col-span-9 field group">
+              <label for="addressLine" class="form-label text-neutral-300">Endereço (Rua e Nº)</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <!-- home -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    d="M10.707 2.293a1 1 0 00-1.414 0L2 9.586V18a2 2 0 002 2h4v-6h4v6h4a2 2 0 002-2V9.586l-7.293-7.293z" />
+                </svg>
+                <input type="text" id="addressLine" v-model="profile.addressLine" placeholder="Ex: Rua Brasil, 123"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500" />
+              </div>
+            </div>
+
+            <!-- Complemento -->
+            <div class="sm:col-span-6 field group">
+              <label for="complement" class="form-label text-neutral-300">Complemento</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <!-- layers -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L1 7l11 5 11-5-11-5zm0 9L1 6v2l11 5 11-5V6l-11 5zm0 4L1 11v2l11 5 11-5v-2l-11 4z" />
+                </svg>
+                <input type="text" id="complement" v-model="profile.addressComplement"
+                  placeholder="Ex: Apto 101, Bloco B"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500" />
+              </div>
+            </div>
+
+            <!-- Bairro -->
+            <div class="sm:col-span-6 field group">
+              <label for="neighborhood" class="form-label text-neutral-300">Bairro</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <!-- building -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M3 22h18V2H3v20zm4-2H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V8h2v4zm4 8H9v-2h2v2zm0-4H9v-2h2v2zm0-4H9V8h2v4zm4 8h-2v-6h2v6z" />
+                </svg>
+                <input type="text" id="neighborhood" v-model="profile.neighborhood" placeholder="Digite seu bairro"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500" />
+              </div>
+            </div>
+
+            <!-- Cidade -->
+            <div class="sm:col-span-8 field group">
+              <label for="city" class="form-label text-neutral-300">Cidade</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <!-- map -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9 2l-5 2v12l5-2 6 2 5-2V2l-5 2-6-2z" />
+                </svg>
+                <input type="text" id="city" v-model="profile.city" placeholder="Digite sua cidade"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500" />
+              </div>
+            </div>
+
+            <!-- UF -->
+            <div class="sm:col-span-4 field group">
+              <label for="state" class="form-label text-neutral-300">Estado (UF)</label>
+              <div
+                class="flex items-center gap-2 bg-neutral-900/60 border border-neutral-800 rounded-xl px-3 py-2.5 shadow-inner transition group-hover:border-orange-500/40">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 group-hover:text-orange-400"
+                  viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9 2l-5 2v12l5-2 6 2 5-2V2l-5 2-6-2z" />
+                </svg>
+                <input type="text" id="state" v-model="profile.state" maxlength="2" placeholder="Ex: SP"
+                  class="w-full bg-transparent border-none focus:ring-0 text-neutral-100 placeholder-neutral-500 uppercase" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end">
+          <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-medium
+                   text-white bg-orange-600 hover:bg-orange-500 active:bg-orange-700
+                   focus:outline-none focus:ring-2 focus:ring-orange-500/60
+                   disabled:bg-neutral-700 disabled:text-neutral-400 disabled:cursor-not-allowed
+                   shadow-md hover:shadow-orange-500/20 transition-all" :disabled="isLoading">
+            <svg v-if="isLoading" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="4"
+                stroke-linecap="round" />
+            </svg>
+            <span>{{ isLoading ? 'Salvando...' : 'Salvar Alterações' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -97,8 +302,17 @@ import { onMounted, ref } from 'vue';
 import { useProfile } from '../composables/useProfile';
 
 const { profile, isLoading, error, fetchProfile, updateProfile } = useProfile();
-
 const successMessage = ref('');
+const activeTab = ref('conta'); // 'conta' | 'pessoais' | 'endereco'
+
+const tabBtnClass = (key) =>
+  [
+    'w-full rounded-xl px-4 py-2 text-sm font-medium transition-all',
+    'focus:outline-none focus:ring-2 focus:ring-orange-500/60',
+    activeTab.value === key
+      ? 'bg-neutral-800 text-white shadow border border-neutral-700'
+      : 'bg-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 border border-transparent',
+  ].join(' ');
 
 onMounted(() => {
   fetchProfile();
@@ -106,27 +320,48 @@ onMounted(() => {
 
 const handleSubmit = async () => {
   successMessage.value = '';
-  
-  const success = await updateProfile(); 
-  
+  const success = await updateProfile();
   if (success) {
     successMessage.value = 'Perfil atualizado com sucesso!';
-    setTimeout(() => {
-      successMessage.value = '';
-    }, 3000);
+    setTimeout(() => (successMessage.value = ''), 3000);
   }
 };
 </script>
 
 <style scoped>
+/* Campos com respiro vertical */
+.field {
+  @apply space-y-2;
+}
+
+/* Labels e inputs padrão */
+.form-label {
+  @apply block text-sm font-medium text-neutral-200;
+}
+
+.form-input {
+  @apply block w-full rounded-xl border border-neutral-800 bg-neutral-900/60 text-neutral-100 placeholder-neutral-500 px-3 py-2.5 shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition;
+}
+
+.form-input.disabled {
+  @apply bg-neutral-900/40 text-neutral-500 cursor-not-allowed;
+}
+
+/* Transição mensagens */
 .fade-in-out-enter-active,
 .fade-in-out-leave-active {
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity .35s ease, transform .35s ease;
 }
 
 .fade-in-out-enter-from,
 .fade-in-out-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-6px);
+}
+
+/* corrige autofill no dark */
+input:-webkit-autofill {
+  -webkit-text-fill-color: #e5e7eb;
+  transition: background-color 9999s ease-in-out 0s;
 }
 </style>
