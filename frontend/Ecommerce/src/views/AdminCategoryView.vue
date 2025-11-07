@@ -6,8 +6,11 @@
         {{ editingCategoryId ? 'Editar Categoria' : 'Gerenciador de Categorias' }}
       </h1>
 
-      <!-- FORM -->
-      <div class="bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mb-8">
+      <!-- FORM: controlado por toggle OU edição -->
+      <div
+        v-show="editingCategoryId || showCreate"
+        class="bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mb-8"
+      >
         <h3 class="text-2xl font-semibold text-gray-200 mb-6 border-b border-gray-700 pb-3">
           {{ editingCategoryId ? `Editando Categoria (ID: ${editingCategoryId})` : 'Adicionar Nova Categoria' }}
         </h3>
@@ -56,9 +59,18 @@
 
       <!-- LISTA -->
       <div class="bg-gray-800 shadow-xl rounded-lg overflow-hidden">
-        <h2 class="text-2xl font-semibold text-gray-200 p-6 border-b border-gray-700">
-          Categorias Existentes
-        </h2>
+        <!-- Cabeçalho com botão à direita -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-700 flex-wrap gap-3">
+          <h2 class="text-2xl font-semibold text-gray-200">
+            Categorias Existentes
+          </h2>
+
+          <AdminCreateToggle
+            v-model="showCreate"
+            entity="Categoria"
+            :forceOpen="!!editingCategoryId"
+          />
+        </div>
 
         <div v-if="loadingList" class="text-center p-10 text-gray-400">
           Carregando categorias...
@@ -116,8 +128,12 @@
 import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCategories, createCategory, updateCategory, deleteCategory } from '@/services/api'
+import AdminCreateToggle from '@/components/AdminCreateToggle.vue' // ✅
 
 const router = useRouter()
+
+// Toggle de criação
+const showCreate = ref(false)
 
 // ----- STATE
 const categoryForm = ref({ name: '' })
@@ -143,6 +159,7 @@ const resetForm = () => {
   errorSubmit.value = ''
   successSubmit.value = false
   successMessage.value = ''
+  showCreate.value = false // ✅ fecha o create após salvar/cancelar
 }
 
 const logout = () => {
@@ -183,9 +200,7 @@ const saveCategoryHandler = async () => {
   successSubmit.value = false
 
   try {
-    const payload = {
-      name: categoryForm.value.name
-    }
+    const payload = { name: categoryForm.value.name }
 
     if (editingCategoryId.value) {
       await updateCategory(editingCategoryId.value, payload)
@@ -209,7 +224,6 @@ const saveCategoryHandler = async () => {
     if (err?.response && (err.response.status === 401 || err.response.status === 403)) {
       errorSubmit.value = 'Acesso negado. Você precisa ser Admin.'
     } else if (err?.response?.data?.errors) {
-      // Exibe mensagens de validação vindas da API (ex.: "O nome da categoria é obrigatório.")
       errorSubmit.value = Object.values(err.response.data.errors).flat().join(' ')
     }
   } finally {
