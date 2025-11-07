@@ -5,7 +5,11 @@
         {{ editingId ? 'Editar Produto' : 'Gerenciador de Produtos' }}
       </h1>
 
-      <div class="bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mb-8">
+      <!-- Card de criação/edição controlado por toggle OU edição -->
+      <div
+        v-show="editingId || showCreate"
+        class="bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mb-8"
+      >
         <h3 class="text-2xl font-semibold text-gray-200 mb-6 border-b border-gray-700 pb-3">
           {{ editingId ? `Editando Produto (ID: ${editingId})` : 'Adicionar Novo Produto' }}
         </h3>
@@ -101,8 +105,18 @@
         </form>
       </div>
 
+      <!-- Lista de produtos -->
       <div class="bg-gray-800 shadow-xl rounded-lg overflow-hidden">
-        <h2 class="text-2xl font-semibold text-gray-200 p-6 border-b border-gray-700">Produtos</h2>
+        <!-- Cabeçalho com botão à direita -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-700 flex-wrap gap-3">
+          <h2 class="text-2xl font-semibold text-gray-200">Produtos</h2>
+
+          <AdminCreateToggle
+            v-model="showCreate"
+            entity="Produto"
+            :forceOpen="!!editingId"
+          />
+        </div>
 
         <div v-if="loadingList" class="text-center p-10 text-gray-400">Carregando produtos...</div>
         <div v-else-if="errorList" class="text-center p-10 text-red-500">{{ errorList }}</div>
@@ -171,8 +185,12 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiGet, apiPost, apiPut, apiDelete, getCategories, getBrands } from '@/services/api'
+import AdminCreateToggle from '@/components/AdminCreateToggle.vue'
 
 const router = useRouter()
+
+/* Toggle de criação */
+const showCreate = ref(false)
 
 const products = ref([])
 const categories = ref([])
@@ -216,11 +234,6 @@ function goToPage(p) {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const filteredSubcategories = computed(() => {
-  if (!form.value.category_id) return []
-  return subcategories.value.filter(s => String(s.category_id) === String(form.value.category_id))
-})
-
 const form = ref({
   code: '',
   name: '',
@@ -236,6 +249,11 @@ const form = ref({
   sub_category_id: null,
   brand_id: null,
   provider_id: null
+})
+
+const filteredSubcategories = computed(() => {
+  if (!form.value.category_id) return []
+  return subcategories.value.filter(s => String(s.category_id) === String(form.value.category_id))
 })
 
 const editingId = ref(null)
@@ -281,7 +299,7 @@ const fetchLookups = async () => {
     subcategories.value = Array.isArray(subs) ? subs : []
     providers.value = Array.isArray(provs) ? provs : []
     brands.value = brs ?? []
-  } catch (e) {}
+  } catch {}
 }
 
 const syncSubcategories = () => {
@@ -313,6 +331,7 @@ const resetForm = () => {
   errorSubmit.value = ''
   successSubmit.value = false
   successMessage.value = ''
+  showCreate.value = false // fecha a área de criação
 }
 
 const startEdit = (item) => {
@@ -419,8 +438,8 @@ const deleteHandler = async (id) => {
     await apiDelete(`/products/${id}`)
     if (editingId.value === id) resetForm()
     await fetchProducts()
-  } catch (e) {
-  } finally {
+  } catch {}
+  finally {
     const t = { ...loadingDelete }
     delete t[id]
     Object.assign(loadingDelete, t)
