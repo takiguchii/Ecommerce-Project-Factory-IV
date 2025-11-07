@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-// Importações existentes
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
@@ -14,6 +13,7 @@ import AdminSubCategoryView from '../views/AdminSubCategoryView.vue';
 import AdminProviderView from '../views/AdminProviderView.vue';
 import ProfileView from '../views/ProfileView.vue';
 import { jwtDecode } from 'jwt-decode';
+import CartView from '@/views/CartView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -53,51 +53,60 @@ const router = createRouter({
       name: 'Category',
       component: () => import('../views/CategoryView.vue')
     },
-    { path: '/brand/:id',
+    {
+      path: '/brand/:id',
       name: 'Brand',
-      component: () => import('../views/BrandView.vue') },
-    { path: '/search',
+      component: () => import('../views/BrandView.vue')
+    },
+    {
+      path: '/search',
       name: 'search',
       component: SearchResultsView
+    },
+    {
+      path: '/cart',
+      name: 'cart',
+      component: CartView,
+      meta: { requiresAuth: true } 
     },
     {
       path: '/profile',
       name: 'Profile',
       component: ProfileView,
-      meta: { requiresAuth: true } 
+      meta: { requiresAuth: true }
     },
     {
       path: '/admin',
-      component: AdminLayout, 
+      component: AdminLayout,
       children: [
         {
-          path: '', 
-          redirect: '/admin/brands' 
+          path: '',
+          redirect: '/admin/brands'
         },
         {
-          path: 'brands', 
+          path: 'brands',
           name: 'admin-brands',
-          component: AdminBrandView 
+          component: AdminBrandView
         },
         {
-          path: 'products', 
+          path: 'products',
           name: 'admin-products',
-          component: AdminProductView 
+          component: AdminProductView
         },
         {
-          path: 'categories', 
+          path: 'categories',
           name: 'admin-categories',
-          component: AdminCategoryView 
+          component: AdminCategoryView
         },
         {
-          path: 'subcategories', 
+          path: 'subcategories',
           name: 'admin-subcategories',
-          component: AdminSubCategoryView 
+          component: AdminSubCategoryView
         },
         {
-          path: 'providers', 
+          path: 'providers',
           name: 'admin-providers',
-          component: AdminProviderView 
+          component: AdminProviderView
         }
       ]
     }
