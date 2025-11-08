@@ -40,6 +40,7 @@ namespace Ecommerce.Service
             {
                 Id = Guid.NewGuid(),
                 Code = createDto.Code.ToUpper(), 
+                Description = createDto.Description,
                 DiscountValue = createDto.DiscountValue,
                 IsPercentage = createDto.IsPercentage,
                 ExpiryDate = createDto.ExpiryDate,
@@ -67,6 +68,7 @@ namespace Ecommerce.Service
             }
 
             existingCoupon.Code = updateDto.Code.ToUpper();
+            existingCoupon.Description = updateDto.Description; 
             existingCoupon.DiscountValue = updateDto.DiscountValue;
             existingCoupon.IsPercentage = updateDto.IsPercentage;
             existingCoupon.ExpiryDate = updateDto.ExpiryDate;

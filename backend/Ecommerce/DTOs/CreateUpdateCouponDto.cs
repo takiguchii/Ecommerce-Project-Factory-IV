@@ -6,6 +6,7 @@ namespace Ecommerce.DTOs
     {
         [Required]
         public string Code { get; set; }
+        public string? Description { get; set; }
 
         [Required]
         public decimal DiscountValue { get; set; }

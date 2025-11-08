@@ -9,6 +9,8 @@ namespace Ecommerce.Entity
 
         [Required]
         public string Code { get; set; } 
+        [MaxLength(255)]
+        public string? Description { get; set; }
 
         [Required]
         public decimal DiscountValue { get; set; } 
