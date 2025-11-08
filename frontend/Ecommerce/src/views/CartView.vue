@@ -1,167 +1,152 @@
 <template>
-  <div class="cart-container">
-    <h1>Meu Carrinho</h1>
+  <section class="min-h-[60vh] bg-neutral-950 text-neutral-100">
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+      <h1 class="text-2xl md:text-3xl font-bold text-orange-400 mb-6">Meu Carrinho</h1>
 
-    <div v-if="!cart.items || cart.items.length === 0" class="cart-empty">
-      <p>Seu carrinho está vazio.</p>
-      <router-link to="/">Voltar para a loja</router-link>
-    </div>
+      <!-- vazio -->
+      <div
+        v-if="!cart.items || cart.items.length === 0"
+        class="bg-neutral-900 border border-neutral-800 rounded-xl p-10 text-center"
+      >
+        <p class="text-neutral-300 mb-6">Seu carrinho está vazio.</p>
+        <router-link
+          to="/"
+          class="inline-flex items-center justify-center rounded-lg px-5 py-2 font-semibold bg-orange-500 hover:bg-orange-600 text-black transition-colors"
+        >
+          Voltar para a loja
+        </router-link>
+      </div>
 
-    <div v-else class="cart-content">
-      
-      <div class="cart-items">
-        <div v-for="item in cart.items" :key="item.productId" class="cart-item">
-          <img :src="item.imageUrl" :alt="item.name" class="item-image" />
-          <div class="item-details">
-            <h3 class="item-name">{{ item.name }}</h3>
-            <p class="item-price">R$ {{ formatPrice(item.price) }}</p>
-            <div class="item-quantity">
-              <label>Qtd:</label>
-              <input 
-                type="number" 
-                :value="item.quantity"
-                @change="handleQuantityChange(item.productId, $event.target.value)"
-                min="0" 
-              />
+      <!-- conteúdo -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- itens -->
+        <div class="lg:col-span-2 space-y-4">
+          <div
+            v-for="item in cart.items"
+            :key="item.productId"
+            class="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-5 flex gap-4 md:gap-5 items-start"
+          >
+            <!-- imagem -->
+            <div
+              class="w-24 h-24 md:w-28 md:h-28 bg-white rounded-lg flex items-center justify-center overflow-hidden shrink-0"
+            >
+              <img :src="getImageUrl(item)" :alt="item.name" class="max-w-full max-h-full object-contain" />
             </div>
-            <button @click="removeFromCart(item.productId)" class="remove-button">Remover</button>
+
+            <!-- detalhes -->
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-orange-300 truncate">{{ item.name }}</h3>
+              <p class="text-sm text-neutral-400 mt-1">ID: {{ item.productId }}</p>
+
+              <div class="mt-2 flex flex-wrap items-center gap-4">
+                <p class="text-lg font-bold text-orange-400">R$ {{ toFixed2(item.price) }}</p>
+
+                <div class="flex items-center gap-2">
+                  <label class="text-sm text-neutral-400">Qtd:</label>
+                  <input
+                    type="number"
+                    :value="item.quantity"
+                    min="0"
+                    @change="handleQuantityChange(item.productId, $event.target.value)"
+                    class="w-16 rounded-md bg-neutral-800 border border-neutral-700 px-2 py-1 text-neutral-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <p class="text-sm md:text-base text-neutral-300">
+                  Subtotal: <span class="font-semibold text-orange-300">R$ {{ toFixed2(itemSubtotal(item)) }}</span>
+                </p>
+              </div>
+
+              <button
+                @click="removeFromCart(item.productId)"
+                class="mt-3 text-sm text-red-400 hover:text-red-300 transition-colors"
+              >
+                Remover
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="cart-summary">
-        <h2>Resumo do Pedido</h2>
-        <div class="summary-total">
-          <span>Total</span>
-          <span class="total-value">R$ {{ cart.totalValue.toFixed(2) }}</span>
-        </div>
-        <button class="checkout-button">Finalizar Compra</button>
+        <!-- resumo -->
+        <aside class="bg-neutral-900 border border-neutral-800 rounded-xl p-5 h-fit sticky top-6">
+          <h2 class="text-lg font-semibold text-neutral-200 mb-4">Resumo do Pedido</h2>
+
+          <div class="flex justify-between text-neutral-300 mb-2">
+            <span>Itens</span>
+            <span>{{ (cart.items || []).reduce((s,i)=>s + Number(i.quantity||0), 0) }}</span>
+          </div>
+
+          <div class="flex justify-between text-neutral-300 mb-4">
+            <span>Total</span>
+            <span class="font-bold text-orange-300">R$ {{ toFixed2(cartTotal) }}</span>
+          </div>
+
+          <button
+            class="w-full rounded-lg bg-orange-500 hover:bg-orange-600 text-black font-semibold py-2 transition-colors"
+          >
+            Finalizar Compra
+          </button>
+        </aside>
       </div>
     </div>
-
-  </div>
+  </section>
 </template>
 
-<script setup>
-import { onMounted } from 'vue';
-import { useCart } from '@/composables/useCart';
 
-const { cart, fetchCart, removeFromCart, updateItemQuantity } = useCart();
+<script setup>
+import { onMounted, computed } from 'vue'
+import { useCart } from '@/composables/useCart'
+
+const { cart, fetchCart, removeFromCart, updateItemQuantity } = useCart()
+const mainUrl = 'https://www.kabum.com.br/'
 
 onMounted(() => {
-  fetchCart();
-});
+  fetchCart()
+})
 
-function formatPrice(priceString) {
-  const price = parseFloat(priceString);
-  return price.toFixed(2);
+/* ---------- helpers numéricos ---------- */
+function toNum(v) {
+  if (typeof v === 'number') return v
+  if (!v) return 0
+  const s = String(v).replace(/\s/g, '').replace('R$', '')
+  const norm = s.replace(/\./g, '').replace(',', '.')
+  const n = parseFloat(norm)
+  return Number.isFinite(n) ? n : 0
+}
+function toFixed2(v) {
+  return Number(toNum(v)).toFixed(2)
 }
 
+/* ---------- imagens (padrão Kabum) ---------- */
+function getImageUrl(item) {
+  // Se já veio completo da API
+  if (item.imageUrl && /^https?:\/\//i.test(item.imageUrl)) return item.imageUrl
+
+  // Se veio caminho relativo ou campos image_urlN
+  const path =
+    item.imageUrl ||
+    item.image_url0 ||
+    item.image_url1 ||
+    item.image_url2 ||
+    item.image_url3 ||
+    item.image_url4 ||
+    ''
+
+  return /^https?:\/\//i.test(path) ? path : mainUrl + path
+}
+
+/* ---------- totais ---------- */
+function itemSubtotal(item) {
+  return toNum(item.price) * Number(item.quantity || 1)
+}
+const cartTotal = computed(() =>
+  (cart.value?.items || []).reduce((sum, i) => sum + itemSubtotal(i), 0)
+)
+
+/* ---------- handlers ---------- */
 function handleQuantityChange(productId, newQuantity) {
-  updateItemQuantity(productId, parseInt(newQuantity, 10));
+  const q = parseInt(newQuantity, 10)
+  updateItemQuantity(productId, q)
 }
 </script>
 
-<style scoped>
-.cart-container {
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-}
-
-.cart-empty {
-  text-align: center;
-  padding: 50px;
-}
-
-.cart-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.cart-items {
-  flex: 3; 
-  min-width: 300px;
-}
-
-.cart-summary {
-  flex: 1;
-  min-width: 250px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 20px;
-  height: fit-content; 
-}
-
-.cart-item {
-  display: flex;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
-  margin-bottom: 15px;
-}
-
-.item-image {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  margin-right: 15px;
-}
-
-.item-details {
-  flex: 1;
-}
-
-.item-name {
-  font-size: 1.1em;
-  margin: 0;
-}
-
-.item-price {
-  font-size: 1em;
-  color: #333;
-  font-weight: bold;
-}
-
-.item-quantity {
-  margin: 10px 0;
-}
-
-.item-quantity input {
-  width: 50px;
-  margin-left: 5px;
-}
-
-.remove-button {
-  background: none;
-  border: none;
-  color: red;
-  cursor: pointer;
-  text-decoration: underline;
-  padding: 0;
-}
-
-.summary-total {
-  display: flex;
-  justify-content: space-between;
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.checkout-button {
-  width: 100%;
-  padding: 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1.1em;
-  cursor: pointer;
-}
-
-.checkout-button:hover {
-  background-color: #0056b3;
-}
-</style>
