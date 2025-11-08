@@ -5,7 +5,11 @@
         {{ editingId ? 'Editar Fornecedor' : 'Gerenciador de Fornecedores' }}
       </h1>
 
-      <div class="bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mb-8">
+      <!-- FORM: controlado por toggle OU edição -->
+      <div
+        v-show="editingId || showCreate"
+        class="bg-gray-800 shadow-xl rounded-lg p-6 md:p-8 mb-8"
+      >
         <h3 class="text-2xl font-semibold text-gray-200 mb-6 border-b border-gray-700 pb-3">
           {{ editingId ? `Editando Fornecedor (ID: ${editingId})` : 'Adicionar Novo Fornecedor' }}
         </h3>
@@ -46,8 +50,18 @@
         </form>
       </div>
 
+      <!-- LISTA -->
       <div class="bg-gray-800 shadow-xl rounded-lg overflow-hidden">
-        <h2 class="text-2xl font-semibold text-gray-200 p-6 border-b border-gray-700">Fornecedores</h2>
+        <!-- Cabeçalho com botão à direita -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-700 flex-wrap gap-3">
+          <h2 class="text-2xl font-semibold text-gray-200">Fornecedores</h2>
+
+          <AdminCreateToggle
+            v-model="showCreate"
+            entity="Fornecedor"
+            :forceOpen="!!editingId"
+          />
+        </div>
 
         <div v-if="loadingList" class="text-center p-10 text-gray-400">Carregando fornecedores...</div>
         <div v-else-if="errorList" class="text-center p-10 text-red-500">{{ errorList }}</div>
@@ -96,8 +110,12 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api'
+import AdminCreateToggle from '@/components/AdminCreateToggle.vue'
 
 const router = useRouter()
+
+/* Toggle de criação */
+const showCreate = ref(false)
 
 const providers = ref([])
 
@@ -178,6 +196,7 @@ const resetForm = () => {
   errorSubmit.value = ''
   successSubmit.value = false
   successMessage.value = ''
+  showCreate.value = false // fecha a área de criação após salvar/cancelar
 }
 
 const startEdit = (item) => {
