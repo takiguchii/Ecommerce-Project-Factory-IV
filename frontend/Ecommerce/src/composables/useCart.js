@@ -1,73 +1,88 @@
-import { ref } from 'vue';
-import api from '@/services/api'; // Seu 'api.js' que já usa o Axios
+import { ref } from 'vue'
+import api, { apiGet } from '@/services/api'
 
-// --- Estado Global Simples ---
-// Definido fora da função, então é compartilhado por todos que usarem o "useCart"
-const cart = ref({
-  items: [],
-  totalValue: 0
-});
-// -----------------------------
+const cart = ref({ items: [], totalValue: 0 })
+
+function normalizeCart(raw) {
+  if (!raw) return { items: [], totalValue: 0 }
+
+  const items = Array.isArray(raw.items || raw.Itens || raw.Products)
+    ? (raw.items || raw.Itens || raw.Products).map((i) => ({
+        productId: i.productId ?? i.id ?? i.product_id ?? null,
+        name: i.name ?? i.productName ?? i.nome ?? '',
+        price: i.price ?? i.unitPrice ?? i.valor ?? 0,
+        quantity: i.quantity ?? i.qtd ?? i.amount ?? 1,
+
+        imageUrl: i.imageUrl ?? i.image_url ?? i.image ?? '',
+        image_url0: i.image_url0,
+        image_url1: i.image_url1,
+        image_url2: i.image_url2,
+        image_url3: i.image_url3,
+        image_url4: i.image_url4,
+      }))
+    : []
+
+  const totalValue =
+    raw.totalValue ?? raw.total_value ?? raw.total ?? items.reduce((s, it) => s + toNum(it.price) * (it.quantity || 1), 0)
+
+  return { items, totalValue }
+}
+
+// Converte "R$ 409,69" | "409,69" | "409.69" | number -> number
+function toNum(v) {
+  if (typeof v === 'number') return v
+  if (!v) return 0
+  const s = String(v).replace(/\s/g, '').replace('R$', '')
+  const norm = s.replace(/\./g, '').replace(',', '.')
+  const n = parseFloat(norm)
+  return Number.isFinite(n) ? n : 0
+}
 
 export function useCart() {
-
-  // Função para buscar o carrinho da API
-  // (Usado quando a página carrega)
   async function fetchCart() {
     try {
-      const response = await api.get('/api/cart');
-      cart.value = response.data;
+      // baseURL já é .../api
+      const data = await apiGet('/cart')
+      cart.value = normalizeCart(data)
     } catch (error) {
-      console.error("Erro ao buscar carrinho:", error);
-      // Se der erro (ex: 401 não logado), limpa o carrinho local
-      cart.value = { items: [], totalValue: 0 };
+      console.error('Erro ao buscar carrinho:', error)
+      cart.value = { items: [], totalValue: 0 }
     }
   }
 
-  // Função para adicionar um item
-  async function addToCart(productId, quantity) {
+  async function addToCart(productId, quantity = 1) {
     try {
-      const response = await api.post('/api/cart/add', { productId, quantity });
-      cart.value = response.data; // Atualiza o carrinho local com a resposta
-      alert('Produto adicionado ao carrinho!');
+      const { data } = await api.post('/cart/add', { productId, quantity })
+      cart.value = normalizeCart(data)
     } catch (error) {
-      console.error("Erro ao adicionar ao carrinho:", error);
-      alert('Erro ao adicionar produto. Tente fazer o login.');
+      console.error('Erro ao adicionar ao carrinho:', error)
+      throw error
     }
   }
 
-  // Função para remover um item
   async function removeFromCart(productId) {
     try {
-      const response = await api.delete(`/api/cart/remove/${productId}`);
-      cart.value = response.data; // Atualiza o carrinho
+      const { data } = await api.delete(`/cart/remove/${productId}`)
+      cart.value = normalizeCart(data)
     } catch (error) {
-      console.error("Erro ao remover do carrinho:", error);
+      console.error('Erro ao remover do carrinho:', error)
     }
   }
 
-  // Função para atualizar a quantidade
   async function updateItemQuantity(productId, quantity) {
-    // Se a quantidade for 0 ou menos, remove
-    if (quantity <= 0) {
-      await removeFromCart(productId);
-      return;
-    }
-
     try {
-      const response = await api.put(`/api/cart/update/${productId}?quantity=${quantity}`);
-      cart.value = response.data; // Atualiza o carrinho
+      const { data } = await api.put(`/cart/update/${productId}?quantity=${quantity}`)
+      cart.value = normalizeCart(data)
     } catch (error) {
-      console.error("Erro ao atualizar quantidade:", error);
+      console.error('Erro ao atualizar quantidade:', error)
     }
   }
 
-  // Expõe o estado (cart) e as funções para os componentes
   return {
     cart,
     fetchCart,
     addToCart,
     removeFromCart,
-    updateItemQuantity
-  };
+    updateItemQuantity,
+  }
 }
