@@ -22,9 +22,14 @@ namespace Ecommerce.Controller
             {
                 return BadRequest(ModelState);
             }
-            
-            var newCoupon = await _couponService.CreateCoupon(couponDto);
-            return CreatedAtAction(nameof(GetCouponById), new { id = newCoupon.Id }, newCoupon);
+            try {
+                var newCoupon = await _couponService.CreateCoupon(couponDto);
+                return CreatedAtAction(nameof(GetCouponById), new { id = newCoupon.Id }, newCoupon);
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(new { message = ex.Message });
+            } ;
         }
 
         [HttpGet]
