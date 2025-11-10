@@ -1,45 +1,27 @@
 <script setup>
 import { computed, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
+import AddToCartButton from '@/components/AddToCartButton.vue'
 
-const props = defineProps({
-  product: { type: Object, required: true }
-})
-
-const emit = defineEmits(['addToCart'])
-
-const formatPrice = (price) => {
-  if (price === null || price === undefined || price === '') return ''
-  return Number(price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+const props = defineProps({ product: { type: Object, required: true } })
 
 const router = useRouter()
 const goToDetail = () => {
-  console.log('Navegando para:', props.product?.id)
   router.push({ name: 'ProductDetail', params: { id: props.product?.id } })
 }
 
-const mainUrl = "https://www.kabum.com.br/"
+const mainUrl = 'https://www.kabum.com.br/'
 const name = computed(() => props.product?.name ?? '')
-const imgSrc = computed(
-  () =>
-    mainUrl + props.product?.image_url0 ||
-    mainUrl + props.product?.image_url1 ||
-    mainUrl + props.product?.image_url2 ||
-    mainUrl + props.product?.image_url3 ||
-    mainUrl + props.product?.image_url4 ||
-    ''
-)
-const originalPrice = computed(
-  () => props.product?.original_price ?? props.product?.originalPrice ?? null
-)
-const discountPrice = computed(
-  () => props.product?.discount_price ?? props.product?.discountPrice ?? null
-)
-
-watchEffect(() => {
-
+const imgSrc = computed(() => {
+  const p = props.product ?? {}
+  const rel =
+    p.image_url0 || p.image_url1 || p.image_url2 || p.image_url3 || p.image_url4 || ''
+  return rel ? mainUrl + rel : ''
 })
+const originalPrice = computed(() => props.product?.original_price ?? props.product?.originalPrice ?? null)
+const discountPrice = computed(() => props.product?.discount_price ?? props.product?.discountPrice ?? null)
+
+watchEffect(() => {})
 </script>
 
 <template>
@@ -48,11 +30,7 @@ watchEffect(() => {
     class="cursor-pointer bg-neutral-900 rounded-lg shadow-lg hover:shadow-orange-400/20 transition-shadow duration-300 flex flex-col border border-neutral-800 overflow-hidden"
   >
     <div class="h-48 flex items-center justify-center p-4 bg-white">
-      <img
-        :src="imgSrc"
-        :alt="name"
-        class="max-h-full max-w-full object-contain"
-      />
+      <img :src="imgSrc" :alt="name" class="max-h-full max-w-full object-contain" />
     </div>
 
     <div class="p-4 flex flex-col flex-grow">
@@ -70,12 +48,10 @@ watchEffect(() => {
           </p>
         </div>
 
-        <button
-          @click.stop="emit('addToCart', props.product)"
-          class="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-black font-bold py-2 px-4 rounded-md transition-colors duration-300"
-        >
-          Adicionar ao Carrinho
-        </button>
+        
+        <div @click.stop>
+          <AddToCartButton :product="props.product" />
+        </div>
       </div>
     </div>
   </article>
