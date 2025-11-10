@@ -14,6 +14,7 @@ import AdminProviderView from '../views/AdminProviderView.vue';
 import ProfileView from '../views/ProfileView.vue';
 import { jwtDecode } from 'jwt-decode';
 import CartView from '@/views/CartView.vue';
+import AdminCouponView from '@/views/AdminCouponView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -107,6 +108,11 @@ const router = createRouter({
           path: 'providers',
           name: 'admin-providers',
           component: AdminProviderView
+        },
+        {
+          path: 'Coupon',
+          name: 'admin-coupons',
+          component: AdminCouponView
         }
       ]
     }
