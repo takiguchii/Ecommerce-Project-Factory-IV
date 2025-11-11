@@ -77,6 +77,11 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/CouponActivate',
+      name: 'coupon',
+      component: () => import('../views/CouponActivateView.vue'),
+    },
+    {
       path: '/admin',
       component: AdminLayout,
       children: [
@@ -113,7 +118,8 @@ const router = createRouter({
           path: 'Coupon',
           name: 'admin-coupons',
           component: AdminCouponView
-        }
+        },
+      
       ]
     }
   ],
