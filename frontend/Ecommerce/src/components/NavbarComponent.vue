@@ -54,7 +54,7 @@
 
         <!-- CUPOM -->
         <div>
-          <button
+          <button @click="$router.push('/CouponActivate')"
             class="flex items-center justify-center gap-2 bg-gradient-to-r from-neutral-800 to-neutral-800/70 hover:from-green-600 hover:to-green-600 px-3 py-2 rounded-xl shadow-md ring-4 ring-neutral-700/50 hover:ring-orange-500 transition-all duration-200 mx-4 hover:-translate-y-0.5"
             title="Cupom de desconto">
             <img width="28" height="28" src="https://img.icons8.com/color/48/ticket.png" alt="ticket" class="w-7 h-7" />
