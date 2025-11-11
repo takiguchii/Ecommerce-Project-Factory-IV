@@ -34,5 +34,10 @@ namespace Ecommerce.Repositories
         {
             _dbContext.Entry(user).State = EntityState.Modified;
         }
+        public async Task<User?> FindByAppUserIdAsync(string appUserId)
+        {
+            return await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.AppUserId == appUserId);
+        }
     }
 }

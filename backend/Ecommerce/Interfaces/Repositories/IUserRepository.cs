@@ -8,5 +8,6 @@ namespace Ecommerce.Interfaces.Repositories
         void Update(User user);
         Task<User?> GetByAppUserIdAsync(string appUserId);
         void SaveChanges();
+        Task<User?> FindByAppUserIdAsync(string appUserId);
     }
 }
