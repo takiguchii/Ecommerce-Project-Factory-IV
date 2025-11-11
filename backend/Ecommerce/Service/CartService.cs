@@ -13,6 +13,7 @@ namespace Ecommerce.Service
     {
         private readonly ICartRepository _cartRepository;
         private readonly IProductRepository _productRepository; 
+        
         public CartService(ICartRepository cartRepository, IProductRepository productRepository)
         {
             _cartRepository = cartRepository;
@@ -51,27 +52,28 @@ namespace Ecommerce.Service
                     ProductId = dto.ProductId,
                     Quantity = dto.Quantity
                 };
-                _cartRepository.AddItem(newItem);
+                cart.Items.Add(newItem); 
             }
-
+            
             await _cartRepository.SaveChangesAsync();
-
             return await GetCartAsync(appUserId);
         }
 
         public async Task<CartDto> GetCartAsync(string appUserId)
         {
             var cart = await _cartRepository.GetByUserIdAsync(appUserId);
-            
             return MapCartToDto(cart);
         }
-        
+
         public async Task<CartDto> RemoveFromCartAsync(string appUserId, int productId)
         {
             var cart = await _cartRepository.GetByUserIdAsync(appUserId);
-            if (cart == null) return MapCartToDto(null); 
+            if (cart == null)
+            {
+                return new CartDto(); 
+            }
 
-            var itemToRemove = cart.Items.FirstOrDefault(item => item.ProductId == productId);
+            var itemToRemove = await _cartRepository.GetItemInCartAsync(cart.Id, productId);
             if (itemToRemove != null)
             {
                 _cartRepository.RemoveItem(itemToRemove);
@@ -80,18 +82,21 @@ namespace Ecommerce.Service
 
             return await GetCartAsync(appUserId);
         }
-        
+
         public async Task<CartDto> UpdateItemQuantityAsync(string appUserId, int productId, int newQuantity)
         {
-            var cart = await _cartRepository.GetByUserIdAsync(appUserId);
-            if (cart == null) return MapCartToDto(null); 
-
-            var itemToUpdate = cart.Items.FirstOrDefault(item => item.ProductId == productId);
-
             if (newQuantity <= 0)
             {
                 return await RemoveFromCartAsync(appUserId, productId);
             }
+
+            var cart = await _cartRepository.GetByUserIdAsync(appUserId);
+            if (cart == null)
+            {
+                return new CartDto();
+            }
+
+            var itemToUpdate = await _cartRepository.GetItemInCartAsync(cart.Id, productId);
 
             if (itemToUpdate != null)
             {
@@ -101,6 +106,20 @@ namespace Ecommerce.Service
             }
             
             return await GetCartAsync(appUserId);
+        }
+        
+        public async Task ClearCartAsync(string appUserId)
+        {
+            var cart = await _cartRepository.GetByUserIdAsync(appUserId);
+
+            if (cart != null && cart.Items.Any())
+            {
+                foreach (var item in cart.Items)
+                {
+                    _cartRepository.RemoveItem(item);
+                }
+                await _cartRepository.SaveChangesAsync();
+            }
         }
         
         private CartDto MapCartToDto(Cart cart)
@@ -120,7 +139,7 @@ namespace Ecommerce.Service
                     var itemDto = new CartItemDto
                     {
                         ProductId = item.ProductId,
-                        Name = item.Product.name,
+                        Name = item.Product.name, 
                         Price = item.Product.discount_price, 
                         Quantity = item.Quantity,
                         ImageUrl = item.Product.image_url0 
