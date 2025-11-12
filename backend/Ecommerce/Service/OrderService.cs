@@ -1,9 +1,9 @@
-using Ecommerce.DTOs; // Precisamos do CartDto
+using Ecommerce.DTOs; 
 using Ecommerce.Entity;
 using Ecommerce.Interfaces.Repositories;
 using Ecommerce.Interfaces.Services;
 using System;
-using System.Globalization; // Para converter o preço (string)
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -41,7 +41,15 @@ namespace Ecommerce.Service
                 decimal price;
                 try
                 {
-                    price = decimal.Parse(itemDto.Price, CultureInfo.InvariantCulture);
+                    string rawPrice = itemDto.Price;
+                    string sanitizedPrice = rawPrice
+                        .Replace("R$", "")    // Remove "R$"
+                        .Replace(".", "")     // Remove o ponto de milhar
+                        .Replace(",", ".")    // Troca a vírgula de decimal por ponto
+                        .Trim();              // Remove espaços
+
+                    // 3. Converte a string limpa (ex: "2314.90")
+                    price = decimal.Parse(sanitizedPrice, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
                 {
@@ -52,9 +60,9 @@ namespace Ecommerce.Service
                 {
                     ProductId = itemDto.ProductId,
                     Quantity = itemDto.Quantity,
-                    Price = price, 
-                    ProductName = itemDto.Name, 
-                    ImageUrl = itemDto.ImageUrl 
+                    Price = price,
+                    ProductName = itemDto.Name,
+                    ImageUrl = itemDto.ImageUrl
                 };
                 order.Items.Add(orderItem);
             }
