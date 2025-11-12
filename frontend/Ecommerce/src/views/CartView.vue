@@ -3,7 +3,6 @@
     <div class="max-w-6xl mx-auto p-4 md:p-8">
       <h1 class="text-2xl md:text-3xl font-bold text-orange-400 mb-6">Meu Carrinho</h1>
 
-      <!-- vazio -->
       <div
         v-if="!cart.items || cart.items.length === 0"
         class="bg-neutral-900 border border-neutral-800 rounded-xl p-10 text-center"
@@ -17,23 +16,20 @@
         </router-link>
       </div>
 
-      <!-- conteúdo -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- itens -->
+        
         <div class="lg:col-span-2 space-y-4">
           <div
             v-for="item in cart.items"
             :key="item.productId"
             class="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-5 flex gap-4 md:gap-5 items-start"
           >
-            <!-- imagem -->
             <div
               class="w-24 h-24 md:w-28 md:h-28 bg-white rounded-lg flex items-center justify-center overflow-hidden shrink-0"
             >
               <img :src="getImageUrl(item)" :alt="item.name" class="max-w-full max-h-full object-contain" />
             </div>
 
-            <!-- detalhes -->
             <div class="flex-1 min-w-0">
               <h3 class="font-semibold text-orange-300 truncate">{{ item.name }}</h3>
               <p class="text-sm text-neutral-400 mt-1">ID: {{ item.productId }}</p>
@@ -67,7 +63,6 @@
           </div>
         </div>
 
-        <!-- resumo -->
         <aside class="bg-neutral-900 border border-neutral-800 rounded-xl p-5 h-fit sticky top-6">
           <h2 class="text-lg font-semibold text-neutral-200 mb-4">Resumo do Pedido</h2>
 
@@ -82,10 +77,16 @@
           </div>
 
           <button
-            class="w-full rounded-lg bg-orange-500 hover:bg-orange-600 text-black font-semibold py-2 transition-colors"
+            @click="handleCheckout"
+            :disabled="isCheckoutLoading"
+            class="w-full rounded-lg bg-orange-500 hover:bg-orange-600 text-black font-semibold py-2 transition-colors disabled:bg-neutral-600 disabled:cursor-not-allowed"
           >
-            Finalizar Compra
+            {{ isCheckoutLoading ? 'Finalizando...' : 'Finalizar Compra (TESTE)' }}
           </button>
+
+          <p v-if="checkoutError" class="mt-3 text-sm text-red-400">
+            Erro: {{ checkoutError }}
+          </p>
         </aside>
       </div>
     </div>
@@ -96,15 +97,20 @@
 <script setup>
 import { onMounted, computed } from 'vue'
 import { useCart } from '@/composables/useCart'
+import { useOrders } from '@/composables/useOrders' 
+import { useRouter } from 'vue-router' 
 
 const { cart, fetchCart, removeFromCart, updateItemQuantity } = useCart()
+
+const { checkout, isLoading: isCheckoutLoading, error: checkoutError } = useOrders();
+const router = useRouter(); 
+
 const mainUrl = 'https://www.kabum.com.br/'
 
 onMounted(() => {
   fetchCart()
 })
 
-/* ---------- helpers numéricos ---------- */
 function toNum(v) {
   if (typeof v === 'number') return v
   if (!v) return 0
@@ -117,12 +123,9 @@ function toFixed2(v) {
   return Number(toNum(v)).toFixed(2)
 }
 
-/* ---------- imagens (padrão Kabum) ---------- */
 function getImageUrl(item) {
-  // Se já veio completo da API
   if (item.imageUrl && /^https?:\/\//i.test(item.imageUrl)) return item.imageUrl
 
-  // Se veio caminho relativo ou campos image_urlN
   const path =
     item.imageUrl ||
     item.image_url0 ||
@@ -135,7 +138,6 @@ function getImageUrl(item) {
   return /^https?:\/\//i.test(path) ? path : mainUrl + path
 }
 
-/* ---------- totais ---------- */
 function itemSubtotal(item) {
   return toNum(item.price) * Number(item.quantity || 1)
 }
@@ -143,10 +145,22 @@ const cartTotal = computed(() =>
   (cart.value?.items || []).reduce((sum, i) => sum + itemSubtotal(i), 0)
 )
 
-/* ---------- handlers ---------- */
 function handleQuantityChange(productId, newQuantity) {
   const q = parseInt(newQuantity, 10)
   updateItemQuantity(productId, q)
 }
-</script>
 
+const handleCheckout = async () => {
+  try {
+    await checkout();
+
+    alert('Compra finalizada com sucesso!');
+
+    await fetchCart(); 
+
+  } catch (error) {
+    alert(`Erro no checkout: ${error.message}`);
+  }
+};
+
+</script>
