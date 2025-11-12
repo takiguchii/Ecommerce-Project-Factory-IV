@@ -20,8 +20,21 @@ namespace Ecommerce.Service
             _cartService = cartService;
         }
 
-        public async Task<Order> CreateOrderFromCartAsync(string appUserId, int numericUserId)
+
+        public async Task<Order> CreateOrderFromCartAsync(string appUserId, int numericUserId, CreateCheckoutDto dto) 
         {
+            if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
+            {
+                throw new InvalidOperationException("O método de pagamento é obrigatório.");
+            }
+
+            string paymentMethod = dto.PaymentMethod.ToUpperInvariant();
+
+            if (paymentMethod != "PIX" && paymentMethod != "CREDITCARD") 
+            {
+                throw new InvalidOperationException("Método de pagamento inválido. Aceito apenas 'PIX' ou 'CREDITCARD'.");
+            }
+
             var cartDto = await _cartService.GetCartAsync(appUserId);
 
             if (cartDto == null || !cartDto.Items.Any())
@@ -31,9 +44,10 @@ namespace Ecommerce.Service
 
             var order = new Order
             {
-                UserId = numericUserId, 
-                Status = "Aguardando Pagamento", 
-                CreatedAt = DateTime.UtcNow
+                UserId = numericUserId,
+                Status = "Aguardando Pagamento",
+                CreatedAt = DateTime.UtcNow,
+                PaymentMethod = paymentMethod 
             };
 
             foreach (var itemDto in cartDto.Items)
@@ -41,14 +55,8 @@ namespace Ecommerce.Service
                 decimal price;
                 try
                 {
-                    string rawPrice = itemDto.Price;
-                    string sanitizedPrice = rawPrice
-                        .Replace("R$", "")    // Remove "R$"
-                        .Replace(".", "")     // Remove o ponto de milhar
-                        .Replace(",", ".")    // Troca a vírgula de decimal por ponto
-                        .Trim();              // Remove espaços
-
-                    // 3. Converte a string limpa (ex: "2314.90")
+                    string sanitizedPrice = itemDto.Price
+                        .Replace("R$", "").Replace(".", "").Replace(",", ".").Trim();
                     price = decimal.Parse(sanitizedPrice, CultureInfo.InvariantCulture);
                 }
                 catch (Exception ex)
@@ -56,19 +64,18 @@ namespace Ecommerce.Service
                     throw new FormatException($"Formato de preço inválido no DTO: {itemDto.Price}", ex);
                 }
 
-                var orderItem = new OrderItem
+                order.Items.Add(new OrderItem
                 {
                     ProductId = itemDto.ProductId,
                     Quantity = itemDto.Quantity,
                     Price = price,
                     ProductName = itemDto.Name,
                     ImageUrl = itemDto.ImageUrl
-                };
-                order.Items.Add(orderItem);
+                });
             }
-            
+
             order.SubTotal = cartDto.TotalValue;
-            order.Total = cartDto.TotalValue; 
+            order.Total = cartDto.TotalValue;
 
             await _orderRepository.AddAsync(order);
             await _cartService.ClearCartAsync(appUserId);

@@ -15,11 +15,10 @@ namespace Ecommerce.Entity
         public decimal Total { get; set; }    
 
         // filtros do futuri 
-        //public decimal ShippingCost { get; set; } = 0; // Custo do Frete
-        //public decimal Discount { get; set; } = 0;     // Desconto do Cupom
-        //public string? ShippingAddress { get; set; }  // Endereço de entrega
-        //public string? PaymentMethod { get; set; }    // "Pix" ou "Cartao"
-
+        //public decimal ShippingCost { get; set; } = 0; 
+        //public decimal Discount { get; set; } = 0;     
+        //public string? ShippingAddress { get; set; } 
+        public string? PaymentMethod { get; set; }   
         public string Status { get; set; } = "Aguardando Pagamento";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

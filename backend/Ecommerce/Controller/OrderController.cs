@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Ecommerce.DTOs;
 
 namespace Ecommerce.Controller
 {
@@ -23,7 +24,7 @@ namespace Ecommerce.Controller
         }
 
         [HttpPost("checkout")]
-        public async Task<IActionResult> CreateOrderFromCart()
+        public async Task<IActionResult> CreateOrderFromCart([FromBody] CreateCheckoutDto dto)
         {
             try
             {
@@ -42,7 +43,7 @@ namespace Ecommerce.Controller
 
                 var numericUserId = user.Id;
 
-                var order = await _orderService.CreateOrderFromCartAsync(appUserId, numericUserId);
+                var order = await _orderService.CreateOrderFromCartAsync(appUserId, numericUserId, dto); 
 
                 return Ok(order);
             }
