@@ -12,5 +12,7 @@ namespace Ecommerce.Interfaces.Services
         Task<CartDto> RemoveFromCartAsync(string appUserId, int productId);
         
         Task<CartDto> UpdateItemQuantityAsync(string appUserId, int productId, int newQuantity);
+        
+        Task ClearCartAsync(string appUserId); 
     }
 }
