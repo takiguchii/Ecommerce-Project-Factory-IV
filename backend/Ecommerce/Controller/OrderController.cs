@@ -57,7 +57,10 @@ namespace Ecommerce.Controller
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = $"Erro interno no servidor: {ex.Message}" });
+                // Truque de Debug: Pega a mensagem interna (do banco de dados)
+                var dbError = ex.InnerException?.Message ?? ex.Message;
+    
+                return StatusCode(500, new { message = $"Erro do Banco: {dbError}" });
             }
         }
     }
