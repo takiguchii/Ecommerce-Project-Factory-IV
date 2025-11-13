@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Ecommerce.DTOs;
 
 namespace Ecommerce.Controller
 {
@@ -23,7 +24,7 @@ namespace Ecommerce.Controller
         }
 
         [HttpPost("checkout")]
-        public async Task<IActionResult> CreateOrderFromCart()
+        public async Task<IActionResult> CreateOrderFromCart([FromBody] CreateCheckoutDto dto)
         {
             try
             {
@@ -42,7 +43,7 @@ namespace Ecommerce.Controller
 
                 var numericUserId = user.Id;
 
-                var order = await _orderService.CreateOrderFromCartAsync(appUserId, numericUserId);
+                var order = await _orderService.CreateOrderFromCartAsync(appUserId, numericUserId, dto); 
 
                 return Ok(order);
             }
@@ -56,7 +57,10 @@ namespace Ecommerce.Controller
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = $"Erro interno no servidor: {ex.Message}" });
+                // Truque de Debug: Pega a mensagem interna (do banco de dados)
+                var dbError = ex.InnerException?.Message ?? ex.Message;
+    
+                return StatusCode(500, new { message = $"Erro do Banco: {dbError}" });
             }
         }
     }
