@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { apiPost } from '@/services/api'
+import { useCart } from '@/composables/useCart'
 
 const props = defineProps({
   product: { type: Object, required: true }
@@ -11,6 +11,8 @@ const router = useRouter()
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref('success') // success | error | info
+
+const { addToCart: addToCartGlobal } = useCart()
 
 function triggerToast(message, type = 'success') {
   toastMessage.value = message
@@ -28,10 +30,7 @@ async function addToCart() {
       return
     }
 
-    await apiPost('/cart/add', {
-      productId: props.product.id,
-      quantity: 1
-    })
+    await addToCartGlobal(props.product.id, 1) // usa o composable que atualiza o navbar
 
     triggerToast('✅ Produto adicionado ao carrinho!')
   } catch (err) {
