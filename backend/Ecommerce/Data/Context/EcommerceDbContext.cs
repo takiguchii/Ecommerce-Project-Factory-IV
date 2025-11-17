@@ -19,6 +19,8 @@ namespace Ecommerce.Data.Context
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -88,6 +90,16 @@ namespace Ecommerce.Data.Context
                       .WithMany(pr => pr.Products)    
                       .HasForeignKey(p => p.provider_id) 
                       .HasPrincipalKey(p => p.id);     
+                
+                modelBuilder.Entity<Order>()
+                    .HasMany(o => o.Items) 
+                    .WithOne() 
+                    .HasForeignKey(oi => oi.OrderId); 
+                
+                modelBuilder.Entity<User>()
+                    .HasMany<Order>() 
+                    .WithOne() 
+                    .HasForeignKey(o => o.UserId);
             });
             
 

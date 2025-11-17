@@ -35,8 +35,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
-
-// Registro da camada de Repositório
+builder.Services.AddScoped<IOrderRepository, OrderRepository>(); 
+builder.Services.AddScoped<IOrderService, OrderService>(); 
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 
 //teste do carrinho 

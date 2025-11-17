@@ -54,7 +54,7 @@
 
         <!-- CUPOM -->
         <div>
-          <button
+          <button @click="$router.push('/CouponActivate')"
             class="flex items-center justify-center gap-2 bg-gradient-to-r from-neutral-800 to-neutral-800/70 hover:from-green-600 hover:to-green-600 px-3 py-2 rounded-xl shadow-md ring-4 ring-neutral-700/50 hover:ring-orange-500 transition-all duration-200 mx-4 hover:-translate-y-0.5"
             title="Cupom de desconto">
             <img width="28" height="28" src="https://img.icons8.com/color/48/ticket.png" alt="ticket" class="w-7 h-7" />
@@ -175,8 +175,10 @@
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span
-              class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ring-2 ring-neutral-900"></span>
+            <span v-if="cartItemCount > 0"
+              class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ring-2 ring-neutral-900">
+              {{ cartItemCount > 9 ? '9+' : cartItemCount }}
+            </span>
           </RouterLink>
         </div>
       </div>
@@ -185,10 +187,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useCategories } from '@/composables/useCategories'
+import { useCart } from '@/composables/useCart'
 import { apiGet } from '@/services/api'
 
 const router = useRouter()
@@ -199,7 +202,6 @@ const userMenuDropdown = ref(null)
 const toggleUserMenu = () => { isUserMenuOpen.value = !isUserMenuOpen.value }
 const handleLogout = () => { isUserMenuOpen.value = false; logout() }
 
-
 const isDepartmentsOpen = ref(false)
 const hoveredCategoryId = ref(null)
 let departmentTimeout = null
@@ -209,12 +211,27 @@ const showDepartments = () => { clearTimeout(departmentTimeout); isDepartmentsOp
 const hideDepartments = () => {
   departmentTimeout = setTimeout(() => { isDepartmentsOpen.value = false; hoveredCategoryId.value = null }, 200)
 }
-const showSubcategories = (categoryId) => { clearTimeout(subcategoryTimeout); clearTimeout(departmentTimeout); hoveredCategoryId.value = categoryId }
+const showSubcategories = (categoryId) => {
+  clearTimeout(subcategoryTimeout)
+  clearTimeout(departmentTimeout)
+  hoveredCategoryId.value = categoryId
+}
 const hideSubcategories = () => {
   subcategoryTimeout = setTimeout(() => { hoveredCategoryId.value = null; hideDepartments() }, 200)
 }
 
-const { categories, fetchCategories, /* subcategories, fetchSubCategories */ } = useCategories()
+const { categories, subcategories, fetchCategories, fetchSubCategories } = useCategories()
+
+/* CARRINHO */
+const { cart, fetchCart } = useCart()
+
+const cartItemCount = computed(() => {
+  if (!cart.value || !Array.isArray(cart.value.items)) return 0
+  return cart.value.items.reduce((total, item) => {
+    const qty = Number(item.quantity ?? 1)
+    return total + (isNaN(qty) ? 0 : qty)
+  }, 0)
+})
 
 const searchRoot = ref(null)
 const searchTerm = ref('')
@@ -342,6 +359,8 @@ function onDocPointerDown(e) {
 const isMobileMenuOpen = ref(false)
 onMounted(async () => {
   await fetchCategories()
+  await fetchSubCategories()
+  await fetchCart() // carrega o carrinho ao montar o navbar
   document.addEventListener('pointerdown', onDocPointerDown, { capture: true })
 })
 onBeforeUnmount(() => {

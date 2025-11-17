@@ -84,9 +84,14 @@
             </span>
           </div>
 
-          <button class="bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-black font-semibold py-3 px-4 rounded-xl transition-all duration-200 w-full shadow-md ring-1 ring-orange-500/20 hover:ring-orange-500/40 mb-6">
-            Adicionar ao Carrinho
-          </button>
+          <div class="mb-6">
+            <AddToCartButton
+              v-if="product"
+              class="w-full"
+              :product="{ id: product.id }"
+            />
+            <div v-else class="h-12 w-full bg-neutral-800 rounded-xl animate-pulse"></div>
+          </div>
 
           <div class="rounded-2xl bg-neutral-900/60 border border-neutral-800 ring-1 ring-black/5 shadow-lg divide-y divide-neutral-800 overflow-hidden">
             <div class="p-5">
@@ -116,6 +121,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getProductById, getBrandCached } from '@/services/api'
+import AddToCartButton from '@/components/AddToCartButton.vue'
 
 const route = useRoute()
 const product = ref(null)
@@ -162,7 +168,6 @@ function parsePrice(raw) {
   if (raw === undefined || raw === null) return null
   if (typeof raw === 'number') return raw
   if (typeof raw === 'string') {
-    // remove símbolos, pontos de milhar e troca vírgula por ponto
     const norm = raw.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
     const n = parseFloat(norm)
     return Number.isNaN(n) ? null : n

@@ -40,6 +40,11 @@ const navLinkClass = "block py-2 px-3 rounded-md no-underline text-gray-300 font
               Fornecedores
             </router-link>
           </li>
+          <li>
+            <router-link to="/admin/Coupon" :class="navLinkClass">
+              Cupom
+            </router-link>
+          </li>
         </ul>
       </nav>
     </aside>

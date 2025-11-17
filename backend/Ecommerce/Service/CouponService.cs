@@ -31,9 +31,9 @@ namespace Ecommerce.Service
                 throw new Exception("O código do cupom já existe."); 
             }
             
-            if (createDto.ExpiryDate <= DateTime.UtcNow)
+            if (createDto.ExpiryDate.Date < DateTime.UtcNow.Date)
             {
-                 throw new Exception("A data de expiração deve ser no futuro.");
+                throw new Exception("A data de expiração não pode ser um dia no passado.");
             }
 
             var coupon = new Coupon
@@ -94,9 +94,9 @@ namespace Ecommerce.Service
         {
             var coupon = await _couponRepository.GetByCodeAsync(code);
             
-            if (coupon == null || !coupon.IsActive || coupon.ExpiryDate <= DateTime.UtcNow)
+            if (coupon == null || !coupon.IsActive || coupon.ExpiryDate.Date < DateTime.UtcNow.Date)
             {
-                return null; 
+                return null;
             }
 
             return coupon; 

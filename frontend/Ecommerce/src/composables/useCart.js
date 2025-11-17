@@ -41,7 +41,6 @@ function toNum(v) {
 export function useCart() {
   async function fetchCart() {
     try {
-      // baseURL já é .../api
       const data = await apiGet('/cart')
       cart.value = normalizeCart(data)
     } catch (error) {
@@ -52,8 +51,8 @@ export function useCart() {
 
   async function addToCart(productId, quantity = 1) {
     try {
-      const { data } = await api.post('/cart/add', { productId, quantity })
-      cart.value = normalizeCart(data)
+      await api.post('/cart/add', { productId, quantity })
+      await fetchCart() // <-- atualização automática
     } catch (error) {
       console.error('Erro ao adicionar ao carrinho:', error)
       throw error
@@ -62,8 +61,8 @@ export function useCart() {
 
   async function removeFromCart(productId) {
     try {
-      const { data } = await api.delete(`/cart/remove/${productId}`)
-      cart.value = normalizeCart(data)
+      await api.delete(`/cart/remove/${productId}`)
+      await fetchCart() // <-- atualização automática
     } catch (error) {
       console.error('Erro ao remover do carrinho:', error)
     }
@@ -71,8 +70,8 @@ export function useCart() {
 
   async function updateItemQuantity(productId, quantity) {
     try {
-      const { data } = await api.put(`/cart/update/${productId}?quantity=${quantity}`)
-      cart.value = normalizeCart(data)
+      await api.put(`/cart/update/${productId}?quantity=${quantity}`)
+      await fetchCart() // <-- atualização automática
     } catch (error) {
       console.error('Erro ao atualizar quantidade:', error)
     }
