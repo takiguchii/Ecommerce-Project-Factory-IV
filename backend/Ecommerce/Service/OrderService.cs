@@ -2,10 +2,8 @@ using Ecommerce.DTOs;
 using Ecommerce.Entity;
 using Ecommerce.Interfaces.Repositories;
 using Ecommerce.Interfaces.Services;
-using System;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace Ecommerce.Service
 {
@@ -45,7 +43,7 @@ namespace Ecommerce.Service
             var order = new Order
             {
                 UserId = numericUserId,
-                Status = "Aguardando Pagamento",
+                Status = "Pagamento concluido",
                 CreatedAt = DateTime.UtcNow,
                 PaymentMethod = paymentMethod 
             };
@@ -78,6 +76,7 @@ namespace Ecommerce.Service
             order.Total = cartDto.TotalValue;
 
             await _orderRepository.AddAsync(order);
+            
             await _cartService.ClearCartAsync(appUserId);
 
             return order;
