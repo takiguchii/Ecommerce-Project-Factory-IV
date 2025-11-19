@@ -1,6 +1,6 @@
 namespace Ecommerce.DTOs;
 
-public class CalculateShippingDto
+public class CreateCalculateShippingDto
 {
     public string Cep { get; set; } 
 }
