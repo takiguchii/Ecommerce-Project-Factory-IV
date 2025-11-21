@@ -72,7 +72,7 @@ public class ShippingService : IShippingService
             "RS" => 25.00m,
             "BA" or "PE" or "CE" => 45.00m,
             "AM" or "RR" or "AC" => 60.00m,
-            _ => 35.00m // Preço padrão para o resto do Brasil
+            _ => 35.00m 
         };
     }
 }
