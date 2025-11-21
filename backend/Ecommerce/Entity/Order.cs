@@ -15,7 +15,8 @@ namespace Ecommerce.Entity
         public decimal Total { get; set; }    
 
         // filtros do futuri 
-        //public decimal ShippingCost { get; set; } = 0; 
+        public decimal ShippingCost { get; set; } = 0; 
+        public string? Carrier { get; set; } 
         //public decimal Discount { get; set; } = 0;     
         //public string? ShippingAddress { get; set; } 
         public string? PaymentMethod { get; set; }   

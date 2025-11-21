@@ -36,6 +36,7 @@ export async function getBrands() {
   return Array.isArray(list) ? list.map(normalizeBrand) : []
 }
 
+
 export async function getBrandById(id) {
   try {
     const brand = await apiGet(`/brands/${id}`)
@@ -76,6 +77,7 @@ function normalizeCategory(raw) {
   }
 }
 
+
 export async function getCategories() {
   const list = await apiGet('/categories')
   return Array.isArray(list) ? list.map(normalizeCategory) : []
@@ -114,5 +116,9 @@ export function register(userInfo) {
 export async function getProductById(id) {
   return await apiGet(`/products/${id}`)
 }
+export function calculateShipping(cep) {
+  return api.post('/shipping/calculate', { cep })
+}
+
 
 export default api
