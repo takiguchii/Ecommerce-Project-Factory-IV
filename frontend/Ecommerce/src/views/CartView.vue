@@ -51,48 +51,61 @@
           </div>
 
           <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
-            <h2 class="text-lg font-semibold text-neutral-200 mb-4">Calcular Frete</h2>
+            <h2 class="text-lg font-semibold text-neutral-200 mb-4">Entrega</h2>
             
-            <div class="flex gap-3 mb-4">
-              <input 
-                type="text" 
-                v-model="cepInput"
-                @keyup.enter="handleCalculateShipping"
-                placeholder="Digite seu CEP"
-                class="flex-1 rounded-lg bg-neutral-800 border border-neutral-700 px-4 py-2 text-neutral-100 focus:outline-none focus:border-orange-500 transition-colors"
-              />
-              <button 
-                @click="handleCalculateShipping"
-                :disabled="loadingShipping"
-                class="px-6 py-2 rounded-lg border border-orange-500 text-orange-500 font-semibold hover:bg-orange-500 hover:text-black transition-all disabled:opacity-50"
-              >
-                {{ loadingShipping ? '...' : 'OK' }}
-              </button>
+            <div v-if="loadingShipping" class="text-neutral-400 py-4">
+              Calculando frete para seu endereço...
             </div>
 
-            <p v-if="shippingError" class="text-red-400 text-sm mb-3">{{ shippingError }}</p>
-
-            <div v-if="shippingOptions.length > 0" class="space-y-2">
-              <div 
-                v-for="option in shippingOptions" 
-                :key="option.name"
-                @click="selectedShipping = option"
-                class="flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-neutral-800"
-                :class="selectedShipping?.name === option.name ? 'border-orange-500 bg-neutral-800' : 'border-neutral-700'"
-              >
-                <div class="flex items-center gap-3">
-                  <div class="w-4 h-4 rounded-full border flex items-center justify-center"
-                      :class="selectedShipping?.name === option.name ? 'border-orange-500' : 'border-neutral-500'">
-                      <div v-if="selectedShipping?.name === option.name" class="w-2 h-2 rounded-full bg-orange-500"></div>
-                  </div>
-                  <div>
-                    <p class="font-semibold text-neutral-200">{{ option.name }} <span class="text-xs font-normal text-neutral-400">({{ option.carrier }})</span></p>
-                    <p class="text-xs text-neutral-400">Entrega em {{ option.estimatedDeliveryDays }} dias úteis</p>
-                  </div>
+            <div v-else-if="hasAddress">
+                
+                <div class="flex items-start gap-3 mb-6 pb-4 border-b border-neutral-800">
+                    <span class="text-2xl">📍</span>
+                    <div>
+                        <p class="text-neutral-300 font-medium">
+                            {{ profile.addressLine || 'Endereço Principal' }}, {{ profile.addressNumber }}
+                        </p>
+                        <p class="text-sm text-neutral-500">
+                            {{ profile.city }} - {{ profile.state }} (CEP: {{ profile.postalCode }})
+                        </p>
+                    </div>
                 </div>
-                <p class="font-bold text-orange-400">R$ {{ toFixed2(option.price) }}</p>
-              </div>
+
+                <p v-if="shippingError" class="text-red-400 text-sm mb-3">{{ shippingError }}</p>
+
+                <div v-if="shippingOptions.length > 0" class="space-y-2">
+                <div 
+                    v-for="option in shippingOptions" 
+                    :key="option.name"
+                    @click="selectedShipping = option"
+                    class="flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-neutral-800"
+                    :class="selectedShipping?.name === option.name ? 'border-orange-500 bg-neutral-800' : 'border-neutral-700'"
+                >
+                    <div class="flex items-center gap-3">
+                    <div class="w-4 h-4 rounded-full border flex items-center justify-center"
+                        :class="selectedShipping?.name === option.name ? 'border-orange-500' : 'border-neutral-500'">
+                        <div v-if="selectedShipping?.name === option.name" class="w-2 h-2 rounded-full bg-orange-500"></div>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-neutral-200">{{ option.name }} <span class="text-xs font-normal text-neutral-400">({{ option.carrier }})</span></p>
+                        <p class="text-xs text-neutral-400">Entrega em {{ option.estimatedDeliveryDays }} dias úteis</p>
+                    </div>
+                    </div>
+                    <p class="font-bold text-orange-400">R$ {{ toFixed2(option.price) }}</p>
+                </div>
+                </div>
             </div>
+
+            <div v-else class="text-center py-6">
+                <p class="text-neutral-300 mb-4">Não encontramos um endereço de entrega no seu perfil.</p>
+                <router-link 
+                    to="/profile" 
+                    class="text-orange-500 border border-orange-500 px-4 py-2 rounded hover:bg-orange-500 hover:text-black transition-colors"
+                >
+                    Cadastrar Endereço
+                </router-link>
+            </div>
+
           </div>
 
           <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
@@ -163,7 +176,7 @@
           </button>
           
           <div class="mt-3 text-center text-xs text-neutral-500 space-y-1">
-            <p v-if="!selectedShipping" class="text-orange-400/70">* Calcule e selecione o frete</p>
+            <p v-if="!selectedShipping" class="text-orange-400/70">* Selecione o frete</p>
             <p v-if="!selectedPayment" class="text-orange-400/70">* Selecione o pagamento</p>
           </div>
 
@@ -180,24 +193,36 @@
 import { onMounted, computed, ref } from 'vue' 
 import { useCart } from '@/composables/useCart'
 import { useOrders } from '@/composables/useOrders' 
+import { useProfile } from '@/composables/useProfile' 
 import { useRouter } from 'vue-router'
 import { calculateShipping } from '@/services/api' 
 
 const { cart, fetchCart, removeFromCart, updateItemQuantity } = useCart()
 const { checkout, isLoading: isCheckoutLoading, error: checkoutError } = useOrders();
-const router = useRouter();
+const { profile, fetchProfile } = useProfile(); 
 
+const router = useRouter();
 const selectedPayment = ref('');
 const mainUrl = 'https://www.kabum.com.br/'
 
-const cepInput = ref('');
 const shippingOptions = ref([]);
-const selectedShipping = ref(null); 
+const selectedShipping = ref(null);
 const loadingShipping = ref(false);
 const shippingError = ref('');
+const hasAddress = ref(false); 
 
-onMounted(() => {
-  fetchCart()
+onMounted(async () => {
+  await Promise.all([ fetchCart(), fetchProfile() ]);
+
+  const postalCode = profile.value?.postalCode || profile.value?.PostalCode;
+
+  if (postalCode) {
+      hasAddress.value = true;
+      await handleCalculateShipping(postalCode);
+  } else {
+      hasAddress.value = false;
+      console.log("Usuário sem PostalCode cadastrado.");
+  }
 })
 
 function toNum(v) {
@@ -229,28 +254,29 @@ function handleQuantityChange(productId, newQuantity) {
   updateItemQuantity(productId, q)
 }
 
-// --- Lógica do Frete ---
-const handleCalculateShipping = async () => {
-    if (!cepInput.value || cepInput.value.length < 8) {
-        shippingError.value = "Digite um CEP válido.";
+// --- Lógica do Frete (Agora recebe o CEP direto) ---
+const handleCalculateShipping = async (cepToCalculate) => {
+    const rawCep = String(cepToCalculate).replace(/\D/g, ''); 
+
+    if (!rawCep || rawCep.length < 8) {
+        shippingError.value = "CEP inválido no cadastro.";
         return;
     }
 
     loadingShipping.value = true;
     shippingError.value = '';
     shippingOptions.value = [];
-    selectedShipping.value = null;
-
+    
     try {
-        const response = await calculateShipping(cepInput.value);
-        shippingOptions.value = response.data; // O axios devolve em .data
+        const response = await calculateShipping(rawCep);
+        shippingOptions.value = response.data; 
         
         if(shippingOptions.value.length === 0) {
-           shippingError.value = "Nenhuma opção encontrada para este CEP.";
+           shippingError.value = "Nenhuma transportadora disponível para sua região.";
         }
     } catch (error) {
-        console.error("Erro frete:", error);
-        shippingError.value = "Erro ao calcular frete. Verifique o CEP.";
+        console.error("Erro ao calcular frete automático:", error);
+        shippingError.value = "Não foi possível calcular o frete no momento.";
     } finally {
         loadingShipping.value = false;
     }
@@ -268,18 +294,15 @@ const handleCheckout = async () => {
   }
 
   try {
-
     await checkout(selectedPayment.value);
-
     alert('Pedido realizado com sucesso!');
     
+    // Reset total
     selectedPayment.value = '';
     selectedShipping.value = null;
     shippingOptions.value = [];
-    cepInput.value = '';
     
     await fetchCart(); 
-
   } catch (error) {
     console.error(error);
   }

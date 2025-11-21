@@ -120,4 +120,5 @@ export function calculateShipping(cep) {
   return api.post('/shipping/calculate', { cep })
 }
 
+
 export default api
