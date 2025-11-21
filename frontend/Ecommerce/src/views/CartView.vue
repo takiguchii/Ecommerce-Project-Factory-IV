@@ -254,7 +254,6 @@ function handleQuantityChange(productId, newQuantity) {
   updateItemQuantity(productId, q)
 }
 
-// --- Lógica do Frete (Agora recebe o CEP direto) ---
 const handleCalculateShipping = async (cepToCalculate) => {
     const rawCep = String(cepToCalculate).replace(/\D/g, ''); 
 
@@ -294,10 +293,9 @@ const handleCheckout = async () => {
   }
 
   try {
-    await checkout(selectedPayment.value);
+    await checkout(selectedPayment.value,selectedShipping.value);
     alert('Pedido realizado com sucesso!');
     
-    // Reset total
     selectedPayment.value = '';
     selectedShipping.value = null;
     shippingOptions.value = [];

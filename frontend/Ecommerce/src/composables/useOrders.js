@@ -5,17 +5,18 @@ export function useOrders() {
   const isLoading = ref(false);
   const error = ref(null);
 
-  const checkout = async (paymentMethod) => {
+  const checkout = async (paymentMethod, shippingOption) => {
     isLoading.value = true;
     error.value = null;
     
     try {
       const payload = {
-        paymentMethod: paymentMethod 
+        paymentMethod: paymentMethod,
+        shippingCost: shippingOption.price,
+        carrier: shippingOption.name + ' (' + shippingOption.carrier + ')' 
       };
 
       const response = await api.post('/orders/checkout', payload);
-      
       return response.data; 
       
     } catch (err) {
@@ -27,9 +28,5 @@ export function useOrders() {
     }
   };
 
-  return { 
-    checkout, 
-    isLoading, 
-    error 
-  };
+  return { checkout, isLoading, error };
 }
