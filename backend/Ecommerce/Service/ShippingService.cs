@@ -36,24 +36,24 @@ public class ShippingService : IShippingService
         {
             new ShippingResultDto 
             { 
-                Name = "Econômico", 
+                Name = "Jamef", 
                 Carrier = "Transportadora Padrão",
                 Price = basePrice, 
-                EstimatedDeliveryDays = 7 
+                EstimatedDeliveryDays = 5 
             },
             new ShippingResultDto 
             { 
-                Name = "Rápido", 
-                Carrier = "Flash Courier",
-                Price = basePrice * 1.5m, 
+                Name = "Jadlog", 
+                Carrier = "Transportadora Rapido",
+                Price = basePrice * 1.8m, 
                 EstimatedDeliveryDays = 3 
             },
             new ShippingResultDto 
             { 
                 Name = "Sedex", 
                 Carrier = "Correios",
-                Price = basePrice * 2.0m, 
-                EstimatedDeliveryDays = 1 
+                Price = basePrice * 1.2m, 
+                EstimatedDeliveryDays = 9 
             }
         };
 
@@ -64,14 +64,14 @@ public class ShippingService : IShippingService
     {
         return uf switch
         {
-            "SP" => 15.00m, 
-            "RJ" => 20.00m,
-            "MG" => 20.00m,
-            "PR" => 22.00m,
-            "SC" => 25.00m,
+            "SP" => 08.50m, 
+            "RJ" => 12.00m,
+            "MG" => 13.00m,
+            "PR" => 12.00m,
+            "SC" => 18.00m,
             "RS" => 25.00m,
-            "BA" or "PE" or "CE" => 45.00m,
-            "AM" or "RR" or "AC" => 60.00m,
+            "BA" or "PE" or "CE" => 25.00m,
+            "AM" or "RR" or "AC" => 30.00m,
             _ => 35.00m 
         };
     }
