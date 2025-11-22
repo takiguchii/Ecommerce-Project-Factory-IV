@@ -77,15 +77,15 @@ namespace Ecommerce.Service
             });
         }
         
-         decimal discountAmount = 0;
+        decimal discountAmount = 0;
 
-         if (!string.IsNullOrEmpty(dto.CouponCode))
+        if (!string.IsNullOrEmpty(dto.CouponCode))
         {
             var coupon = await _couponRepository.GetByCodeAsync(dto.CouponCode);
         
             if (coupon != null && coupon.IsActive && coupon.ExpiryDate >= DateTime.UtcNow)
             {
-            if (coupon.IsPercentage)
+                if (coupon.IsPercentage)
                 {
                     discountAmount = cartDto.TotalValue * (coupon.DiscountValue / 100m);
                 }
