@@ -6,15 +6,17 @@ import ProductRegisterView from '../views/ProductRegisterView.vue';
 import ProductDetailView from '../views/ProductDetailView.vue';
 import SearchResultsView from '../views/SearchResultsView.vue';
 import AdminLayout from '../views/AdminLayoutView.vue';
-import AdminBrandView from '../views/AdminBrandView.vue'; // 
+import AdminBrandView from '../views/AdminBrandView.vue';
 import AdminProductView from '../views/AdminProductView.vue';
 import AdminCategoryView from '../views/AdminCategoryView.vue';
 import AdminSubCategoryView from '../views/AdminSubCategoryView.vue';
 import AdminProviderView from '../views/AdminProviderView.vue';
-import ProfileView from '../views/ProfileView.vue';
-import { jwtDecode } from 'jwt-decode';
-import CartView from '@/views/CartView.vue';
 import AdminCouponView from '@/views/AdminCouponView.vue';
+import AdminOrdersView from '@/views/AdminOrdersView.vue'; 
+import ProfileView from '../views/ProfileView.vue';
+import CartView from '@/views/CartView.vue';
+
+import { jwtDecode } from 'jwt-decode';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -68,7 +70,7 @@ const router = createRouter({
       path: '/cart',
       name: 'cart',
       component: CartView,
-      meta: { requiresAuth: true } 
+      meta: { requiresAuth: true }
     },
     {
       path: '/profile',
@@ -84,6 +86,7 @@ const router = createRouter({
     {
       path: '/admin',
       component: AdminLayout,
+      meta: { requiresAdmin: true },
       children: [
         {
           path: '',
@@ -119,35 +122,38 @@ const router = createRouter({
           name: 'admin-coupons',
           component: AdminCouponView
         },
-      
+        {
+          path: 'orders',
+          name: 'admin-orders',
+          component: AdminOrdersView
+        }
       ]
     }
   ],
 });
-
 
 router.beforeEach((to, from, next) => {
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
   const token = localStorage.getItem('authToken');
 
   if (requiresAdmin) {
-    if (!token) {
-      next({ name: 'login' });
-    } else {
-      try {
-        const decodedToken = jwtDecode(token);
-        const userRole = decodedToken.role || decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    if (!token) return next({ name: 'login' });
 
-        if (userRole === 'Admin') {
-          next();
-        } else {
-          next({ name: 'home' });
-        }
-      } catch (e) {
-        console.error("Erro ao decodificar token:", e);
-        localStorage.removeItem('authToken');
-        next({ name: 'login' });
+    try {
+      const decodedToken = jwtDecode(token);
+      const userRole =
+        decodedToken.role ||
+        decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+      if (userRole === 'Admin') {
+        next();
+      } else {
+        next({ name: 'home' });
       }
+    } catch (e) {
+      console.error('Erro ao decodificar token:', e);
+      localStorage.removeItem('authToken');
+      next({ name: 'login' });
     }
   } else {
     next();
