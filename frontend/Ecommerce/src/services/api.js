@@ -119,6 +119,8 @@ export async function getProductById(id) {
 export function calculateShipping(cep) {
   return api.post('/shipping/calculate', { cep })
 }
-
+export function validateCoupon(code) {
+  return api.get(`/coupon/validate/${code}`)
+}
 
 export default api
