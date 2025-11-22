@@ -38,6 +38,7 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>(); 
 builder.Services.AddScoped<IOrderService, OrderService>(); 
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
+builder.Services.AddScoped<IShippingService, ShippingService>();
 
 //teste do carrinho 
 builder.Services.AddScoped<ICartRepository, CartRepository>();

@@ -6,5 +6,7 @@ namespace Ecommerce.DTOs
     {
         [Required]
         public string PaymentMethod { get; set; }
+        public decimal ShippingCost { get; set; }
+        public string Carrier { get; set; }
     }
 }
