@@ -1,7 +1,8 @@
 using Ecommerce.Entity;
-using Ecommerce.DTOs;
+using Ecommerce.DTOs; 
 
 namespace Ecommerce.Interfaces.Repositories;
+
 public interface IProductRepository
 {
     void Add(Product product);
@@ -12,12 +13,7 @@ public interface IProductRepository
     List<Product> GetPromotions(); 
     void Update(Product product);
     
-    //Task<CreatePaginatedResultDto<Product>> GetByCategoryPaginatedAsync(int categoryId, int pageNumber, int pageSize);
-    Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId);
-
-    // Adicionando metodo da barra de pesquisa ( experimental ) 
+    Task<(List<Product> Items, int TotalCount)> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId);
     Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm, int limit);
-    
-    // Metodo para endpoint da grid de produtos filtrados
     Task<List<Product>> GetFilteredProductsAsync(int? categoryId, int? subCategoryId, int? brandId);
 }
