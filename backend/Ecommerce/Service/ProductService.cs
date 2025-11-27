@@ -31,7 +31,6 @@ public class ProductService : IProductService
     
     public Product? CreateProduct(CreateProductDto productDto)
     {
-
         var category = _categoryRepository.GetById(productDto.category_id);
         if (category == null) return null;
 
@@ -60,7 +59,7 @@ public class ProductService : IProductService
             discount_price = productDto.discount_price,
             description = productDto.description,
             technical_info = productDto.technical_info,
-            // IDs
+            // minhas fks de produto 
             category_id = productDto.category_id,
             sub_category_id = productDto.sub_category_id,
             brand_id = productDto.brand_id,
@@ -82,6 +81,7 @@ public class ProductService : IProductService
     {
         return _productRepository.GetById(id);
     }
+    
     public bool DeleteProduct(int id)
     {
         var product = _productRepository.GetById(id);
@@ -158,23 +158,33 @@ public class ProductService : IProductService
         return selectedPromotions;
     }
     
-    //paginação
     public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
     {
-        return await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
+        // Busca os dados brutos do repositório
+        var (items, totalCount) = await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
+
+        // Monta o DTO 
+        return new CreatePaginatedResultDto<Product>
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
     }
   
     public async Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm)
     {
-        const int suggestionLimit = 5; // Limitandoo a sugestão para 5 itens 
+        const int suggestionLimit = 5; 
             
-        if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) // Definindo o limite para aparecer a sugestão ( só aprece depois de 3 caracters )
+        if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3) 
         { 
             return new List<ProductSearchSuggestionDto>(); 
         }
     
         return await _productRepository.GetSearchSuggestionsAsync(searchTerm, suggestionLimit);
     }
+    
     public async Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId)
     {
         const int productLimit = 12;

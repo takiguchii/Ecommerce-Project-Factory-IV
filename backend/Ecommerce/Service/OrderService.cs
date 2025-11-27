@@ -11,76 +11,101 @@ namespace Ecommerce.Service
     {
         private readonly IOrderRepository _orderRepository;
         private readonly ICartService _cartService;
+        private readonly ICouponRepository _couponRepository;
 
-        public OrderService(IOrderRepository orderRepository, ICartService cartService)
+        public OrderService(IOrderRepository orderRepository, ICartService cartService,ICouponRepository couponRepository)
         {
             _orderRepository = orderRepository;
             _cartService = cartService;
+            _couponRepository = couponRepository;
         }
 
 
         public async Task<Order> CreateOrderFromCartAsync(string appUserId, int numericUserId, CreateCheckoutDto dto) 
         {
-            if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
+        if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
+        {
+            throw new InvalidOperationException("O método de pagamento é obrigatório.");
+        }
+
+        string paymentMethod = dto.PaymentMethod.ToUpperInvariant();
+
+         if (paymentMethod != "PIX" && paymentMethod != "CREDITCARD") 
+        {
+            throw new InvalidOperationException("Método de pagamento inválido.");
+        }
+
+        var cartDto = await _cartService.GetCartAsync(appUserId);
+
+        if (cartDto == null || !cartDto.Items.Any())
+        {
+             throw new InvalidOperationException("Carrinho vazio.");
+        }
+
+        var order = new Order
+        {
+            UserId = numericUserId,
+            Status = "Pagamento concluido", 
+            CreatedAt = DateTime.UtcNow,
+            PaymentMethod = paymentMethod, 
+            Carrier = dto.Carrier,
+            ShippingCost = dto.ShippingCost,
+            CouponCode = dto.CouponCode 
+        };
+
+        foreach (var itemDto in cartDto.Items)
+        {
+            decimal price;
+            try
             {
-                throw new InvalidOperationException("O método de pagamento é obrigatório.");
+                 string sanitizedPrice = itemDto.Price
+                   .Replace("R$", "").Replace(".", "").Replace(",", ".").Trim();
+                 price = decimal.Parse(sanitizedPrice, CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw new FormatException($"Preço inválido: {itemDto.Price}", ex);
             }
 
-            string paymentMethod = dto.PaymentMethod.ToUpperInvariant();
-
-            if (paymentMethod != "PIX" && paymentMethod != "CREDITCARD") 
+            order.Items.Add(new OrderItem
             {
-                throw new InvalidOperationException("Método de pagamento inválido. Aceito apenas 'PIX' ou 'CREDITCARD'.");
-            }
+                ProductId = itemDto.ProductId,
+                Quantity = itemDto.Quantity,
+                Price = price,
+                ProductName = itemDto.Name,
+                ImageUrl = itemDto.ImageUrl
+            });
+        }
+        
+        decimal discountAmount = 0;
 
-            var cartDto = await _cartService.GetCartAsync(appUserId);
-
-            if (cartDto == null || !cartDto.Items.Any())
+        if (!string.IsNullOrEmpty(dto.CouponCode))
+        {
+            var coupon = await _couponRepository.GetByCodeAsync(dto.CouponCode);
+        
+            if (coupon != null && coupon.IsActive && coupon.ExpiryDate >= DateTime.UtcNow)
             {
-                throw new InvalidOperationException("Não é possível criar um pedido de um carrinho vazio.");
-            }
-
-            var order = new Order
-            {
-                UserId = numericUserId,
-                Status = "Pagamento concluido",
-                CreatedAt = DateTime.UtcNow,
-                PaymentMethod = paymentMethod, 
-                Carrier = dto.Carrier,
-                ShippingCost = dto.ShippingCost
-            };
-
-            foreach (var itemDto in cartDto.Items)
-            {
-                decimal price;
-                try
+                if (coupon.IsPercentage)
                 {
-                    string sanitizedPrice = itemDto.Price
-                        .Replace("R$", "").Replace(".", "").Replace(",", ".").Trim();
-                    price = decimal.Parse(sanitizedPrice, CultureInfo.InvariantCulture);
+                    discountAmount = cartDto.TotalValue * (coupon.DiscountValue / 100m);
                 }
-                catch (Exception ex)
+                else
                 {
-                    throw new FormatException($"Formato de preço inválido no DTO: {itemDto.Price}", ex);
+                    discountAmount = coupon.DiscountValue;
                 }
-
-                order.Items.Add(new OrderItem
-                {
-                    ProductId = itemDto.ProductId,
-                    Quantity = itemDto.Quantity,
-                    Price = price,
-                    ProductName = itemDto.Name,
-                    ImageUrl = itemDto.ImageUrl
-                });
             }
+        }
 
-            order.SubTotal = cartDto.TotalValue; 
-            order.Total = cartDto.TotalValue + dto.ShippingCost;
+        order.Discount = discountAmount;
 
-            await _orderRepository.AddAsync(order);
-            await _cartService.ClearCartAsync(appUserId);
+        order.SubTotal = cartDto.TotalValue; 
+        
+        order.Total = Math.Max(0, order.SubTotal + dto.ShippingCost - discountAmount);
 
-            return order;
+        await _orderRepository.AddAsync(order);
+        await _cartService.ClearCartAsync(appUserId);
+
+        return order;
         }
     }
 }

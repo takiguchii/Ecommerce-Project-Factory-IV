@@ -5,7 +5,7 @@ export function useOrders() {
   const isLoading = ref(false);
   const error = ref(null);
 
-  const checkout = async (paymentMethod, shippingOption) => {
+  const checkout = async (paymentMethod, shippingOption, couponCode = null) => {
     isLoading.value = true;
     error.value = null;
     
@@ -13,7 +13,8 @@ export function useOrders() {
       const payload = {
         paymentMethod: paymentMethod,
         shippingCost: shippingOption.price,
-        carrier: shippingOption.name + ' (' + shippingOption.carrier + ')' 
+        carrier: shippingOption.name + ' (' + shippingOption.carrier + ')',
+        couponCode: couponCode
       };
 
       const response = await api.post('/orders/checkout', payload);

@@ -58,7 +58,7 @@ public class ProductRepository : IProductRepository
     }
     
     //Paginação ( em teste usando o Dto ) 
-    public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
+    public async Task<(List<Product> Items, int TotalCount)> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
     {
         var query = _dbContext.Products.AsQueryable();
 
@@ -84,14 +84,9 @@ public class ProductRepository : IProductRepository
             .ToListAsync();
 
         // Retorna o resultado no DTO
-        return new CreatePaginatedResultDto<Product>
-        {
-            Items = items,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalCount = totalCount
-        };
+        return (items, totalCount);
     }
+
     public async Task<List<Product>> GetFilteredProductsAsync(int? categoryId, int? subCategoryId, int? brandId)
     {
         var query = _dbContext.Products.AsQueryable();
@@ -111,5 +106,4 @@ public class ProductRepository : IProductRepository
 
         return await query.ToListAsync();
     }
-
 }
