@@ -60,4 +60,20 @@ public class BrandService : IBrandService
 
         return existingBrand;
     }
+    public List<Brand> GetRandomBrands(int limit)
+    {
+        var allBrands = _brandRepository.GetAll();
+
+        if (allBrands == null || !allBrands.Any())
+        {
+            return new List<Brand>();
+        }
+
+        var randomBrands = allBrands
+            .OrderBy(x => Guid.NewGuid()) 
+            .Take(limit) 
+            .ToList();
+
+        return randomBrands;
+    }
 }
