@@ -35,7 +35,7 @@ namespace Ecommerce.Service
         public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
-
+;
             if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             {
                 throw new UnauthorizedAccessException("Usuário ou senha inválidos.");
