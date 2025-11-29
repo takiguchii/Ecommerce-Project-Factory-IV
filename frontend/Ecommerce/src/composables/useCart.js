@@ -28,7 +28,6 @@ function normalizeCart(raw) {
   return { items, totalValue }
 }
 
-// Converte "R$ 409,69" | "409,69" | "409.69" | number -> number
 function toNum(v) {
   if (typeof v === 'number') return v
   if (!v) return 0
@@ -62,7 +61,7 @@ export function useCart() {
   async function removeFromCart(productId) {
     try {
       await api.delete(`/cart/remove/${productId}`)
-      await fetchCart() // <-- atualização automática
+      await fetchCart()
     } catch (error) {
       console.error('Erro ao remover do carrinho:', error)
     }
@@ -71,7 +70,7 @@ export function useCart() {
   async function updateItemQuantity(productId, quantity) {
     try {
       await api.put(`/cart/update/${productId}?quantity=${quantity}`)
-      await fetchCart() // <-- atualização automática
+      await fetchCart() 
     } catch (error) {
       console.error('Erro ao atualizar quantidade:', error)
     }

@@ -12,16 +12,14 @@ const props = defineProps({
 const emit = defineEmits(['fetch-needed'])
 onMounted(() => emit('fetch-needed'))
 
-const MAX_DISPLAY_SLOTS = 12; // Define o número máximo de slots na grade (ex: 2 linhas de 6)
+const MAX_DISPLAY_SLOTS = 12; 
 
 const displayedBrands = computed(() => props.brands?.slice(0, MAX_DISPLAY_SLOTS) ?? [])
 
-// Lógica para preencher os buracos da grade com blocos vazios
 const placeholders = computed(() => {
   const count = displayedBrands.value.length
-  // Calcula o número de placeholders necessários para preencher o total de slots
   const remaining = MAX_DISPLAY_SLOTS > count ? MAX_DISPLAY_SLOTS - count : 0
-  return Array(remaining).fill(null) // Array de N elementos vazios
+  return Array(remaining).fill(null) 
 })
 
 const placeholderSvg =
