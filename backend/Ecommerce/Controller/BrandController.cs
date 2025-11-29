@@ -22,6 +22,24 @@ namespace Ecommerce.Api.Controllers
             var brands = _brandService.GetAll();
             return Ok(brands);
         }
+        
+        [HttpGet("random")]
+        public IActionResult GetRandomBrands([FromQuery] int limit = 8) 
+        {
+            if (limit <= 0 || limit > 50) 
+            {
+                return BadRequest("O limite de marcas deve ser entre 1 e 50.");
+            }
+
+            var brands = _brandService.GetRandomBrands(limit);
+
+            if (brands == null || !brands.Any())
+            {
+                return NotFound("Nenhuma marca encontrada para exibição aleatória.");
+            }
+
+            return Ok(brands);
+        }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
