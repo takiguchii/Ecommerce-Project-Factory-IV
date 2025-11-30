@@ -107,6 +107,17 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
     
+    [HttpGet("category/{categoryId}")]
+    public IActionResult GetByCategory(
+        int categoryId, 
+        [FromQuery] int? subCategoryId = null, 
+        [FromQuery] string? sort = null) 
+    {
+      var products = _productService.GetProductsByCategory(categoryId, subCategoryId, sort);
+    
+        return Ok(products);
+    }
+    
     [HttpPut("{id}")]
     public IActionResult UpdateProduct(int id, [FromBody] CreateProductDto productDto)
     {
