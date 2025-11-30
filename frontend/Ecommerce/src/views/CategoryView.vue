@@ -3,211 +3,209 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiGet } from '@/services/api'
 import { useCategories } from '@/composables/useCategories'
-import { useProducts } from '@/composables/useProducts'
-import ProductCardComponent from '@/components/ProductCardComponent.vue' 
+import ProductCardComponent from '@/components/ProductCardComponent.vue'
 
 const route = useRoute()
-const { fetchCategoryById } = useCategories()
-const { products, loading: loadingLegacy, error: errorLegacy, fetchProductsByCategory } = useProducts()
+// Importamos a nova função e o estado subCategories
+const { fetchCategoryById, fetchSubCategoriesByCategoryId, subCategories } = useCategories()
 
 const categoryName = ref('Categoria')
 const loading = ref(false)
 const error = ref(null)
-const pagedItems = ref([])
+const allProducts = ref([]) // Armazena todos os produtos buscados
+const selectedSubCategoryId = ref(null) // Controla o filtro ativo
 
+// Paginação local
 const pageNumber = ref(1)
 const pageSize = ref(16)
-const totalPages = ref(1)
-const totalCount = ref(0)
 
-async function loadCategoryName() {
-  try {
-    const c = await fetchCategoryById(route.params.id)
-    categoryName.value = c?.name || 'Categoria'
-  } catch {
-    categoryName.value = 'Categoria'
-  }
-}
-
-async function fetchFromFilter() {
+/* --- 1. Carregar Dados Iniciais --- */
+async function loadData() {
   loading.value = true
   error.value = null
-
-  const qs = new URLSearchParams({
-    pageNumber: String(pageNumber.value),
-    pageSize: String(pageSize.value),
-    categoryId: String(route.params.id),
-  }).toString()
+  selectedSubCategoryId.value = null // Reseta filtro ao mudar de categoria
+  pageNumber.value = 1
+  
+  const catId = route.params.id
 
   try {
-    const data = await apiGet(`/products/filter?${qs}`)
-    const list = Array.isArray(data) ? data : (data?.items ?? [])
-    pagedItems.value = list
-    totalPages.value = Number(
-      data?.totalPages ??
-      Math.max(1, Math.ceil((data?.totalCount ?? list.length) / pageSize.value))
-    )
-    totalCount.value = Number(data?.totalCount ?? list.length)
+    // 1. Busca nome da categoria
+    const c = await fetchCategoryById(catId)
+    categoryName.value = c?.name || 'Departamento'
 
-    if (!list.length) await fetchLegacy()
+    // 2. Busca as subcategorias para o menu lateral
+    await fetchSubCategoriesByCategoryId(catId)
+
+    // 3. Busca os produtos iniciais (sem filtro)
+    await fetchProducts(catId)
+
   } catch (e) {
-    await fetchLegacy()
-    error.value = e?.message || null
+    console.error(e)
+    error.value = 'Erro ao carregar dados.'
   } finally {
     loading.value = false
   }
 }
 
-async function fetchLegacy() {
+/* --- 2. Buscar Produtos (Com ou Sem Filtro) --- */
+async function fetchProducts(categoryId, subId = null) {
+  loading.value = true
   try {
-    await fetchProductsByCategory(route.params.id)
-    totalCount.value = products.value.length
-    totalPages.value = Math.max(1, Math.ceil(products.value.length / pageSize.value))
-  } catch (_) {}
+    // Monta a URL com o filtro opcional
+    let url = `/products/category/${categoryId}`
+    if (subId) {
+      url += `?subCategoryId=${subId}`
+    }
+
+    const data = await apiGet(url)
+    allProducts.value = Array.isArray(data) ? data : []
+    pageNumber.value = 1 // Volta para página 1 ao filtrar
+  } catch (e) {
+    error.value = 'Erro ao buscar produtos.'
+    allProducts.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
-async function loadAll() {
-  pageNumber.value = 1
-  await Promise.all([loadCategoryName(), fetchFromFilter()])
+/* --- 3. Ação do Filtro --- */
+function toggleSubCategory(subId) {
+  // Se clicar no mesmo que já está ativo, remove o filtro (toggle)
+  if (selectedSubCategoryId.value === subId) {
+    selectedSubCategoryId.value = null
+  } else {
+    selectedSubCategoryId.value = subId
+  }
+  // Recarrega os produtos com o novo estado do filtro
+  fetchProducts(route.params.id, selectedSubCategoryId.value)
 }
 
-onMounted(loadAll)
-watch(() => route.params.id, async () => {
-  await loadAll()
-  window.scrollTo({ top: 0, behavior: 'auto' })
-})
-watch([pageNumber, pageSize], async () => {
-  await fetchFromFilter()
-  window.scrollTo({ top: 0, behavior: 'auto' })
+/* --- 4. Hooks e Watchers --- */
+onMounted(loadData)
+
+watch(() => route.params.id, () => {
+  loadData()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 })
 
-const displayed = computed(() => {
-  const list = pagedItems.value?.length ? pagedItems.value : (() => {
-    const start = (pageNumber.value - 1) * pageSize.value
-    return products.value.slice(start, start + pageSize.value)
-  })()
-  return list.map(p => ({
+// Paginação computada (Client-side)
+const totalCount = computed(() => allProducts.value.length)
+const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value) || 1)
+
+const displayedProducts = computed(() => {
+  const start = (pageNumber.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return allProducts.value.slice(start, end).map(p => ({
     ...p,
-    coverImageUrl:
-      p.coverImageUrl ||
-      p.image_url0 ||
-      p.additionalImage_url1 ||
-      p.additionalImage_url2 ||
-      p.additionalImage_url3 ||
-      p.additionalImage_url4 ||
-      'https://placehold.co/400x400?text=Sem+Imagem'
+    coverImageUrl: p.coverImageUrl || p.image_url0 || 'https://placehold.co/400x400?text=Sem+Imagem'
   }))
 })
 
 function goToPage(p) {
-  if (p < 1 || p > totalPages.value || p === pageNumber.value) return
-  pageNumber.value = p
+  if (p >= 1 && p <= totalPages.value) {
+    pageNumber.value = p
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 }
 
-const showingRange = computed(() => {
-  const start = (pageNumber.value - 1) * pageSize.value + 1
-  const end = Math.min(pageNumber.value * pageSize.value, totalCount.value)
-  return { start, end }
-})
-
-function handleAddToCart(prod) {
-  console.log('Adicionar ao carrinho:', prod)
-}
-
-/* --- Paginação dinâmica --- */
 const visiblePages = computed(() => {
-  const delta = 2 // número de páginas para mostrar antes/depois
+  const delta = 2
   const pages = []
   const start = Math.max(1, pageNumber.value - delta)
   const end = Math.min(totalPages.value, pageNumber.value + delta)
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-
-  // Adiciona reticências se necessário
-  if (start > 1) pages.unshift('...')
-  if (end < totalPages.value) pages.push('...')
-  if (!pages.includes(1)) pages.unshift(1)
-  if (!pages.includes(totalPages.value)) pages.push(totalPages.value)
-
-  return pages.filter((v, i, a) => a.indexOf(v) === i)
+  for (let i = start; i <= end; i++) pages.push(i)
+  return pages
 })
 </script>
 
 <template>
-  <div class="py-12 bg-black min-h-screen text-white">
-    <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-orange-400 mb-6">{{ categoryName }}</h2>
-
-      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div class="text-sm text-orange-200">
-          <template v-if="totalCount">
-            Mostrando {{ showingRange.start }}–{{ showingRange.end }} de {{ totalCount }}
-          </template>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <label class="text-sm text-neutral-300">Itens por página</label>
-          <select
-            v-model.number="pageSize"
-            class="bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
-          >
-            <option :value="8">8</option>
-            <option :value="12">12</option>
-            <option :value="16">16</option>
-            <option :value="24">24</option>
-          </select>
-        </div>
+  <div class="py-8 bg-black min-h-screen text-white">
+    <div class="container mx-auto px-4">
+      
+      <div class="mb-8 border-b border-neutral-800 pb-4">
+        <h2 class="text-3xl font-bold text-orange-500 uppercase tracking-wide">{{ categoryName }}</h2>
+        <p class="text-neutral-400 text-sm mt-1" v-if="!loading">
+          {{ totalCount }} produtos encontrados
+        </p>
       </div>
 
-      <div v-if="loading || loadingLegacy" class="text-orange-200">Carregando...</div>
-      <div v-else-if="(error || errorLegacy) && !displayed.length" class="text-red-400">
-        {{ error || errorLegacy }}
-      </div>
+      <div class="flex flex-col lg:flex-row gap-8">
+        
+        <aside class="w-full lg:w-1/4">
+          <div class="bg-neutral-900/50 rounded-xl p-6 border border-neutral-800 sticky top-24">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filtrar por
+            </h3>
+            
+            <div v-if="subCategories.length" class="space-y-2">
+              <button 
+                v-for="sub in subCategories" 
+                :key="sub.id"
+                @click="toggleSubCategory(sub.id)"
+                class="w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 flex items-center justify-between group"
+                :class="selectedSubCategoryId === sub.id 
+                  ? 'bg-orange-500 text-black font-bold shadow-lg shadow-orange-500/20' 
+                  : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'"
+              >
+                {{ sub.name }}
+                <span v-if="selectedSubCategoryId === sub.id" class="text-xs bg-black/20 px-2 py-0.5 rounded-full">✓</span>
+              </button>
+            </div>
+            <div v-else class="text-neutral-500 text-sm italic">
+              Sem filtros disponíveis.
+            </div>
+          </div>
+        </aside>
 
-      <div v-else>
-        <div v-if="displayed && displayed.length" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          <ProductCardComponent
-            v-for="p in displayed"
-            :key="p.id ?? p.code"
-            :product="p"
-            @addToCart="handleAddToCart"
-          />
-        </div>
+        <main class="w-full lg:w-3/4">
+          
+          <div v-if="loading" class="py-20 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <p class="text-neutral-400">Carregando produtos...</p>
+          </div>
 
-        <div v-else class="text-neutral-300">Nenhum produto encontrado.</div>
+          <div v-else-if="error" class="text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-500/30 text-center">
+            {{ error }}
+          </div>
 
-        <!-- Paginação -->
-        <div v-if="totalPages > 1" class="mt-8 flex flex-wrap items-center justify-center gap-2">
-          <button
-            class="px-3 py-2 rounded bg-neutral-900 border border-neutral-700 text-sm disabled:opacity-50"
-            :disabled="pageNumber === 1"
-            @click="goToPage(pageNumber - 1)"
-          >
-            Anterior
-          </button>
+          <div v-else>
+            <div v-if="displayedProducts.length" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <ProductCardComponent
+                v-for="product in displayedProducts"
+                :key="product.id"
+                :product="product"
+              />
+            </div>
+            
+            <div v-else class="text-center py-20 bg-neutral-900/30 rounded-xl border border-neutral-800 border-dashed">
+              <p class="text-neutral-400 text-lg">Nenhum produto encontrado com este filtro.</p>
+              <button @click="selectedSubCategoryId = null; fetchProducts(route.params.id)" class="mt-4 text-orange-400 hover:underline text-sm">
+                Limpar filtros
+              </button>
+            </div>
 
-          <template v-for="(p, idx) in visiblePages" :key="idx">
-            <button
-              v-if="p !== '...'"
-              class="px-3 py-2 rounded border text-sm"
-              :class="p === pageNumber ? 'bg-orange-500 border-orange-500 text-black' : 'bg-neutral-900 border-neutral-700'"
-              @click="goToPage(p)"
-            >
-              {{ p }}
-            </button>
-            <span v-else class="px-2 text-neutral-400">…</span>
-          </template>
-
-          <button
-            class="px-3 py-2 rounded bg-neutral-900 border border-neutral-700 text-sm disabled:opacity-50"
-            :disabled="pageNumber === totalPages"
-            @click="goToPage(pageNumber + 1)"
-          >
-            Próxima
-          </button>
-        </div>
+            <div v-if="totalPages > 1" class="mt-10 flex justify-center gap-2">
+              <button @click="goToPage(pageNumber - 1)" :disabled="pageNumber === 1" class="px-3 py-1 rounded bg-neutral-800 text-neutral-300 disabled:opacity-50 hover:bg-neutral-700">
+                &lt;
+              </button>
+              <button 
+                v-for="p in visiblePages" 
+                :key="p" 
+                @click="goToPage(p)"
+                class="px-3 py-1 rounded text-sm font-medium transition-colors"
+                :class="pageNumber === p ? 'bg-orange-500 text-black' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'"
+              >
+                {{ p }}
+              </button>
+              <button @click="goToPage(pageNumber + 1)" :disabled="pageNumber === totalPages" class="px-3 py-1 rounded bg-neutral-800 text-neutral-300 disabled:opacity-50 hover:bg-neutral-700">
+                &gt;
+              </button>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   </div>
