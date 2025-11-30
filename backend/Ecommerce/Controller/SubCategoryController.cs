@@ -36,6 +36,13 @@ public class SubCategoryController : ControllerBase
         return Ok(subCategories);
     }
 
+    [HttpGet("category/{categoryId}")]
+    public IActionResult GetByCategoryId(int categoryId)
+    {
+        var subCategories = _subCategoryService.GetSubCategoriesByCategoryId(categoryId);
+        return Ok(subCategories);
+    }
+
     [HttpGet("{id}")]
     public IActionResult GetSubCategoryById(int id)
     {
@@ -46,6 +53,8 @@ public class SubCategoryController : ControllerBase
         }
         return Ok(subCategory);
     }
+    
+
     [HttpPut("{id}")]
     public IActionResult UpdateSubCategory(int id, [FromBody] CreateSubCategoryDto subCategoryDto)
     {

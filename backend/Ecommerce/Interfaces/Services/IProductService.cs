@@ -15,5 +15,7 @@ namespace Ecommerce.Interfaces.Services
         Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId);
         Task<List<ProductSearchSuggestionDto>> GetSearchSuggestionsAsync(string searchTerm);
         Task<List<Product>> GetRandomProductsAsync(int? categoryId, int? subCategoryId, int? brandId);
+        List<Product> GetProductsByCategory(int categoryId, int? subCategoryId = null);
+        List<Product> GetProductsByCategory(int categoryId, int? subCategoryId = null, string? sort = null);
     }
 }

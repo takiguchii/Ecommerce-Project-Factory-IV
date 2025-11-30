@@ -144,12 +144,7 @@ import AdminCreateToggle from '@/components/AdminCreateToggle.vue'
 
 const router = useRouter()
 
-// controla abrir/fechar criação
 const showCreate = ref(false)
-
-// opcional: ícone custom para o toggle (SVG/URL). Se não passar, usa o default do componente.
-// import customIcon from '@/assets/images/ethereum.svg'
-// const customIcon = null
 
 const brandForm = ref({ name: '', imageUrl: '' })
 const editingBrandId = ref(null)

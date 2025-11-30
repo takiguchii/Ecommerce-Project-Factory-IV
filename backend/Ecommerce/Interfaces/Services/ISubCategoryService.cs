@@ -10,4 +10,5 @@ public interface ISubCategoryService
     SubCategory? GetSubCategoryById(int id);
     bool DeleteSubCategory(int id);
     SubCategory? UpdateSubCategory(int id, CreateSubCategoryDto subCategoryDto);
+    List<SubCategory> GetSubCategoriesByCategoryId(int categoryId); 
 }

@@ -3,6 +3,7 @@ import { apiGet } from '@/services/api'
 
 export function useCategories() {
   const categories = ref([])
+  const subCategories = ref([]) 
   const loading = ref(false)
   const error = ref(null)
 
@@ -36,5 +37,23 @@ export function useCategories() {
     return categories.value.find(c => String(c.id) === String(id)) ?? null
   }
 
-  return { categories, loading, error, fetchCategories, fetchCategoryById }
+  async function fetchSubCategoriesByCategoryId(categoryId) {
+    subCategories.value = [] 
+    try {
+      const data = await apiGet(`/subcategories/category/${categoryId}`)
+      subCategories.value = Array.isArray(data) ? data : []
+    } catch (e) {
+      console.error('Erro ao buscar subcategorias:', e)
+    }
+  }
+
+  return { 
+    categories, 
+    subCategories, 
+    loading, 
+    error, 
+    fetchCategories, 
+    fetchCategoryById,
+    fetchSubCategoriesByCategoryId 
+  }
 }
