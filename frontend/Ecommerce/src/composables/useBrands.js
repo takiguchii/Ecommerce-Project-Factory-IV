@@ -1,6 +1,8 @@
 import { ref } from 'vue'
 import { apiGet } from '@/services/api'
 
+const MAX_BRANDS_HOME = 12
+
 export function useBrands() {
   const brands = ref([])
   const loading = ref(false)
@@ -25,11 +27,16 @@ export function useBrands() {
     }
   }
 
-  async function fetchBrands() {
+  // Busca marcas aleatórias
+  async function fetchBrands(limit = MAX_BRANDS_HOME) {
     loading.value = true
     error.value = null
+
     try {
-      const data = await apiGet('/brands')
+      const data = await apiGet('/brands/random', {
+        params: { limit },
+      })
+
       brands.value = (Array.isArray(data) ? data : [])
         .map(normalizeBrand)
         .filter(Boolean)
@@ -41,9 +48,15 @@ export function useBrands() {
     }
   }
 
+  // Busca uma marca específica pelo ID                               
   async function fetchBrandById(id) {
-    if (!brands.value.length) await fetchBrands()
-    return brands.value.find(b => String(b.id) === String(id)) ?? null
+    try {
+      const data = await apiGet(`/brands/${id}`)
+      return normalizeBrand(data)
+    } catch (err) {
+      console.error('Erro ao buscar marca por ID:', err)
+      return null
+    }
   }
 
   return { brands, loading, error, fetchBrands, fetchBrandById }

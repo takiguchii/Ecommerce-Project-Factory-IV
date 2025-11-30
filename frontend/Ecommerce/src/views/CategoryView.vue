@@ -119,7 +119,7 @@ const visiblePages = computed(() => {
 </script>
 
 <template>
-  <div class="py-8 bg-black min-h-screen text-white pt-24 pb-10">
+  <div class="py-8 bg-black min-h-screen text-white pt-24 pb-10jj">
     <div class="container mx-auto px-4">
       
       <div class="mb-8 border-b border-neutral-800 pb-4">
