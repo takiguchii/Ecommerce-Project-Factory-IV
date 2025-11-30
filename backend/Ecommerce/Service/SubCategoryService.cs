@@ -8,7 +8,7 @@ namespace Ecommerce.Service;
 public class SubCategoryService : ISubCategoryService
 {
     private readonly ISubCategoryRepository _subCategoryRepository;
-    private readonly ICategoryRepository _categoryRepository; // Verifica se a ctegoria pai existe
+    private readonly ICategoryRepository _categoryRepository; 
 
     public SubCategoryService(ISubCategoryRepository subCategoryRepository, ICategoryRepository categoryRepository)
     {
@@ -18,11 +18,9 @@ public class SubCategoryService : ISubCategoryService
 
     public object? CreateSubCategory(CreateSubCategoryDto subCategoryDto)
     {
-        // Verificar se a Categoria Pai informada realmente existe no banco de dados.
         var parentCategory = _categoryRepository.GetById(subCategoryDto.category_id);
         if (parentCategory == null)
         {
-            // Se não existir, retorna uma mensagem de erro em vez da entidade
             return new { Message = "A categoria pai informada não existe." };
         }
 
@@ -75,5 +73,11 @@ public class SubCategoryService : ISubCategoryService
         _subCategoryRepository.SaveChanges();
 
         return existingSubCategory;
+    }
+    public List<SubCategory> GetSubCategoriesByCategoryId(int categoryId)
+    {
+        return _subCategoryRepository.GetAll()
+            .Where(s => s.category_id == categoryId)
+            .ToList();
     }
 }
