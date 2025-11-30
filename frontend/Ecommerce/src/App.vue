@@ -1,22 +1,20 @@
-
 <template>
-  <NavbarComponent />
+  <NavbarComponent v-if="!isAdminRoute" />
   <RouterView />
-  </template>
+</template>
 
 <script setup>
-import { onMounted } from 'vue';
-import { RouterView } from 'vue-router';
-import NavbarComponent from './components/NavbarComponent.vue'; // Verifique o caminho
-// 1. Importe o composable
-import { useAuth } from './composables/useAuth';
+import { onMounted, computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+import NavbarComponent from './components/NavbarComponent.vue'
+import { useAuth } from './composables/useAuth'
 
-const { checkAuthStatus } = useAuth();
-
+const route = useRoute()
+const { checkAuthStatus } = useAuth()
+const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 onMounted(() => {
-  checkAuthStatus();
-});
+  checkAuthStatus()
+})
 </script>
-
 <style scoped>
 </style>
