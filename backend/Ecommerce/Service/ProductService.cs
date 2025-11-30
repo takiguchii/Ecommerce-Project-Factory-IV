@@ -198,4 +198,17 @@ public class ProductService : IProductService
 
         return selectedProducts;
     }
+    public List<Product> GetProductsByCategory(int categoryId, int? subCategoryId = null)
+    {
+
+        var query = _productRepository.GetAll()
+            .Where(p => p.category_id == categoryId); 
+        
+        if (subCategoryId.HasValue)
+        {
+            query = query.Where(p => p.sub_category_id == subCategoryId.Value);
+        }
+        
+        return query.ToList();
+    }
 }
