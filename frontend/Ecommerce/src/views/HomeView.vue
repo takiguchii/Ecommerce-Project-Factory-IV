@@ -1,11 +1,13 @@
 <script setup>
 import HeroCarouselComponent from '@/components/HeroCarouselComponent.vue';
 import ProductSectionComponent from '@/components/ProductSectionComponent.vue';
-import DepartmentSectionComponent from '@/components/DepartmentSectionComponent.vue';
+import DepartmentSectionComponent from '@/components/DepartmentSectionComponent.vue';  
 import BrandSectionComponent from '@/components/BrandSectionComponent.vue'; 
 import { usePromotions } from '@/composables/usePromotions.js';
 import { useProducts } from '@/composables/useProducts.js';
 import { useBrands } from '@/composables/useBrands.js'; 
+import IntelProductsSection from '@/components/IntelProductsSection.vue'
+import CellphoneSection from '@/components/CellphoneSection.vue'
 
 const { promotions, loading: promotionsLoading, error: promotionsError, fetchPromotions } = usePromotions();
 const { products, loading: productsLoading, error: productsError, fetchProducts } = useProducts();
@@ -60,6 +62,17 @@ const { brands, loading: brandsLoading, error: brandsError, fetchBrands } = useB
           :error="promotionsError"
           @fetch-needed="fetchPromotions"
         />
+      </section>
+      <section
+        class="rounded-2xl bg-neutral-900/60 border-[1.5px] md:border-4 border-neutral-700/70 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6 hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 ease-out"
+      >
+        <IntelProductsSection />
+      </section>
+
+      <section
+        class="rounded-2xl bg-neutral-900/60 border-[1.5px] md:border-4 border-neutral-700/70 shadow-xl ring-1 ring-black/5 backdrop-blur-sm p-4 sm:p-6 hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 ease-out"
+      >
+        <CellphoneSection />
       </section>
     </main>
   </div>

@@ -146,24 +146,6 @@
 
       </div>
 
-
-      <!-- DESCRIÇÃO À DIREITA (ALTURA = TAMANHO DO TEXTO) -->
-      <div class="rounded-2xl bg-neutral-900/60 border border-neutral-800 ring-1 ring-black/5 shadow-lg p-5">
-        <h2 class="text-lg font-semibold text-neutral-200 mb-2">Descrição</h2>
-
-        <p :class="[
-          'text-neutral-300 leading-relaxed transition-all duration-300',
-          showDesc ? 'max-h-none' : 'max-h-40 overflow-hidden'
-        ]">
-          {{ descriptionDisplay }}
-        </p>
-
-        <button v-if="isDescLong" @click="showDesc = !showDesc"
-          class="mt-3 text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors">
-          {{ showDesc ? 'Ver menos' : 'Ler mais' }}
-        </button>
-      </div>
-
     </div>
 
 
