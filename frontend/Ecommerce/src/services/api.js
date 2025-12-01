@@ -22,6 +22,7 @@ export const apiPost = async (url, data) => (await api.post(url, data)).data
 export const apiPut = async (url, data) => (await api.put(url, data)).data
 export const apiDelete = async (url) => (await api.delete(url)).data
 
+
 function normalizeBrand(raw) {
   if (!raw) return null
   return {
@@ -35,7 +36,6 @@ export async function getBrands() {
   const list = await apiGet('/brands')
   return Array.isArray(list) ? list.map(normalizeBrand) : []
 }
-
 
 export async function getBrandById(id) {
   try {
@@ -68,6 +68,7 @@ export function deleteBrand(brandId) {
   return api.delete(`/brands/${brandId}`)
 }
 
+
 function normalizeCategory(raw) {
   if (!raw) return null
   return {
@@ -76,7 +77,6 @@ function normalizeCategory(raw) {
     products: Array.isArray(raw.products) ? raw.products : []
   }
 }
-
 
 export async function getCategories() {
   const list = await apiGet('/categories')
@@ -105,6 +105,52 @@ export function deleteCategory(id) {
   return api.delete(`/categories/${id}`)
 }
 
+export async function getProductById(id) {
+  return await apiGet(`/products/${id}`)
+}
+
+export async function getPromotions() {
+  return await apiGet('/products/promotions')
+}
+
+export async function getRandomProducts(categoryId = null, subCategoryId = null, brandId = null) {
+  const params = {}
+  if (categoryId) params.categoryId = categoryId
+  if (subCategoryId) params.subCategoryId = subCategoryId
+  if (brandId) params.brandId = brandId
+
+  return (await api.get('/products/productsGridHomePage', { params })).data
+}
+
+export async function getSearchSuggestions(query) {
+  return (await api.get('/products/search-suggestions', { params: { query } })).data
+}
+
+
+export async function getProductsByFilter(page, pageSize, categoryId, subCategoryId, brandId, sort) {
+  const params = {
+    pageNumber: page,
+    pageSize: pageSize
+  }
+
+  if (categoryId) params.categoryId = categoryId
+  if (subCategoryId) params.subCategoryId = subCategoryId
+  if (brandId) params.brandId = brandId
+  
+  if (sort) params.sort = sort 
+
+  return (await api.get('/products/filter', { params })).data
+}
+
+export async function getProductsByCategory(categoryId, subCategoryId, sort) {
+  const params = {}
+  if (subCategoryId) params.subCategoryId = subCategoryId
+  if (sort) params.sort = sort
+
+  return (await api.get(`/products/category/${categoryId}`, { params })).data
+}
+
+
 export function login(credentials) {
   return api.post('/auth/login', credentials)
 }
@@ -113,12 +159,10 @@ export function register(userInfo) {
   return api.post('/auth/register', userInfo)
 }
 
-export async function getProductById(id) {
-  return await apiGet(`/products/${id}`)
-}
 export function calculateShipping(cep) {
   return api.post('/shipping/calculate', { cep })
 }
+
 export function validateCoupon(code) {
   return api.get(`/coupon/validate/${code}`)
 }

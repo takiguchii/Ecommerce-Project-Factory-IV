@@ -66,15 +66,15 @@ public class ProductsController : ControllerBase
         [FromQuery] int pageSize = 10,
         [FromQuery] int? categoryId = null,
         [FromQuery] int? subCategoryId = null,
-        [FromQuery] int? brandId = null)
+        [FromQuery] int? brandId = null,
+        [FromQuery] string? sort = null) 
     {
-        var result = await _productService.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
+        var result = await _productService.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId, sort);
         
         if (result.TotalCount == 0)
         {
             return NotFound("Nenhum produto encontrado para os filtros aplicados.");
         }
-        
         return Ok(result);
     }
     
@@ -100,10 +100,12 @@ public class ProductsController : ControllerBase
         
         return Ok(products);
     }
+
+
     [HttpGet("category/{categoryId}")]
-    public IActionResult GetByCategory(int categoryId, [FromQuery] int? subCategoryId = null)
+    public IActionResult GetByCategory(int categoryId, [FromQuery] int? subCategoryId = null, [FromQuery] string? sort = null)
     {
-        var products = _productService.GetProductsByCategory(categoryId, subCategoryId);
+        var products = _productService.GetProductsByCategory(categoryId, subCategoryId, sort);
         return Ok(products);
     }
     
