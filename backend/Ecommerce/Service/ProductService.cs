@@ -3,6 +3,7 @@ using Ecommerce.Entity;
 using Ecommerce.Interfaces.Repositories; 
 using Ecommerce.DTOs;
 using Ecommerce.Interfaces.Services;
+using System.Globalization; 
 
 namespace Ecommerce.Service;
 
@@ -28,7 +29,33 @@ public class ProductService : IProductService
         _brandRepository = brandRepository;
         _providerRepository = providerRepository;
     }
+
+    // --- MÉTODOS AUXILIARES ---
+    private decimal GetRealPrice(Product product)
+    {
+        decimal price = ParsePriceString(product.discount_price);
+        if (price == 0) price = ParsePriceString(product.original_price);
+        return price;
+    }
+
+    private decimal ParsePriceString(string? priceString)
+    {
+        if (string.IsNullOrWhiteSpace(priceString)) return 0m;
+        try
+        {
+            var cleanString = priceString
+                .Replace("R$", "", StringComparison.OrdinalIgnoreCase)
+                .Replace("r$", "", StringComparison.OrdinalIgnoreCase)
+                .Trim();
+            
+            if (decimal.TryParse(cleanString, NumberStyles.Any, new CultureInfo("pt-BR"), out decimal result))
+                return result;
+        }
+        catch { return 0m; }
+        return 0m;
+    }
     
+    // --- CRUD ---
     public Product? CreateProduct(CreateProductDto productDto)
     {
         var category = _categoryRepository.GetById(productDto.category_id);
@@ -59,7 +86,6 @@ public class ProductService : IProductService
             discount_price = productDto.discount_price,
             description = productDto.description,
             technical_info = productDto.technical_info,
-            // minhas fks de produto 
             category_id = productDto.category_id,
             sub_category_id = productDto.sub_category_id,
             brand_id = productDto.brand_id,
@@ -85,11 +111,8 @@ public class ProductService : IProductService
     public bool DeleteProduct(int id)
     {
         var product = _productRepository.GetById(id);
-
-        if (product == null)
-        {
-            return false;
-        }
+        if (product == null) return false;
+        
         _productRepository.Delete(product);
         _productRepository.SaveChanges();
         return true; 
@@ -98,11 +121,7 @@ public class ProductService : IProductService
     public Product? UpdateProduct(int id, CreateProductDto productDto)
     {
         var existingProduct = _productRepository.GetById(id);
-
-        if (existingProduct == null)
-        {
-            return null;
-        }
+        if (existingProduct == null) return null;
 
         var category = _categoryRepository.GetById(productDto.category_id);
         if (category == null) return null; 
@@ -148,7 +167,7 @@ public class ProductService : IProductService
         var potentialPromotions = _productRepository.GetPromotions();
         
         var actualPromotions = potentialPromotions
-            .Where(p => p.original_price != null && p.discount_price != null)
+            .Where(p => !string.IsNullOrEmpty(p.original_price) && !string.IsNullOrEmpty(p.discount_price))
             .ToList();
 
         var shuffledPromotions = actualPromotions.OrderBy(p => _random.Next());
@@ -158,12 +177,56 @@ public class ProductService : IProductService
         return selectedPromotions;
     }
     
-    public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(int pageNumber, int pageSize, int? categoryId, int? subCategoryId, int? brandId)
+    public async Task<CreatePaginatedResultDto<Product>> GetProductsPaginatedAsync(
+        int pageNumber, 
+        int pageSize, 
+        int? categoryId, 
+        int? subCategoryId, 
+        int? brandId, 
+        string? sortOrder = null)
     {
-        // Busca os dados brutos do repositório
-        var (items, totalCount) = await _productRepository.GetProductsPaginatedAsync(pageNumber, pageSize, categoryId, subCategoryId, brandId);
+        var allQuery = _productRepository.GetAll().AsQueryable();
 
-        // Monta o DTO 
+        if (categoryId.HasValue)
+            allQuery = allQuery.Where(p => p.category_id == categoryId.Value);
+        
+        if (subCategoryId.HasValue)
+            allQuery = allQuery.Where(p => p.sub_category_id == subCategoryId.Value);
+            
+        if (brandId.HasValue)
+            allQuery = allQuery.Where(p => p.brand_id == brandId.Value);
+
+        var filteredList = allQuery.ToList();
+
+        // --- ORDENAÇÃO ---
+        if (!string.IsNullOrEmpty(sortOrder))
+        {
+            switch (sortOrder.ToLower())
+            {
+                case "price_asc":
+                    filteredList = filteredList.OrderBy(p => GetRealPrice(p)).ToList();
+                    break;
+                case "price_desc":
+                    filteredList = filteredList.OrderByDescending(p => GetRealPrice(p)).ToList();
+                    break;
+                default:
+                    
+                    filteredList = filteredList.OrderBy(p => p.id).ToList();
+                    break;
+            }
+        }
+        else
+        {
+            filteredList = filteredList.OrderBy(p => p.id).ToList();
+        }
+
+        // --- PAGINAÇÃO ---
+        var totalCount = filteredList.Count;
+        var items = filteredList
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
         return new CreatePaginatedResultDto<Product>
         {
             Items = items,
@@ -193,24 +256,11 @@ public class ProductService : IProductService
         
         var shuffledProducts = filteredProducts.OrderBy(p => _random.Next());
         
-        // pega os primeiros 12.
         var selectedProducts = shuffledProducts.Take(productLimit).ToList();
 
         return selectedProducts;
     }
-    public List<Product> GetProductsByCategory(int categoryId, int? subCategoryId = null)
-    {
 
-        var query = _productRepository.GetAll()
-            .Where(p => p.category_id == categoryId); 
-        
-        if (subCategoryId.HasValue)
-        {
-            query = query.Where(p => p.sub_category_id == subCategoryId.Value);
-        }
-        
-        return query.ToList();
-    }
     public List<Product> GetProductsByCategory(int categoryId, int? subCategoryId = null, string? sort = null)
     {
         var query = _productRepository.GetAll()
@@ -221,20 +271,20 @@ public class ProductService : IProductService
             query = query.Where(p => p.sub_category_id == subCategoryId.Value);
         }
 
+        var list = query.ToList();
+
         if (!string.IsNullOrEmpty(sort))
         {
             if (sort == "price_asc") 
             {
-                query = query.OrderBy(p => 
-                    decimal.TryParse(p.discount_price, out var price) ? price : 0);
+                list = list.OrderBy(p => GetRealPrice(p)).ToList();
             }
             else if (sort == "price_desc") 
             {
-                query = query.OrderByDescending(p => 
-                    decimal.TryParse(p.discount_price, out var price) ? price : 0);
+                list = list.OrderByDescending(p => GetRealPrice(p)).ToList();
             }
         }
     
-        return query.ToList();
+        return list;
     }
 }
